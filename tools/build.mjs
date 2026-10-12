@@ -8,6 +8,7 @@
 // app. El resto del archivo queda idéntico. Si la cabecera del original cambia
 // y algo no se encuentra, falla en vez de publicar una página a medias.
 import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const [src, commit = ''] = process.argv.slice(2);
 if (!src) { console.error('uso: node tools/build.mjs <Index.html> [commit]'); process.exit(2); }
@@ -18,6 +19,12 @@ function replaceOnce(re, to, what) {
   if (hits.length !== 1) { console.error(`build: esperaba 1 "${what}", encontré ${hits.length}`); process.exit(1); }
   html = html.replace(re, to);
 }
+
+// GitHub Pages deja que el navegador guarde cada archivo 10 minutos. Con la
+// huella del contenido en el link, un cambio en config.js o api.js se ve en
+// cuanto llega el index.html nuevo. Por eso index.html se regenera después
+// de tocar cualquiera de esos archivos.
+const hashOf = f => createHash('sha256').update(readFileSync(new URL('../' + f, import.meta.url))).digest('hex').slice(0, 10);
 
 // La versión más alta que menciona el archivo (los comentarios marcan "v2.15").
 const version = [...html.matchAll(/\bv(\d+)\.(\d+)\b/g)]
@@ -42,9 +49,9 @@ replaceOnce(/<!-- No icon\/manifest links here on purpose\.[\s\S]*?-->/, [
   // body se repetía debajo de pantallas cortas (una franja visible).
   '  <style>html { background: #0e0d13; }</style>',
   `  <script>window.UAT_BUILD = ${build};</script>`,
-  '  <script src="config.js"></script>',
-  '  <script src="demo.js"></script>',
-  '  <script src="api.js"></script>',
+  `  <script src="config.js?v=${hashOf('config.js')}"></script>`,
+  `  <script src="demo.js?v=${hashOf('demo.js')}"></script>`,
+  `  <script src="api.js?v=${hashOf('api.js')}"></script>`,
 ].join('\n'), 'comentario de íconos');
 
 const banner = `<!-- GENERADO por tools/build.mjs desde Index.html${commit ? ' @ ' + commit.slice(0, 7) : ''}. No editar aquí: los cambios se hacen en el repo privado. -->\n`;

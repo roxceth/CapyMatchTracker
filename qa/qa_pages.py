@@ -29,6 +29,9 @@ check('después de la cabecera, la app es idéntica a la de Apps Script', built[
 check('sin <base target="_top">', '<base target' not in built)
 check('carga config, demo y api antes que la app', built.index('config.js') < built.index('demo.js') < built.index('api.js') < built.index('<link rel="preconnect"'))
 check('trae título, íconos y manifest', all(x in built for x in ['<title>Union Arena Tracker</title>', 'apple-touch-icon', 'manifest.webmanifest', 'name="viewport"']))
+import hashlib
+hashes_ok = all(f'{f}?v={hashlib.sha256(open(os.path.join(ROOT, f), "rb").read()).hexdigest()[:10]}' in built for f in ['config.js', 'api.js', 'demo.js'])
+check('los scripts llevan la huella de su contenido (no quedan viejos en el navegador)', hashes_ok)
 check('anota versión y commit', '"commit":"abcdef1"' in built and '"version":"' in built)
 bad = os.path.join(ROOT, 'qa', '_bad.html')
 open(bad, 'w').write(orig.replace('<base target="_top">', ''))
@@ -120,7 +123,7 @@ with sync_playwright() as p:
     def live_ctx(handler, timeout_ms=None):
         ctx = b.new_context(viewport={'width': 390, 'height': 844})
         extra = f", timeoutMs: {timeout_ms}" if timeout_ms else ''
-        ctx.route('**/config.js', lambda r: r.fulfill(status=200, content_type='application/javascript',
+        ctx.route('**/config.js?*', lambda r: r.fulfill(status=200, content_type='application/javascript',
                   body=f"window.UAT_CONFIG = {{ apiUrl: '{EXEC}'{extra} }};"))
         ctx.route(EXEC, handler)
         return ctx
@@ -207,7 +210,7 @@ with sync_playwright() as p:
         route.fulfill(status=200, content_type='application/json', body=json.dumps({'ok': True, 'result': ['Qa']}))
     def cfg_ctx(cfg):
         ctx = b.new_context(viewport={'width': 390, 'height': 844})
-        ctx.route('**/config.js', lambda r: r.fulfill(status=200, content_type='application/javascript', body='window.UAT_CONFIG = ' + json.dumps(cfg) + ';'))
+        ctx.route('**/config.js?*', lambda r: r.fulfill(status=200, content_type='application/javascript', body='window.UAT_CONFIG = ' + json.dumps(cfg) + ';'))
         ctx.route('https://script.google.com/**', any_api)
         ctx.route('https://evil.example/**', any_api)
         return ctx
