@@ -48,6 +48,7 @@ srv = socketserver.TCPServer(('127.0.0.1', 0), partial(Quiet, directory=ROOT))
 PORT = srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 BASE = f'http://127.0.0.1:{PORT}/'
+DEMO = BASE + '?demo'   # config.js ya apunta a la app real; el demo se pide con ?demo
 
 def watch(pg):
     errs = []
@@ -72,13 +73,24 @@ with sync_playwright() as p:
         check(f'{path} responde 200', r.status == 200, r.status)
     ctx.close()
 
-    print("\n=== Modo demo (sin apiUrl) ===\n")
+    print("\n=== config.js publicado ===\n")
+    ctx = b.new_context(); pg = ctx.new_page()
+    pg.route('https://script.google.com/**', lambda r: r.fulfill(status=200, content_type='application/json', body='{"ok":true,"result":[]}'))
+    pg.goto(BASE); pg.wait_for_timeout(400)
+    cfg = pg.evaluate('window.UAT_CONFIG')
+    check('el link normal va a la app real', pg.evaluate('window.UAT_MODE') == 'live' and cfg['apiUrl'].startswith('https://script.google.com/macros/s/') and cfg['apiUrl'].endswith('/exec'), cfg)
+    check('la real y la de QA son distintas', cfg['apiUrl'] != cfg.get('qaApiUrl'), cfg)
+    pg.goto(DEMO); pg.wait_for_timeout(300)
+    check('?demo sigue dando el demo', pg.evaluate('window.UAT_MODE') == 'demo')
+    ctx.close()
+
+    print("\n=== Modo demo (?demo) ===\n")
     for role, name in [('member', 'Sofia'), ('manager', 'Luis'), ('admin', 'Hector')]:
         ctx = b.new_context(viewport={'width': 390, 'height': 844})
         pg = ctx.new_page(); errs = watch(pg)
         reqs = []
         pg.on('request', lambda r: reqs.append(r.url) if r.method == 'POST' else None)
-        pg.goto(BASE); login(pg, name)
+        pg.goto(DEMO); login(pg, name)
         pg.wait_for_selector('#app', state='visible')
         check(f'{role}: entra', pg.is_visible('#app'))
         check(f'{role}: modo demo con aviso visible', pg.evaluate('window.UAT_MODE') == 'demo' and pg.is_visible('#demoRibbon'))
@@ -102,19 +114,19 @@ with sync_playwright() as p:
     print("\n=== Sesión recordada (cerrar y abrir) ===\n")
     ctx = b.new_context(viewport={'width': 390, 'height': 844})
     pg = ctx.new_page(); errs = watch(pg)
-    pg.goto(BASE); login(pg, 'Sofia'); pg.wait_for_selector('#app', state='visible')
-    pg.close(); pg = ctx.new_page(); pg.goto(BASE)
+    pg.goto(DEMO); login(pg, 'Sofia'); pg.wait_for_selector('#app', state='visible')
+    pg.close(); pg = ctx.new_page(); pg.goto(DEMO)
     pg.wait_for_selector('#app', state='visible', timeout=5000)
     check('al volver a abrir entra solo, sin PIN', pg.is_visible('#app') and not pg.is_visible('#screenLogin'))
     pg.click('#btnAccount'); pg.click('#btnLogout'); pg.wait_for_timeout(300)
-    pg.goto(BASE); pg.wait_for_timeout(800)
+    pg.goto(DEMO); pg.wait_for_timeout(800)
     check('después de Log out pide PIN otra vez', pg.is_visible('#screenLogin'))
     ctx.close()
 
     print("\n=== Anchos de pantalla ===\n")
     for w, h in [(320, 640), (390, 844), (768, 1024), (1280, 800), (1920, 1080)]:
         ctx = b.new_context(viewport={'width': w, 'height': h})
-        pg = ctx.new_page(); pg.goto(BASE); login(pg, 'Hector'); pg.wait_for_selector('#app', state='visible'); pg.wait_for_timeout(500)
+        pg = ctx.new_page(); pg.goto(DEMO); login(pg, 'Hector'); pg.wait_for_selector('#app', state='visible'); pg.wait_for_timeout(500)
         check(f'{w}px: sin desborde horizontal', pg.evaluate(no_overflow))
         ctx.close()
 
