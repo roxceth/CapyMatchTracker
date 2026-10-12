@@ -10,5 +10,5 @@
  */
 window.UAT_CONFIG = {
   apiUrl: '',
-  qaApiUrl: ''
+  qaApiUrl: 'https://script.google.com/macros/s/AKfycbybJybG3MsLTQXF7bDs4Z77eHKWymEb5O5wudX9OcxRilmQCtK6H6PDaZCoFZVtUlAhyg/exec'
 };
