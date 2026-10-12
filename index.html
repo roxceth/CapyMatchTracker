@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 56b06ab. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 5a685ca. No editar aquí: los cambios se hacen en el repo privado. -->
 <html>
 <head>
   <meta charset="utf-8">
@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.15","commit":"56b06ab"};</script>
+  <script>window.UAT_BUILD = {"version":"2.16","commit":"5a685ca"};</script>
   <script src="config.js?v=db291b83ff"></script>
-  <script src="demo.js?v=d4fe5e6f48"></script>
+  <script src="demo.js?v=c8cd415acc"></script>
   <script src="api.js?v=5ff40190c1"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -531,6 +531,11 @@
     .role-badge.manager { background: rgba(53,167,230,0.16); color: #7cc6f0; }
     .role-badge.member { background: var(--surface-2); color: var(--text-sec); }
     .member-sub { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+    /* PIN lockout (v2.16) */
+    .locked-tag { color: #ff8b97; font-weight: 600; }
+    .lock-box { border: 1px solid #5a2a33; background: rgba(230,72,90,.08); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .lock-box p { margin: 0 0 10px; font-size: 13px; color: var(--text); }
+    .lock-box button { width: 100%; min-height: 44px; }
     .member-row button.small { min-height: 40px; }
 
     /* ---- Bottom sheet ---- */
@@ -2064,7 +2069,7 @@
           <span class="avatar" aria-hidden="true">${esc(String(i.name || '?').charAt(0).toUpperCase())}</span>
           <div class="member-main">
             <div class="member-name">${esc(i.name)}<span class="role-badge ${roleOf(i)}">${esc(roleOf(i))}</span></div>
-            <div class="member-sub">${i.name === myName ? 'You' : (i.hasPin ? 'PIN set' : 'No PIN yet')}</div>
+            <div class="member-sub">${i.lockedMinutes ? `<span class="locked-tag">Locked · ${i.lockedMinutes} min</span>` : (i.name === myName ? 'You' : (i.hasPin ? 'PIN set' : 'No PIN yet'))}</div>
           </div>
           ${i.active
             ? `<button type="button" class="small" data-edit="${i.row}">Edit</button>`
@@ -2112,7 +2117,12 @@
     if (!member) return;
     const self = member.name === myName;
     const roleNow = String(member.role || 'member').toLowerCase();
-    openSheet(`Edit ${member.name}`, `
+    const lockBox = member.lockedMinutes ? `
+      <div class="lock-box" id="mLockBox">
+        <p><strong>Locked</strong> after 5 wrong PINs · ${member.lockedMinutes} min left. Unlock to let them try again with their current PIN.</p>
+        <button type="button" class="small" id="mUnlock">Unlock now</button>
+      </div>` : '';
+    openSheet(`Edit ${member.name}`, `${lockBox}
       <label for="mName">Name</label>
       <input id="mName" value="${esc(member.name)}" autocomplete="off">
       <label for="mPin">New PIN <span class="opt">(leave empty to keep the current one)</span></label>
@@ -2127,6 +2137,17 @@
       <p class="error" id="mError"></p>
       ${self ? '' : `<button type="button" class="sheet-action danger" id="mDeactivate" style="margin-top:8px">Deactivate ${esc(member.name)}…</button>`}`,
       '<button type="button" class="primary" id="mSave">Save changes</button>');
+    if (member.lockedMinutes) el('mUnlock').onclick = () => {
+      el('mUnlock').disabled = true;
+      gs()
+        .withSuccessHandler(() => { closeSheet(); showToast(`${member.name} can log in again.`, null, false); loadAdmin(); })
+        .withFailureHandler(e => {
+          if (!el('mUnlock')) return;
+          el('mUnlock').disabled = false;
+          el('mError').textContent = failText(e); el('mError').style.display = 'block';
+        })
+        .unlockMember(token, member.row);
+    };
     if (!self) el('mDeactivate').onclick = () => {
       if (!confirm(`Deactivate ${member.name}? They won't be able to log in. Their matches stay.`)) return;
       setActive(member.row, false);

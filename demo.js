@@ -20,7 +20,7 @@
     listMembersAdmin: () => ([
       {row:2,name:'Hector',hasPin:true,role:'admin',active:true},
       {row:3,name:'Luis',hasPin:true,role:'manager',active:true},
-      {row:4,name:'Sofia',hasPin:true,role:'member',active:true}]),
+      {row:4,name:'Sofia',hasPin:true,role:'member',active:true,lockedMinutes:12}]),
     updateMemberRole: () => ({ok:true}),
     getWinRateByDeck: () => ([{deck:'Jujutsu Kaisen - Red',wins:14,total:21,winRate:67,
       bestMatchup:{rivalDeck:'Titan Ramp',wins:8,total:10,winRate:80},
@@ -101,6 +101,7 @@
     findPossibleDuplicateDecks: () => ([]),
     findPossibleDuplicateRivalNames: () => ([]),
     previewCatalogSpellingRepair: () => ({total:0, changes:[]}),
+    unlockMember: () => ({ok:true}),
     updateDeck: (tok, orig, name) => ({ok:true, renamed: orig !== name}),
     removeDeck: () => ({ok:true}),
     mergeDecks: () => ({ok:true, rowsUpdated:3, backupName:null}),
