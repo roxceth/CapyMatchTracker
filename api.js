@@ -12,14 +12,20 @@
  *
  * Modo demo: sin apiUrl en config.js, o con ?demo en el link, responde con
  * los datos de prueba de demo.js y no llama a ningún servidor.
+ * Modo QA: con ?qa en el link, usa qaApiUrl (la copia de prueba de la hoja).
  */
 (function () {
   'use strict';
   var cfg = window.UAT_CONFIG || {};
   var params = new URLSearchParams(location.search);
-  var demo = params.has('demo') || !cfg.apiUrl;
+  // ?qa usa el Apps Script de la copia de prueba de la hoja (qaApiUrl). El
+  // link sale de config.js y no del URL a propósito: un ?api=<cualquiera>
+  // permitiría armar un link que mande los PINs a otro servidor.
+  var qa = params.has('qa') && !!cfg.qaApiUrl;
+  var apiUrl = qa ? cfg.qaApiUrl : cfg.apiUrl;
+  var demo = params.has('demo') || !apiUrl;
   var TIMEOUT_MS = cfg.timeoutMs || 30000;
-  window.UAT_MODE = demo ? 'demo' : 'live';
+  window.UAT_MODE = demo ? 'demo' : (qa ? 'qa' : 'live');
 
   function fail(message) { return new Error(message); }
 
@@ -29,7 +35,7 @@
     while (args.length && args[args.length - 1] === undefined) args.pop();
     var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, TIMEOUT_MS) : null;
-    return fetch(cfg.apiUrl, {
+    return fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ fn: fn, args: args, v: (window.UAT_BUILD || {}).version || '' }),
@@ -87,13 +93,14 @@
   window.google.script = window.google.script || {};
   window.google.script.run = runner({});
 
-  if (demo) {
+  if (demo || qa) {
     document.addEventListener('DOMContentLoaded', function () {
       var b = document.createElement('div');
-      b.id = 'demoRibbon';
+      b.id = demo ? 'demoRibbon' : 'qaRibbon';
       b.setAttribute('role', 'status');
-      b.textContent = 'DEMO · fake data · any PIN works';
-      b.style.cssText = 'display:block;width:max-content;max-width:100%;margin:0 auto 12px;background:#e4b73f;color:#0e0d13;' +
+      b.textContent = demo ? 'DEMO · fake data · any PIN works' : 'QA · test copy of the sheet';
+      b.style.cssText = 'display:block;width:max-content;max-width:100%;margin:0 auto 12px;' +
+        (demo ? 'background:#e4b73f;color:#0e0d13;' : 'background:#35a7e6;color:#0e0d13;') +
         'font:600 12px/1 Inter,Arial,sans-serif;letter-spacing:.04em;padding:6px 12px;border-radius:999px;';
       document.body.insertBefore(b, document.body.firstChild);
     });

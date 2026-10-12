@@ -198,6 +198,39 @@ with sync_playwright() as p:
     check('undefined al final no viaja como null', gm and gm[0]['args'] == ['t', 'All', 0, 20], gm)
     check('withUserObject funciona como en Apps Script', pg.evaluate('window.__u') == 'x')
     ctx.close()
+
+    print("\n=== Modo QA (?qa → la copia de prueba) ===\n")
+    QA_EXEC = 'https://script.google.com/macros/s/QA/exec'
+    hits = []
+    def any_api(route):
+        hits.append(route.request.url)
+        route.fulfill(status=200, content_type='application/json', body=json.dumps({'ok': True, 'result': ['Qa']}))
+    def cfg_ctx(cfg):
+        ctx = b.new_context(viewport={'width': 390, 'height': 844})
+        ctx.route('**/config.js', lambda r: r.fulfill(status=200, content_type='application/javascript', body='window.UAT_CONFIG = ' + json.dumps(cfg) + ';'))
+        ctx.route('https://script.google.com/**', any_api)
+        ctx.route('https://evil.example/**', any_api)
+        return ctx
+    ctx = cfg_ctx({'apiUrl': '', 'qaApiUrl': QA_EXEC}); pg = ctx.new_page()
+    pg.goto(BASE); pg.wait_for_timeout(500)
+    check('sin ?qa y sin apiUrl: demo', pg.evaluate('window.UAT_MODE') == 'demo')
+    hits.clear(); pg.goto(BASE + '?qa'); pg.wait_for_timeout(600)
+    check('con ?qa: modo qa', pg.evaluate('window.UAT_MODE') == 'qa')
+    check('con su aviso azul, sin el de demo', pg.is_visible('#qaRibbon') and not pg.is_visible('#demoRibbon') and 'QA' in pg.inner_text('#qaRibbon'))
+    check('llama a la copia de prueba', hits and all(h == QA_EXEC for h in hits), hits)
+    ctx.close()
+    ctx = cfg_ctx({'apiUrl': EXEC, 'qaApiUrl': QA_EXEC}); pg = ctx.new_page()
+    hits.clear(); pg.goto(BASE); pg.wait_for_timeout(600)
+    check('con las dos: sin ?qa usa la real', pg.evaluate('window.UAT_MODE') == 'live' and hits and all(h == EXEC for h in hits), hits)
+    hits.clear(); pg.goto(BASE + '?qa'); pg.wait_for_timeout(600)
+    check('y con ?qa la de prueba', hits and all(h == QA_EXEC for h in hits), hits)
+    hits.clear(); pg.goto(BASE + '?api=https://evil.example/exec&apiUrl=https://evil.example/exec'); pg.wait_for_timeout(600)
+    check('un link con ?api=otro servidor no cambia a dónde van los PINs', hits and all(h == EXEC for h in hits), hits)
+    ctx.close()
+    ctx = cfg_ctx({'apiUrl': EXEC, 'qaApiUrl': ''}); pg = ctx.new_page()
+    hits.clear(); pg.goto(BASE + '?qa'); pg.wait_for_timeout(600)
+    check('?qa sin copia de prueba configurada: usa la real (no se rompe)', pg.evaluate('window.UAT_MODE') == 'live' and all(h == EXEC for h in hits))
+    ctx.close()
     b.close()
 srv.shutdown()
 
