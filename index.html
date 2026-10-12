@@ -1,0 +1,3196 @@
+<!DOCTYPE html>
+<!-- GENERADO por tools/build.mjs desde Index.html @ 56b06ab. No editar aquí: los cambios se hacen en el repo privado. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Union Arena Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e0d13">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="UA Tracker">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>html { background: #0e0d13; }</style>
+  <script>window.UAT_BUILD = {"version":"2.15","commit":"56b06ab"};</script>
+  <script src="config.js"></script>
+  <script src="demo.js"></script>
+  <script src="api.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+
+    :root {
+      --bg: #0e0d13;
+      --surface: #1a1822;
+      --surface-2: #221f2c;
+      --border: #322e3d;
+      --border-strong: #453f56;
+      --text: #f1efe9;
+      --text-sec: #a29dae;
+      --text-muted: #8f8a9c;
+      --gold: #e4b73f;
+      --red: #e6485a;
+      --green: #35c780;
+      --stripe: linear-gradient(90deg, #e6485a, #f4a300, #35c780, #35a7e6, #9b5de5);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: radial-gradient(circle at 50% -10%, #1e1a2b 0%, var(--bg) 55%);
+      margin: 0;
+      padding: 18px 14px 40px;
+      color: var(--text);
+    }
+    .container { max-width: 440px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 4px; }
+    .header .brand-logo {
+      display: block; width: 62px; height: auto; margin: 0 auto 8px;
+      opacity: 0.95;
+    }
+    .header .stripe { height: 4px; border-radius: 3px; background: var(--stripe); margin: 0 auto 14px; max-width: 220px; }
+    .header h1 {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 28px;
+      letter-spacing: 2px; margin: 0; text-transform: uppercase;
+      color: var(--text);
+    }
+    .header h1 span { color: var(--gold); }
+    .header p { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin: 2px 0 18px; }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+    .topbar-right { display: inline-flex; align-items: center; gap: 10px; }
+    .topbar-right #btnLogout {
+      width: auto; margin: 0; padding: 7px 11px; font-size: 12px; min-height: 34px; flex: 0 0 auto;
+    }
+    .who { font-size: 12px; color: var(--text-sec); }
+    .who b { color: var(--gold); font-weight: 600; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .card h2 {
+      font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 17px;
+      letter-spacing: 0.5px; margin: 0 0 14px; text-transform: uppercase; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card h2 .bar { width: 4px; height: 16px; background: var(--gold); border-radius: 2px; display: inline-block; }
+
+    label { font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px; }
+
+    select, input {
+      width: 100%; padding: 10px 12px; margin-bottom: 14px;
+      border: 1px solid var(--border-strong); border-radius: 8px; font-size: 14px;
+      background: var(--surface-2); color: var(--text); font-family: inherit;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--gold); }
+    input::placeholder { color: var(--text-muted); }
+
+    button {
+      width: 100%; padding: 11px; border-radius: 8px; border: 1px solid var(--border-strong);
+      background: var(--surface-2); color: var(--text); font-size: 14px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s;
+    }
+    button:hover { border-color: var(--border-strong); background: #262231; }
+    button.primary { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
+    button.primary:hover { background: #edc25a; }
+    button.half { width: 48%; display: inline-block; }
+    button.active-yes { border-color: var(--green); color: var(--green); }
+    button.active-no { border-color: var(--red); color: var(--red); }
+    button.small { width: auto; padding: 8px 10px; min-height: 34px; font-size: 12px; }
+    button.icon { width: 38px; min-height: 38px; padding: 6px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; }
+
+    .link-toggle {
+      width: auto; background: none; border: none; margin: -6px 0 10px;
+      /* Vertical padding here is the tap target, not decoration: as a bare
+         inline link this was only ~14px tall, too small to hit reliably. */
+      padding: 10px 2px;
+      color: var(--gold); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    .link-toggle:hover { background: none; border: none; color: #edc25a; }
+
+    .inline-form {
+      background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px;
+      padding: 14px; margin: -4px 0 14px;
+    }
+    .inline-form .button-row { display: flex; gap: 8px; margin-top: 4px; }
+
+    .error { color: var(--red); font-size: 12.5px; margin: -6px 0 12px; display: none; }
+    .hint { color: var(--green); font-size: 12.5px; margin: -6px 0 12px; display: none; }
+    .hidden { display: none !important; }
+
+    .member-row { display: flex; gap: 6px; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); }
+    /* min-width real en vez de 0: con el selector de rol en la misma fila,
+       permitir que se encojan sin tope dejaba el nombre y el PIN cortados
+       ("Hecto", "12"). Con un piso legible, la fila envuelve sola. */
+    .member-row input { margin: 0; width: auto; flex: 2 1 110px; min-width: 90px; }
+    .member-row input.pin { flex: 0 1 68px; min-width: 60px; }
+    /* El selector de rol entra en la misma fila; en pantallas angostas la
+       fila envuelve en vez de comprimir los campos hasta hacerlos ilegibles. */
+    .member-row { flex-wrap: wrap; }
+    .member-row select.role { margin: 0; width: auto; flex: 1 1 108px; min-width: 100px; font-size: 12px; padding: 8px 6px; }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+
+    .bar-bg { height: 6px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--gold); }
+    .deck-row { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .deck-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .deck-header { display: flex; align-items: center; gap: 7px; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+    .deck-header .deck-name { display: flex; align-items: center; gap: 7px; }
+    .matchup-line { display: flex; justify-content: space-between; font-size: 11.5px; margin-top: 8px; gap: 8px; }
+    .matchup-line .best { color: var(--green); }
+    .matchup-line .worst { color: var(--red); }
+    .matchup-line .label { color: var(--text-muted); }
+    .matchup-none { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
+    .turn-line { color: var(--text-sec); margin-top: 4px; }
+
+    .hist-row { padding: 10px 0; border-top: 1px solid var(--border); }
+    .hist-header { display: flex; align-items: center; gap: 8px; }
+    .hist-info { flex: 1; min-width: 0; }
+    .hist-vs { font-size: 13px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .hist-vs .deck-chip { display: inline-flex; align-items: center; gap: 6px; }
+    .hist-player { font-size: 11.5px; color: var(--gold); font-weight: 600; margin-bottom: 2px; }
+    .hist-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+    .badge-win { background: rgba(53,199,128,0.15); color: var(--green); }
+    .badge-loss { background: rgba(230,72,90,0.15); color: var(--red); }
+    .badge-turn { background: var(--surface-2); color: var(--text-sec); border: 1px solid var(--border-strong); }
+    .hist-actions { display: flex; gap: 6px; }
+    .hist-edit { margin-top: 10px; padding: 12px; background: var(--surface-2); border-radius: 8px; border: 1px solid var(--border-strong); }
+    .hist-edit label { margin-top: 4px; }
+    .hist-edit .button-row { display: flex; gap: 8px; margin-top: 4px; }
+
+    .loading { text-align: center; color: var(--text-muted); font-size: 13px; padding: 14px 0; }
+    .empty { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: var(--surface-2); border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--gold); }
+    .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-top: 2px; }
+
+    .section-label {
+      font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted);
+      margin: 18px 0 8px; padding-top: 12px; border-top: 1px solid var(--border);
+    }
+
+    /* Brick marks. Deliberately NOT styled like .half (Win/Loss, 1st/2nd):
+       those are mutually exclusive pairs where picking one clears the
+       other, while the two brick marks are independent - either, both, or
+       neither can be on. The checkbox square is what signals that. */
+    .check-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .check-chip {
+      flex: 1; display: flex; align-items: center; gap: 8px;
+      padding: 10px; min-height: 44px; width: auto;
+      border-radius: 8px; border: 1px solid var(--border-strong);
+      background: var(--surface-2); color: var(--text-sec);
+      font-family: inherit; font-size: 12.5px; text-align: left; cursor: pointer;
+    }
+    .check-chip:hover { background: #262231; }
+    .check-chip .box {
+      width: 18px; height: 18px; flex: 0 0 auto;
+      border-radius: 4px; border: 1.5px solid var(--border-strong);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; line-height: 1; color: transparent;
+    }
+    .check-chip.active { border-color: var(--gold); color: var(--text); background: #26212c; }
+    .check-chip.active .box { background: var(--gold); border-color: var(--gold); color: #241d08; }
+
+    /* Dedicated "Bricks" view. Lives beside the win-rate views rather than
+       inside the deck rows, so the win-rate figures stay exactly as they
+       were and the brick numbers read as the separate statistic they are. */
+    .brick-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: 13px; margin-bottom: 5px; gap: 8px;
+    }
+    .brick-head .pct { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: var(--gold); }
+    .brick-head .pct-label { color: var(--text-muted); font-size: 11.5px; }
+    .brick-split { display: flex; gap: 8px; margin-top: 8px; }
+    .brick-split div {
+      flex: 1; background: var(--surface-2); border-radius: 8px; padding: 8px; text-align: center;
+    }
+    .brick-split .v { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; }
+    .brick-split .v.good { color: var(--green); }
+    .brick-split .v.bad { color: var(--red); }
+    .brick-split .v.na { font-size: 12px; color: var(--text-muted); font-family: inherit; font-weight: 500; }
+    .brick-split .k { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-top: 2px; }
+    .brick-note { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
+    .badge-brick { background: rgba(228,183,63,0.15); color: var(--gold); border: 1px solid rgba(228,183,63,0.35); }
+
+    .toggle-row { display: flex; gap: 8px; margin: -4px 0 14px; }
+    .toggle-btn {
+      flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border-strong);
+      background: var(--surface-2); color: var(--text-sec); font-size: 12.5px; text-align: center;
+      font-family: inherit; cursor: pointer;
+    }
+    .toggle-btn.active { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
+
+    /* Top-level nav inside the admin screen (Panel / Catalogs). Same visual
+       language as .toggle-btn but bigger, since it switches whole views. */
+    .nav-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .nav-btn {
+      flex: 1; padding: 12px 8px; border-radius: 10px; border: 1px solid var(--border-strong);
+      background: var(--surface-2); color: var(--text-sec); font-size: 13px; text-align: center;
+      font-family: inherit; cursor: pointer;
+    }
+    .nav-btn:hover { background: #262231; }
+    .nav-btn.active { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
+
+    .member-summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; padding: 8px 0; border-top: 1px solid var(--border);
+    }
+    .member-summary-row:first-child { border-top: none; }
+
+    .filter-note { font-size: 11.5px; color: var(--text-muted); margin: -8px 0 10px; }
+    .repair-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      font-size: 12.5px; padding: 7px 0; border-top: 1px solid var(--border);
+    }
+    .repair-from { color: var(--red); }
+    .repair-arrow { color: var(--text-muted); }
+    .repair-to { color: var(--green); }
+    .repair-count { color: var(--text-muted); font-size: 11px; margin-left: auto; }
+    .dup-tier {
+      font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase;
+      margin: 12px 0 2px; font-weight: 600;
+    }
+    .dup-tier.exact { color: var(--green); }
+    .dup-tier.fuzzy { color: var(--gold); }
+    .dup-group { padding: 10px 0; border-top: 1px solid var(--border); }
+    .dup-group:first-child { border-top: none; }
+    .dup-names { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .dup-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* Catalog rows are collapsed to one line and open on tap.
+       Showing all four editable fields at once cost 108px per deck, so the
+       Catalogs screen grew with the catalog - 6.6 phone screens at 40 decks,
+       11.7 at 80. Closed, a row is 44px, and with paging the screen stops
+       growing with the data altogether. Same pattern as the history rows. */
+    .cat-row { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); }
+    .cat-row:first-child { border-top: none; }
+    .cat-open {
+      /* min-width:0 es obligatorio: por defecto un ítem flex no se encoge
+         por debajo del ancho de su contenido, así que a 320px el botón
+         desbordaba la tarjeta en vez de dejar que el nombre se recortara. */
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: 8px; min-height: 44px; width: auto;
+      background: none; border: none; padding: 6px 0; color: var(--text);
+      font-family: inherit; font-size: 13px; text-align: left; cursor: pointer;
+    }
+    .cat-open:hover { background: none; border: none; color: var(--gold); }
+    .cat-open .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cat-open .meta { font-size: 11px; color: var(--text-muted); flex: 0 0 auto; }
+    .cat-open .chev { color: var(--text-muted); font-size: 11px; flex: 0 0 auto; }
+    .cat-edit { padding: 2px 0 12px; }
+    /* Los campos envuelven en vez de comprimirse: apretados en una sola
+       fila a 390px, los selectores cortaban su propio texto ("Owr",
+       "Purpl"), que es justo el dato que hay que leer para elegir bien. */
+    .cat-edit .de-fields { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .cat-edit .de-anime { flex: 1 1 100%; }
+    .cat-edit .de-color, .cat-edit .de-type { flex: 1 1 96px; min-width: 96px; }
+
+    .deck-edit-row { padding: 10px 0; border-top: 1px solid var(--border); }
+    .deck-edit-row:first-child { border-top: none; }
+    .deck-edit-row .de-name { margin-bottom: 8px; }
+    .deck-edit-row .de-fields { display: flex; gap: 6px; }
+    .deck-edit-row .de-fields input, .deck-edit-row .de-fields select { margin-bottom: 0; }
+    .de-anime { flex: 2; }
+    .de-color { flex: 1; }
+    .de-type { flex: 1; }
+    .de-remove { flex: 0 0 auto; width: 34px; padding: 6px; display: inline-flex; align-items: center; justify-content: center; }
+
+    .pager {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .pager-btn {
+      width: auto; margin: 0; flex: 0 0 auto; padding: 9px 12px; font-size: 12.5px;
+      min-height: 36px;
+    }
+    .pager-btn:disabled { opacity: 0.4; cursor: default; }
+    .pager-label { font-size: 12px; color: var(--text-muted); text-align: center; flex: 1 1 auto; }
+
+    svg.i { width: 15px; height: 15px; }
+
+    .stat-value.sm { font-size: 17px; }
+    .stat-value.muted { color: var(--text-muted); font-size: 14px; font-family: inherit; font-weight: 500; }
+    .stat-sub { font-size: 12px; color: #d6d2dc; margin-top: 1px; }
+    .stat-foot { font-size: 12px; color: var(--text-sec); text-align: center; margin: -6px 0 14px; }
+    .pips { display: flex; gap: 3px; justify-content: center; margin: 5px 0 2px; flex-wrap: wrap; }
+    .pips .sq { width: 9px; height: 9px; border-radius: 2px; }
+    .pips .sq.w { background: var(--green); } .pips .sq.l { background: var(--red); }
+    .deck-header .wr { white-space: nowrap; }
+    .deck-header .cnt { color: var(--text-sec); font-weight: 400; }
+    .deck-row.few .bar-fill { background: #6f6a7a; }
+    .few-note { font-size: 11.5px; color: #c9a447; margin: 6px 0 0; }
+
+    /* Rival search + tappable rival rows (v2.15) */
+    .stats-search { margin: -2px 0 14px; min-height: 44px; font-size: 16px; }
+    .row-link {
+      display: block; width: 100%; text-align: left; background: none; border: none; border-radius: 0;
+      border-bottom: 1px solid var(--border); padding: 0 0 12px; margin: 0 0 14px; color: inherit; font: inherit; cursor: pointer;
+    }
+    .row-link:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .row-link:hover { background: none; border-color: var(--border); }
+    .row-link:hover .deck-name { color: var(--gold); }
+    .row-link .bar-bg, .row-link .few-note { display: block; }
+    .row-link .open-hint { display: block; text-align: right; font-size: 12px; font-weight: 600; color: var(--gold); margin-top: 6px; }
+    .vs-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+      padding: 10px 12px; margin: 0 0 6px; border-radius: 10px; font-size: 13.5px;
+      background: rgba(228,183,63,0.10); border: 1px solid rgba(228,183,63,0.35); color: #f1efe9;
+    }
+    .vs-banner .muted { color: var(--text-sec); }
+
+    /* ================= v2.14 app shell =================
+       One page, one view at a time. On a phone the views are tabs at the
+       bottom (thumb reach); from 960px up the same nav becomes a sidebar
+       and the member's Log and Stats sit side by side. Everything below
+       overrides the single-column layout above only where it has to. */
+    body.in-app { padding: 0; }
+    .login-wrap { max-width: 440px; margin: 0 auto; }
+
+    #app { min-height: 100vh; }
+    .appbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 16px; min-height: 58px;
+      background: rgba(14,13,19,0.94); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(6px);
+    }
+    .appbar .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .appbar .brand img { width: 30px; height: 30px; object-fit: contain; }
+    .wordmark { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
+    .wordmark b { color: var(--gold); font-weight: 700; }
+    .account { position: relative; }
+    #btnAccount {
+      width: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+      padding: 4px 4px 4px 10px; background: none; border: 1px solid transparent; color: var(--text-sec); font-size: 13px;
+    }
+    #btnAccount:hover { border-color: var(--border); background: none; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--gold); font-weight: 600; font-size: 14px;
+    }
+    .menu {
+      position: absolute; right: 0; top: calc(100% + 6px); min-width: 210px; z-index: 40;
+      background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 6px;
+      box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+    }
+    .menu-who { padding: 8px 10px 10px; font-size: 13px; color: var(--text-sec); border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+    .menu-who b { color: var(--text); font-weight: 600; }
+    .menu button { text-align: left; border: none; background: none; min-height: 44px; padding: 0 10px; border-radius: 8px; }
+    .menu button:hover { background: var(--surface-2); border: none; }
+
+    #appNav {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+      display: flex; justify-content: space-around; gap: 2px;
+      padding: 6px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+      background: #14121a; border-top: 1px solid var(--border);
+    }
+    .nav-item {
+      flex: 1 1 0; min-width: 0; width: auto; min-height: 52px; padding: 6px 2px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      background: none; border: none; border-radius: 10px; color: var(--text-sec);
+      font-size: 11.5px; font-weight: 500;
+    }
+    .nav-item:hover { background: none; border: none; color: var(--text); }
+    .nav-item svg { width: 22px; height: 22px; }
+    .nav-item[aria-current="page"] { color: var(--gold); font-weight: 600; }
+    .nav-item .lbl-wide { display: none; }
+
+    .views { padding: 16px 14px 104px; max-width: 560px; margin: 0 auto; }
+    .view.hidden { display: none !important; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .card-head h2 { margin: 0; }
+    .card-head button { width: auto; }
+
+    /* ---- Log form ---- */
+    .log-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .log-head h2 { margin: 0; }
+    .today { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-sec); }
+    .today b { color: var(--text); font-weight: 600; }
+    .today .pip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .pip.w { background: var(--green); } .pip.l { background: var(--red); }
+    .field { margin-bottom: 16px; }
+    .field > label, .field-label {
+      font-size: 11.5px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-sec);
+      display: block; margin-bottom: 7px; font-weight: 600;
+    }
+    .opt { text-transform: none; letter-spacing: 0; font-weight: 400; }
+    .field input { margin-bottom: 8px; min-height: 46px; font-size: 16px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .chips .chips-label { font-size: 12px; color: var(--text-sec); margin-right: 2px; }
+    .chip {
+      width: auto; min-height: 38px; max-width: 100%; padding: 0 13px; border-radius: 19px;
+      display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px;
+      background: var(--surface-2); border: 1px solid var(--border); color: #d6d2dc;
+    }
+    .chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .chip.on { background: rgba(228,183,63,0.16); border-color: var(--gold); color: #f6d77f; }
+    .chip.add { background: none; border-style: dashed; border-color: var(--border-strong); color: var(--text-sec); }
+    .deck-card {
+      display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 14px; margin-bottom: 8px;
+      text-align: left; border-radius: 14px; background: rgba(228,183,63,0.09); border: 1px solid var(--gold); color: var(--text);
+    }
+    .deck-card:hover { background: rgba(228,183,63,0.14); border-color: var(--gold); }
+    .deck-card .dot { width: 12px; height: 12px; }
+    .deck-card .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .deck-card .nm { font-weight: 600; font-size: 15.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .deck-card .sub { font-size: 12px; color: var(--text-sec); }
+    .deck-card .chg { font-size: 13px; font-weight: 600; color: var(--gold); white-space: nowrap; }
+
+    .assist { border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); overflow: hidden; margin-bottom: 8px; }
+    .assist-row {
+      width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 0 14px; text-align: left; border: none; border-bottom: 1px solid var(--border); border-radius: 0; background: none; font-size: 14.5px;
+    }
+    .assist-row:last-child { border-bottom: none; }
+    .assist-row .meta { font-size: 12px; color: var(--text-sec); }
+    .assist-note { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .assist-note:last-child { border-bottom: none; }
+    .assist-note.warn { background: rgba(244,163,0,0.10); color: #f1d58a; }
+    .assist-note.block { background: rgba(230,72,90,0.10); color: #ffb3bc; }
+    .assist-note .grow { flex: 1; min-width: 0; }
+    .assist-note button { width: auto; min-height: 36px; padding: 0 12px; flex: 0 0 auto; }
+    .tag-new { padding: 2px 7px; border-radius: 6px; background: rgba(53,167,230,0.16); color: #7cc6f0; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; }
+
+    .result-row, .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .pair { gap: 8px; margin-bottom: 8px; }
+    .result-btn {
+      min-height: 56px; border-radius: 14px; border-width: 2px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .result-btn.win[aria-checked="true"] { background: rgba(53,199,128,0.18); border-color: var(--green); color: #4fe09a; }
+    .result-btn.loss[aria-checked="true"] { background: rgba(230,72,90,0.18); border-color: var(--red); color: #ff8b97; }
+    .tog { min-height: 44px; }
+    .tog.on { background: rgba(228,183,63,0.16); border-color: var(--gold); color: #f6d77f; }
+    .more { border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); margin-bottom: 16px; }
+    .more-toggle {
+      display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 14px;
+      background: none; border: none; text-align: left; font-size: 14px;
+    }
+    .more-toggle:hover { background: none; border: none; }
+    .more-toggle svg { transition: transform .15s; width: 18px; height: 18px; color: var(--text-sec); }
+    .more-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .more-panel { padding: 0 12px 4px; }
+    .more-panel .check-row { margin-bottom: 8px; }
+    .muted { color: var(--text-sec); font-weight: 400; }
+
+    .save-btn {
+      min-height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 1px; text-transform: uppercase;
+      background: var(--surface); border: 1px dashed var(--border-strong); color: #8f8a9c; cursor: not-allowed;
+    }
+    .save-btn.ready { background: var(--gold); border: 1px solid var(--gold); color: #1a1406; cursor: pointer; box-shadow: 0 6px 20px rgba(228,183,63,0.22); }
+    .save-btn.ready:hover { background: #edc25a; }
+    .save-btn.busy { opacity: 0.75; cursor: progress; }
+    .save-summary { text-align: center; font-size: 13px; color: var(--text-sec); margin: 8px 0 0; min-height: 18px; }
+    .save-summary.ready { color: #d6d2dc; }
+    .link-btn { width: auto; background: none; border: none; color: var(--gold); text-decoration: underline; text-underline-offset: 3px; min-height: 40px; padding: 0 4px; }
+    .link-btn:hover { background: none; border: none; }
+    .edit-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; margin-bottom: 14px;
+      border-radius: 10px; background: rgba(53,167,230,0.10); border: 1px solid rgba(53,167,230,0.35); font-size: 13px; color: #b7def5; }
+
+    /* ---- History ---- */
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .filter-row select { width: auto; flex: 1 1 140px; min-width: 0; margin: 0; min-height: 40px; border-radius: 20px; padding: 8px 12px; font-size: 13px; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .hist-day { display: flex; justify-content: space-between; padding: 14px 2px 6px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--text-sec); }
+    .hist-day span:last-child { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    .hist-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+    .res-badge { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 16px; }
+    .res-badge.w { background: rgba(53,199,128,0.16); color: #4fe09a; }
+    .res-badge.l { background: rgba(230,72,90,0.16); color: #ff8b97; }
+    .hist-main { flex: 1; min-width: 0; }
+    .hist-title { font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-title .who { color: var(--gold); }
+    .hist-sub { font-size: 12px; color: var(--text-sec); margin-top: 3px; line-height: 1.7; }
+    .hist-sub .dot { width: 8px; height: 8px; margin-right: 5px; vertical-align: 0; }
+    .hist-sub .badge { margin-left: 4px; padding: 1px 7px; }
+    .hist-time { font-size: 12px; color: var(--text-sec); white-space: nowrap; }
+    .hist-row .icon { border: none; background: none; color: var(--text-sec); width: 44px; min-height: 44px; }
+
+    /* ---- Members ---- */
+    #adminList .member-row, #inactiveList .member-row { flex-wrap: nowrap; gap: 12px; padding: 10px 0; }
+    .member-main { flex: 1; min-width: 0; }
+    .member-name { font-weight: 600; font-size: 15px; }
+    .role-badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; vertical-align: 1px; }
+    .role-badge.admin { background: rgba(228,183,63,0.16); color: #f6d77f; }
+    .role-badge.manager { background: rgba(53,167,230,0.16); color: #7cc6f0; }
+    .role-badge.member { background: var(--surface-2); color: var(--text-sec); }
+    .member-sub { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+    .member-row button.small { min-height: 40px; }
+
+    /* ---- Bottom sheet ---- */
+    .sheet-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(8,7,12,0.62); display: flex; flex-direction: column; justify-content: flex-end; }
+    .sheet {
+      background: var(--surface); border-top: 1px solid var(--border-strong); border-radius: 20px 20px 0 0;
+      max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 -12px 40px rgba(0,0,0,0.45);
+    }
+    .sheet-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--border-strong); margin: 10px auto 0; }
+    .sheet-head { display: flex; align-items: center; gap: 6px; padding: 8px 12px 10px 18px; border-bottom: 1px solid var(--border); }
+    .sheet-head h3 { flex: 1; margin: 0; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 20px; }
+    .sheet-head button { width: auto; min-height: 40px; background: none; border: none; color: var(--text-sec); }
+    .sheet-body { overflow-y: auto; padding: 12px 18px; flex: 1 1 auto; }
+    .sheet-foot { padding: 12px 18px calc(16px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); }
+    .sheet-foot:empty { display: none; }
+    .sheet-sec { font-size: 11.5px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--text-sec); margin: 10px 0 4px; }
+    .sheet-row {
+      width: 100%; min-height: 50px; display: flex; align-items: center; gap: 12px; padding: 0 6px; text-align: left;
+      border: none; border-radius: 10px; background: none; font-size: 15px;
+    }
+    .sheet-row:hover { background: var(--surface-2); border: none; }
+    .sheet-row.on { color: #f6d77f; font-weight: 600; background: rgba(228,183,63,0.08); }
+    .sheet-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sheet-row .meta { font-size: 12px; color: var(--text-sec); }
+    .sheet-action { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; min-height: 48px; text-align: left; padding: 0 14px; }
+    .sheet-action.danger { color: #ff8b97; border-color: #5a2a33; background: none; }
+    .sheet-sub { font-size: 13px; color: var(--text-sec); margin: 0 0 12px; }
+    .color-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed; left: 12px; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+      display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 16px; border-radius: 14px;
+      background: #2b2737; border: 1px solid var(--border-strong); box-shadow: 0 10px 30px rgba(0,0,0,0.45); font-size: 14px;
+    }
+    .toast .grow { flex: 1; min-width: 0; }
+    .toast .pip { width: 10px; height: 10px; }
+    .toast button { width: auto; min-height: 40px; padding: 0 14px; color: var(--gold); font-weight: 600; background: none; }
+
+    @media (min-width: 960px) {
+      #app { display: grid; grid-template-columns: 236px minmax(0, 1fr); grid-template-rows: auto 1fr; }
+      .appbar { grid-column: 1 / -1; padding: 10px 24px; }
+      #appNav {
+        position: sticky; top: 58px; bottom: auto; left: auto; right: auto; align-self: start;
+        height: calc(100vh - 58px); flex-direction: column; justify-content: flex-start; gap: 4px;
+        padding: 18px 14px; border-top: none; border-right: 1px solid var(--border);
+      }
+      .nav-item { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 12px; min-height: 44px; padding: 0 12px; font-size: 14px; }
+      .nav-item[aria-current="page"] { background: rgba(228,183,63,0.12); color: #f6d77f; }
+      .nav-item svg { width: 19px; height: 19px; }
+      #app[data-role="member"] .nav-item[data-view="stats"] { display: none; }
+      #app[data-role="member"] .nav-item[data-view="log"] .lbl-phone { display: none; }
+      #app[data-role="member"] .nav-item[data-view="log"] .lbl-wide { display: inline; }
+      .views { max-width: 1160px; margin: 0; padding: 26px 32px 48px; }
+      .views.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+      .views.pair .view .card { margin-bottom: 0; }
+      #viewTeam, #viewCatalogs, #viewHistory { column-count: 2; column-gap: 20px; }
+      #viewTeam .card, #viewCatalogs .card, #viewHistory .card { break-inside: avoid; -webkit-column-break-inside: avoid; }
+      #viewHistory.single { column-count: 1; }
+      .sheet-backdrop { justify-content: center; align-items: center; }
+      .sheet { width: 100%; max-width: 480px; border-radius: 18px; border: 1px solid var(--border-strong); max-height: 80vh; }
+      .sheet-grip { display: none; }
+      .toast { left: auto; right: 24px; bottom: 24px; max-width: 420px; }
+    }
+  </style>
+</head>
+<body>
+<!-- ===== LOGIN ===== -->
+<div id="screenLogin" class="login-wrap">
+  <div class="header">
+    <img id="brandLogo" class="brand-logo" alt="CapyBros" src="data:image/png;base64,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" alt="CapyBros">
+    <h1>Union <span>Arena</span></h1>
+    <p>Team Tracker</p>
+    <div class="stripe"></div>
+  </div>
+  <div class="card">
+    <h2><span class="bar"></span>Log in</h2>
+    <p class="hint" id="loginResume">Signing you back in…</p>
+    <label for="loginName">Your name</label>
+    <select id="loginName"></select>
+    <label for="loginPin">PIN</label>
+    <input id="loginPin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="&#8226;&#8226;&#8226;&#8226;">
+    <p class="error" id="loginError"></p>
+    <button class="primary" id="btnLogin">Log in</button>
+  </div>
+</div>
+
+<!-- ===== APP (every role; the nav decides which views exist) ===== -->
+<div id="app" class="hidden">
+  <header class="appbar">
+    <div class="brand"><img id="appLogo" alt=""><span class="wordmark">Union <b>Arena</b></span></div>
+    <div class="account">
+      <button type="button" id="btnAccount" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu">
+        <span id="whoAmI"></span><span class="avatar" id="avatar" aria-hidden="true"></span>
+      </button>
+      <div id="accountMenu" class="menu hidden">
+        <div class="menu-who" id="menuWho"></div>
+        <button type="button" id="btnRefresh">Refresh</button>
+        <button type="button" id="btnLogout">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <nav id="appNav" aria-label="Main">
+    <button type="button" class="nav-item" data-view="team" id="navTeam">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <span>Team</span>
+    </button>
+    <button type="button" class="nav-item" data-view="log" id="navLog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      <span class="lbl-phone">Log</span><span class="lbl-wide">Log &amp; my stats</span>
+    </button>
+    <button type="button" class="nav-item" data-view="stats" id="navStats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      <span>My stats</span>
+    </button>
+    <button type="button" class="nav-item" data-view="history" id="navHistory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 3"/></svg>
+      <span>History</span>
+    </button>
+    <button type="button" class="nav-item" data-view="catalogs" id="navCatalogs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="16" rx="1.5"/></svg>
+      <span>Catalogs</span>
+    </button>
+    <button type="button" class="nav-item" data-view="members" id="navMembers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c-.5-2.4-1.8-4-3.5-4.8"/></svg>
+      <span>Members</span>
+    </button>
+  </nav>
+
+  <main id="appMain" class="views">
+
+    <!-- ===== TEAM (managers, admins) ===== -->
+    <section class="view hidden" id="viewTeam" data-view="team">
+      <div class="card">
+        <div class="card-head">
+          <h2><span class="bar"></span>Team dashboard</h2>
+        </div>
+        <div id="teamStats" class="loading">Loading…</div>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn active" id="teamViewByDeck">By deck</button>
+          <button type="button" class="toggle-btn" id="teamViewByRival">By rival</button>
+          <button type="button" class="toggle-btn" id="teamViewBricks">Bricks</button>
+        </div>
+        <!-- Only meaningful in the By rival view, so it's hidden in By deck. -->
+        <div id="teamRivalFilterRow" class="hidden">
+          <label for="teamRivalMemberFilter">Member</label>
+          <select id="teamRivalMemberFilter"></select>
+        </div>
+        <input type="search" id="teamRivalSearch" class="stats-search hidden" placeholder="Search a rival…" autocomplete="off" aria-label="Search a rival">
+        <div id="teamStatsList"></div>
+        <p class="section-label">By member</p>
+        <div id="teamByMember"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>Reports</h2>
+        <p class="sheet-sub">A PDF styled like the app: win rate by deck and by member, matchups, rival meta and named rivals.</p>
+        <p class="error" id="reportError"></p>
+        <p class="hint" id="reportHint"></p>
+        <button class="primary" id="btnGenerateReport">Generate PDF report</button>
+      </div>
+    </section>
+
+    <!-- ===== LOG (everyone) ===== -->
+    <section class="view hidden" id="viewLog" data-view="log">
+      <div class="card" id="logCard">
+        <div id="editBanner" class="edit-banner hidden">
+          <span id="editBannerText">Editing a match</span>
+          <button type="button" class="link-btn" id="btnCancelEdit">Cancel</button>
+        </div>
+        <div class="log-head">
+          <h2 id="logTitle"><span class="bar"></span>Log a match</h2>
+          <div class="today" id="todayStrip"></div>
+        </div>
+
+        <div class="field hidden" id="logPlayerRow">
+          <label for="logPlayer">Player</label>
+          <select id="logPlayer"></select>
+        </div>
+
+        <div class="field">
+          <div class="field-label" id="deckLabel">Your deck</div>
+          <input type="hidden" id="formDeck">
+          <div id="deckPicker"></div>
+        </div>
+
+        <div class="field">
+          <label for="formRival">Rival deck</label>
+          <input id="formRival" autocomplete="off" placeholder="Type to search, or tap a recent one">
+          <div id="rivalAssist" class="assist hidden"></div>
+          <div id="rivalRecent" class="chips"></div>
+        </div>
+
+        <div class="field">
+          <label for="formRivalName"><span id="nameLabel">Who did you play?</span> <span class="opt">(optional)</span></label>
+          <input id="formRivalName" autocomplete="off" placeholder="Rival's name">
+          <div id="nameAssist" class="assist hidden"></div>
+          <div id="nameRecent" class="chips"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label" id="resultLabel">Result</div>
+          <div class="result-row" role="radiogroup" aria-labelledby="resultLabel">
+            <button type="button" class="result-btn win" id="btnWin" role="radio" aria-checked="false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Win</button>
+            <button type="button" class="result-btn loss" id="btnLoss" role="radio" aria-checked="false">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>Loss</button>
+          </div>
+        </div>
+
+        <div class="more">
+          <button type="button" class="more-toggle" id="btnMore" aria-expanded="false" aria-controls="morePanel">
+            <span>Turn &amp; brick <span class="muted" id="moreSummary">· optional</span></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="more-panel hidden" id="morePanel">
+            <div class="pair">
+              <button type="button" class="tog" id="btnFirst" aria-pressed="false">Went 1st</button>
+              <button type="button" class="tog" id="btnSecond" aria-pressed="false">Went 2nd</button>
+            </div>
+            <div class="check-row">
+              <button type="button" class="check-chip" id="btnOwnBrick" aria-pressed="false"><span class="box">&#10003;</span><span id="ownBrickLabel">I bricked</span></button>
+              <button type="button" class="check-chip" id="btnRivalBrick" aria-pressed="false"><span class="box">&#10003;</span>Rival bricked</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="error" id="formError"></p>
+        <button type="button" class="save-btn" id="btnSave" aria-disabled="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>
+          <span id="btnSaveText">Save match</span>
+        </button>
+        <p class="save-summary" id="saveSummary" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ===== MY STATS (members) ===== -->
+    <section class="view hidden" id="viewStats" data-view="stats">
+      <div class="card">
+        <h2><span class="bar"></span>My stats</h2>
+        <div id="personalStats" class="loading">Loading…</div>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn active" id="memberViewByDeck">By deck</button>
+          <button type="button" class="toggle-btn" id="memberViewByRival">By rival</button>
+          <button type="button" class="toggle-btn" id="memberViewBricks">Bricks</button>
+        </div>
+        <input type="search" id="rivalStatsSearch" class="stats-search hidden" placeholder="Search a rival…" autocomplete="off" aria-label="Search a rival">
+        <div id="personalStatsList"></div>
+      </div>
+    </section>
+
+    <!-- ===== HISTORY ===== -->
+    <section class="view hidden" id="viewHistory" data-view="history">
+      <div class="card" id="memberHistoryCard">
+        <h2><span class="bar"></span>History</h2>
+        <div class="filter-row">
+          <label><span class="sr">Your deck</span><select id="historyFilter"></select></label>
+          <label><span class="sr">Rival deck</span><select id="historyRivalFilter"></select></label>
+          <label><span class="sr">Rival</span><select id="historyNameFilter"></select></label>
+        </div>
+        <div id="historyVs" class="vs-banner hidden"></div>
+        <div id="historyList"><div class="loading">Loading…</div></div>
+      </div>
+
+      <div class="card" id="teamHistoryCard">
+        <h2><span class="bar"></span>Team history</h2>
+        <div class="filter-row">
+          <label><span class="sr">Member</span><select id="teamPlayerFilter"></select></label>
+          <label><span class="sr">Deck</span><select id="teamDeckFilter"></select></label>
+          <label><span class="sr">Rival deck</span><select id="teamRivalDeckFilter"></select></label>
+          <label><span class="sr">Rival</span><select id="teamNameFilter"></select></label>
+        </div>
+        <div id="teamHistoryVs" class="vs-banner hidden"></div>
+        <div id="teamHistoryList"><div class="loading">Loading…</div></div>
+      </div>
+    </section>
+
+    <!-- ===== CATALOGS (admin) ===== -->
+    <section class="view hidden" id="viewCatalogs" data-view="catalogs">
+      <div class="card">
+        <h2><span class="bar"></span>Catalogs</h2>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn active" id="catViewDecks">Decks</button>
+          <button type="button" class="toggle-btn" id="catViewRivals">Rivals</button>
+        </div>
+        <div id="catalogDecks">
+        <p class="section-label" style="margin-top:0;">Edit decks</p>
+        <input id="deckSearch" type="search" placeholder="Filter decks by name…" autocomplete="off">
+        <p class="filter-note" id="deckFilterNote"></p>
+        <div id="deckEditList" class="loading">Loading…</div>
+        <p class="section-label">Possible duplicates</p>
+        <div id="duplicatesList" class="loading">Loading…</div>
+        <p class="section-label">Merge manually</p>
+        <label for="mergeFrom">Deck to merge (will be removed)</label>
+        <select id="mergeFrom"></select>
+        <label for="mergeInto">Merge into (keeps this name)</label>
+        <select id="mergeInto"></select>
+        <p class="error" id="mergeError"></p>
+        <p class="hint" id="mergeHint"></p>
+        <button id="btnMerge">Merge decks</button>
+      </div>
+        <div id="catalogRivals" class="hidden">
+        <p class="section-label" style="margin-top:0;">Edit rivals</p>
+        <input id="rivalSearch" type="search" placeholder="Filter rivals by name…" autocomplete="off">
+        <p class="filter-note" id="rivalFilterNote"></p>
+        <div id="rivalEditList" class="loading">Loading…</div>
+        <p class="section-label">Possible duplicates</p>
+        <div id="rivalDuplicatesList" class="loading">Loading…</div>
+        <p class="section-label">Merge manually</p>
+        <label for="rivalMergeFrom">Rival to merge (will be removed)</label>
+        <select id="rivalMergeFrom"></select>
+        <label for="rivalMergeInto">Merge into (keeps this name)</label>
+        <select id="rivalMergeInto"></select>
+        <p class="error" id="rivalMergeError"></p>
+        <p class="hint" id="rivalMergeHint"></p>
+        <button id="btnMergeRival">Merge rivals</button>
+      </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>Fix spelling in saved matches</h2>
+        <p style="font-size:12.5px;color:var(--text-sec);margin:-6px 0 14px;">
+          Older matches may have been saved with a different capitalization than the catalog
+          (for example "kenji" when the catalog says "Kenji"), which splits one rival or deck
+          into two in the stats. This finds those and lines them up with the catalog.
+        </p>
+        <p class="error" id="repairError"></p>
+        <p class="hint" id="repairHint"></p>
+        <div id="repairPreview"></div>
+        <button id="btnPreviewRepair">Check for spelling drift</button>
+      </div>
+    </section>
+
+    <!-- ===== MEMBERS (admin) ===== -->
+    <section class="view hidden" id="viewMembers" data-view="members">
+      <div class="card" id="cardMembers">
+        <div class="card-head">
+          <h2><span class="bar"></span>Members</h2>
+          <button type="button" class="primary small" id="btnAddMember">+ Add</button>
+        </div>
+        <div id="adminList"><div class="loading">Loading…</div></div>
+        <button type="button" class="link-btn hidden" id="btnShowInactive" aria-expanded="false"></button>
+        <div id="inactiveList" class="hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden" role="status">
+    <span class="pip" id="toastPip"></span>
+    <span class="grow" id="toastText"></span>
+    <button type="button" id="btnUndo">Undo</button>
+  </div>
+
+  <div id="sheet" class="sheet-backdrop hidden">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-grip"></div>
+      <div class="sheet-head">
+        <button type="button" id="sheetBack" class="hidden" aria-label="Back">&#8249; Back</button>
+        <h3 id="sheetTitle"></h3>
+        <button type="button" id="sheetClose">Close</button>
+      </div>
+      <div class="sheet-body" id="sheetBody"></div>
+      <div class="sheet-foot" id="sheetFoot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ================= State =================
+  let token = null;
+  let role = null;
+  let myName = null;
+  let currentView = null;
+  let historyOffset = 0;
+  let teamHistoryOffset = 0;
+  const HISTORY_PAGE_SIZE = 20;
+  let catalog = [];       // [{name, anime, color, type}] - own AND rival decks, one list
+  let colorMap = {};       // name -> color (text)
+  let rivalCatalog = [];  // [name, ...] - rival NAMES (people), not decks
+  let activeMembers = [];  // names for the manager's "Player" picker and filters
+  let personalDeckStats = [];
+  let personalRivalStats = { byRival: [], bestRival: null, worstRival: null };
+  let personalStatsView = 'deck';  // 'deck' | 'rival' | 'brick'
+  let personalBrickStats = null;   // loaded the first time the Bricks tab opens
+  let teamDashboardData = null;
+  let teamStatsView = 'deck';      // 'deck' | 'rival' | 'brick'
+  // Managers share the team views but not Catalogs or Members. The server
+  // enforces that independently - hiding the UI is convenience, not security.
+  const isManager = () => role === 'manager' || role === 'admin';
+  const isAdmin = () => role === 'admin';
+  let deckCatalogOffset = 0;
+  let rivalCatalogOffset = 0;
+  let allDecksForEdit = [];
+  let allRivalsForEdit = [];
+
+  // What the Log screen offers as one-tap shortcuts, per player. Comes from
+  // the server with the screen (members) or from getLogContext (managers).
+  const emptyRecent = () => ({ decks: [], rivalDecks: [], rivalNames: [], deckCounts: {}, today: [], last10: [], weekCount: 0 });
+  let recent = emptyRecent();
+
+  // The Log form. One form for every role and for editing, so there is one
+  // screen to learn and one to test.
+  const form = { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false };
+  let lastSaved = null;     // { id, prev } - what Undo needs
+  let toastTimer = null;
+
+  const SESSION_KEY = 'uat.session.v1';
+  // Under this many matches a win rate is flagged as "few games".
+  const FEW_GAMES = 5;
+  const WIDE = window.matchMedia('(min-width: 960px)');
+
+  const HEX_MAP = {
+    'red': '#e6485a', 'blue': '#35a7e6', 'green': '#35c780',
+    'yellow': '#f4a300', 'purple': '#9b5de5',
+  };
+  const hexForDeck = deckName => {
+    const color = (colorMap[deckName] || '').toLowerCase();
+    return HEX_MAP[color] || '#726d7d';
+  };
+  const dot = deckName => `<span class="dot" style="background:${hexForDeck(deckName)}"></span>`;
+
+  const ICON_PENCIL = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  const ICON_TRASH = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+  const ICON_DOTS = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
+
+  // The server's "someone else is saving" message is already a complete,
+  // friendly sentence - prefixing it with "Connection error" would make a
+  // normal wait look like a network failure.
+  const WRITE_BUSY_PREFIX = 'Someone else on the team is saving';
+  function failText(err) {
+    const msg = (err && err.message) || String(err);
+    return msg.indexOf(WRITE_BUSY_PREFIX) === 0 ? msg : 'Connection error: ' + msg;
+  }
+
+  const el = id => document.getElementById(id);
+
+  // ================= Server calls that can't outlive their session =================
+  // Every reply is checked against the session it was asked for: after Log
+  // out (or switching account on a shared tablet) a slow reply from the old
+  // session is dropped instead of painting someone else's data.
+  let epoch = 0;
+  function gs() {
+    const mine = epoch;
+    const guard = f => (...a) => { if (mine === epoch) f(...a); };
+    let run = google.script.run;
+    const api = new Proxy({}, { get(t, prop) {
+      if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') {
+        return f => { run = run[prop](guard(f)); return api; };
+      }
+      return (...args) => run[prop](...args);
+    }});
+    return api;
+  }
+  // Latest-request-wins, per loader: a slow reply to an older request must
+  // not overwrite a newer one (two quick saves, fast paging).
+  const latest = {};
+  function ticket(name) { latest[name] = (latest[name] || 0) + 1; const t = latest[name]; return () => latest[name] === t; }
+  /** Names come from the team's own data, but they still go into innerHTML. */
+  const esc = s => String(s === null || s === undefined ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  // ================= Look-alike names =================
+  // The SAME rules the admin's duplicate finder uses on the server
+  // (normalizeCatalogName_, FUZZY_* in Code.gs), so the app never calls two
+  // names "different" here and "possible duplicates" there. run_qa15.js
+  // checks these constants match the server's.
+  const FUZZY_MAX_DISTANCE = 1;
+  const FUZZY_MIN_LENGTH = 7;
+  function normName(n) {
+    return String(n || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  const tightName = n => normName(n).replace(/ /g, '');
+  function editDistance(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    let prev = [];
+    for (let j = 0; j <= n; j++) prev[j] = j;
+    for (let i = 1; i <= m; i++) {
+      const curr = [i];
+      for (let k = 1; k <= n; k++) {
+        curr[k] = Math.min(prev[k] + 1, curr[k - 1] + 1, prev[k - 1] + (a.charAt(i - 1) === b.charAt(k - 1) ? 0 : 1));
+      }
+      prev = curr;
+    }
+    return prev[n];
+  }
+  const differOnlyInDigits = (a, b) => a !== b && a.replace(/[0-9]/g, '') === b.replace(/[0-9]/g, '');
+  /**
+   * How `text` relates to a list of existing names:
+   *  'same'    - same name ignoring case (the server stores the catalog spelling)
+   *  'exact'   - same once accents, punctuation and spaces are ignored
+   *  'similar' - one typo away, on names long enough for that to mean something
+   *  null      - genuinely new
+   */
+  function lookAlike(text, names) {
+    const t = String(text || '').trim();
+    if (!t) return null;
+    const lower = t.toLowerCase();
+    const same = names.find(n => String(n).toLowerCase() === lower);
+    if (same) return { kind: 'same', name: same };
+    const key = tightName(t);
+    const twin = names.find(n => tightName(n) === key);
+    if (twin) return { kind: 'exact', name: twin };
+    const a = normName(t);
+    if (a.length < FUZZY_MIN_LENGTH) return null;
+    let best = null, bestD = 99;
+    names.forEach(n => {
+      const b = normName(n);
+      if (Math.min(a.length, b.length) < FUZZY_MIN_LENGTH || differOnlyInDigits(a, b)) return;
+      const d = editDistance(a, b);
+      if (d < bestD) { bestD = d; best = n; }
+    });
+    return bestD <= FUZZY_MAX_DISTANCE ? { kind: 'similar', name: best } : null;
+  }
+
+  // ================= Session (remembered on this device) =================
+  // The server keeps a session alive for 6 hours. Keeping its token here
+  // means reopening the app in the middle of a tournament goes straight to
+  // Log instead of asking for the PIN again. Log out forgets it.
+  function saveSession() {
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ token: token, role: role, name: myName })); } catch (e) {}
+  }
+  function clearSession() {
+    try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+  }
+  function readSession() {
+    try { const raw = localStorage.getItem(SESSION_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+
+  // ================= Login =================
+  function loadLoginNames() {
+    gs().withSuccessHandler(names => {
+      const sel = el('loginName');
+      sel.innerHTML = '';
+      names.forEach(n => {
+        const op = document.createElement('option');
+        op.value = n; op.textContent = n;
+        sel.appendChild(op);
+      });
+    }).listNamesForLogin();
+  }
+  loadLoginNames();
+  el('appLogo').src = el('brandLogo').src;
+
+  (function tryResume() {
+    const saved = readSession();
+    if (!saved || !saved.token) return;
+    el('loginResume').style.display = 'block';
+    // Logging in by hand while this is pending would race it: hold the
+    // button until the server answers.
+    el('btnLogin').disabled = true;
+    const done = () => { el('loginResume').style.display = 'none'; el('btnLogin').disabled = false; };
+    gs()
+      .withSuccessHandler(resp => {
+        done();
+        if (token) return;
+        if (resp && resp.ok) enterApp({ token: saved.token, name: resp.name, role: resp.role });
+        else clearSession();
+      })
+      .withFailureHandler(done)
+      .resumeSession(saved.token);
+  })();
+
+  el('btnLogin').onclick = () => {
+    const name = el('loginName').value;
+    const pin = el('loginPin').value;
+    el('loginError').style.display = 'none';
+    gs()
+      .withSuccessHandler(resp => {
+        if (!resp.ok) {
+          el('loginError').textContent = resp.error;
+          el('loginError').style.display = 'block';
+          return;
+        }
+        enterApp(resp);
+      })
+      .withFailureHandler(err => {
+        el('loginError').textContent = failText(err);
+        el('loginError').style.display = 'block';
+      })
+      .login(name, pin);
+  };
+  el('loginPin').addEventListener('keydown', e => { if (e.key === 'Enter') el('btnLogin').click(); });
+
+  function enterApp(resp) {
+    epoch++;
+    token = resp.token;
+    role = resp.role;
+    myName = resp.name;
+    form.player = myName;
+    saveSession();
+    el('whoAmI').textContent = myName;
+    el('avatar').textContent = String(myName || '?').charAt(0).toUpperCase();
+    el('menuWho').innerHTML = `Signed in as <b>${esc(myName)}</b> · ${esc(role)}`;
+    el('screenLogin').classList.add('hidden');
+    el('app').classList.remove('hidden');
+    el('app').dataset.role = isAdmin() ? 'admin' : isManager() ? 'manager' : 'member';
+    document.body.classList.add('in-app');
+    applyRoleVisibility();
+    paintForm();
+    if (isManager()) {
+      loadAdminCatalogAndMembers();
+      loadTeamDashboard();
+      loadLogContext();
+    } else {
+      loadCatalogAndForm();
+    }
+    showView(navFor()[0]);
+  }
+
+  el('btnLogout').onclick = () => {
+    gs().logout(token);
+    clearSession();
+    resetToLoginScreen();
+  };
+
+  /**
+   * Back to the login screen without a page reload. Apps Script web apps run
+   * inside a sandboxed iframe, and location.reload() can leave it blank.
+   */
+  function resetToLoginScreen() {
+    epoch++;
+    token = null; role = null; myName = null; currentView = null;
+    historyOffset = 0; teamHistoryOffset = 0;
+    catalog = []; colorMap = {}; rivalCatalog = []; activeMembers = [];
+    personalDeckStats = []; personalRivalStats = { byRival: [], bestRival: null, worstRival: null };
+    personalStatsView = 'deck'; personalBrickStats = null;
+    teamDashboardData = null; teamStatsView = 'deck';
+    recent = emptyRecent();
+    Object.assign(form, { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false });
+    lastSaved = null;
+    hideToast(); closeSheet(); closeAccountMenu();
+    el('formRival').value = ''; el('formRivalName').value = '';
+    ['memberViewByRival', 'memberViewBricks', 'teamViewByRival', 'teamViewBricks'].forEach(id => el(id).classList.remove('active'));
+    el('memberViewByDeck').classList.add('active'); el('teamViewByDeck').classList.add('active');
+    showCatalogTab('decks');
+    allDecksForEdit = []; allRivalsForEdit = [];
+    el('deckSearch').value = ''; el('rivalSearch').value = '';
+    el('rivalStatsSearch').value = ''; el('teamRivalSearch').value = '';
+    ['historyNameFilter', 'teamNameFilter'].forEach(id => { el(id).innerHTML = ''; });
+    deckCatalogOffset = 0; rivalCatalogOffset = 0;
+    el('app').classList.add('hidden');
+    document.body.classList.remove('in-app');
+    el('loginPin').value = '';
+    el('loginError').style.display = 'none';
+    el('screenLogin').classList.remove('hidden');
+    loadLoginNames();
+  }
+
+  // ================= Account menu =================
+  function closeAccountMenu() {
+    el('accountMenu').classList.add('hidden');
+    el('btnAccount').setAttribute('aria-expanded', 'false');
+  }
+  el('btnAccount').onclick = e => {
+    e.stopPropagation();
+    const open = el('accountMenu').classList.contains('hidden');
+    el('accountMenu').classList.toggle('hidden', !open);
+    el('btnAccount').setAttribute('aria-expanded', String(open));
+  };
+  document.addEventListener('click', e => {
+    if (!el('accountMenu').classList.contains('hidden') && !el('accountMenu').contains(e.target)) closeAccountMenu();
+  });
+
+  el('btnRefresh').onclick = () => {
+    closeAccountMenu();
+    if (!isManager()) { loadCatalogAndForm(); return; }
+    // Refresh what's on screen: reloading the catalogs while looking at the
+    // dashboard (or the other way round) only spends round trips.
+    if (currentView === 'catalogs') {
+      loadAdminCatalogAndMembers(); loadDeckMaintenance(); loadRivalMaintenance();
+    } else if (currentView === 'members') {
+      loadAdmin();
+    } else {
+      loadAdminCatalogAndMembers(); loadTeamDashboard(); loadLogContext();
+    }
+  };
+
+  // ================= Navigation =================
+  const NAV = {
+    member: ['log', 'stats', 'history'],
+    manager: ['team', 'log', 'history'],
+    admin: ['team', 'log', 'history', 'catalogs', 'members'],
+  };
+  const navFor = () => NAV[isAdmin() ? 'admin' : isManager() ? 'manager' : 'member'];
+
+  function applyRoleVisibility() {
+    const items = navFor();
+    document.querySelectorAll('#appNav .nav-item').forEach(b => b.classList.toggle('hidden', items.indexOf(b.dataset.view) === -1));
+    el('memberHistoryCard').classList.toggle('hidden', isManager());
+    el('teamHistoryCard').classList.toggle('hidden', !isManager());
+    el('viewHistory').classList.add('single');
+    el('logPlayerRow').classList.toggle('hidden', !isManager());
+    el('navLog').querySelector('.lbl-phone').textContent = 'Log';
+  }
+
+  /**
+   * One view at a time - except a member on a wide screen, who gets Log and
+   * My stats side by side (the nav shows one "Log & my stats" item there).
+   */
+  function showView(view) {
+    const items = navFor();
+    if (items.indexOf(view) === -1) view = items[0];
+    const changed = currentView !== view;
+    currentView = view;
+    const pair = !isManager() && WIDE.matches && (view === 'log' || view === 'stats');
+    el('app').dataset.view = view;
+    el('appMain').classList.toggle('pair', pair);
+    document.querySelectorAll('#appMain > .view').forEach(s => {
+      const on = s.dataset.view === view || (pair && (s.dataset.view === 'log' || s.dataset.view === 'stats'));
+      s.classList.toggle('hidden', !on);
+    });
+    document.querySelectorAll('#appNav .nav-item').forEach(b => {
+      const on = b.dataset.view === view || (pair && b.dataset.view === 'log');
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (changed) window.scrollTo(0, 0);
+    if (view === 'catalogs' && changed) { loadDeckMaintenance(); loadRivalMaintenance(); }
+    if (view === 'members' && changed) loadAdmin();
+  }
+  document.querySelectorAll('#appNav .nav-item').forEach(b => { b.onclick = () => showView(b.dataset.view); });
+  WIDE.addEventListener('change', () => { if (currentView) showView(currentView); });
+
+  function showCatalogTab(which) {
+    const onDecks = which === 'decks';
+    el('catalogDecks').classList.toggle('hidden', !onDecks);
+    el('catalogRivals').classList.toggle('hidden', onDecks);
+    el('catViewDecks').classList.toggle('active', onDecks);
+    el('catViewRivals').classList.toggle('active', !onDecks);
+  }
+  // Narrowing the filter has to go back to page 1: otherwise a search that
+  // leaves 3 results while you are on page 2 shows an empty list.
+  el('deckSearch').oninput = () => { deckCatalogOffset = 0; loadDeckEditList(); };
+  el('rivalSearch').oninput = () => { rivalCatalogOffset = 0; loadRivalEditList(); };
+  el('catViewDecks').onclick = () => showCatalogTab('decks');
+  el('catViewRivals').onclick = () => showCatalogTab('rivals');
+
+  // ================= Loading data =================
+
+  function applyCatalog(list) {
+    catalog = list;
+    colorMap = {};
+    list.forEach(m => { colorMap[m.name] = m.color; });
+    paintForm();
+  }
+
+  /** Fills a select with "All" plus options, keeping the choice if still valid. */
+  function fillSelect(sel, allLabel, values) {
+    const previous = sel.value;
+    sel.innerHTML = '';
+    if (allLabel) {
+      const op = document.createElement('option');
+      op.value = 'All'; op.textContent = allLabel;
+      sel.appendChild(op);
+    }
+    values.forEach(v => {
+      const op = document.createElement('option');
+      op.value = v; op.textContent = v;
+      sel.appendChild(op);
+    });
+    if (previous && (previous === 'All' || values.indexOf(previous) !== -1)) sel.value = previous;
+  }
+
+  function paintFacedRivalDecks(selectId, decks) {
+    fillSelect(el(selectId), 'All rival decks', decks);
+  }
+  function populateFacedRivalDecks(selectId, playerFilter) {
+    gs().withSuccessHandler(decks => {
+      paintFacedRivalDecks(selectId, decks);
+    }).getFacedRivalDecks(token, playerFilter || 'All');
+  }
+
+  /**
+   * The whole member screen in ONE round trip (getMemberScreen): win rates,
+   * the first history page, the decks faced, and the Log shortcuts.
+   * opts.skipCatalog: the client already has a current catalog - used after
+   * a save that didn't add a deck or rival name, the common case.
+   */
+  function loadCatalogAndForm(opts) {
+    opts = opts || {};
+    const deckFilter = el('historyFilter').value || 'All';
+    const rivalFilter = el('historyRivalFilter').value || 'All';
+    el('personalStats').innerHTML = '<div class="loading">Loading…</div>';
+    el('personalStatsList').innerHTML = '<div class="loading">Loading…</div>';
+    el('historyList').innerHTML = '<div class="loading">Loading…</div>';
+    historyOffset = 0;
+    const current = ticket('memberScreen');
+    gs()
+      .withSuccessHandler(data => {
+        if (!current()) return;
+        if (data.catalog) catalog = data.catalog;
+        if (data.rivalNames) rivalCatalog = data.rivalNames;
+        if (data.catalog) { colorMap = {}; catalog.forEach(m => { colorMap[m.name] = m.color; }); }
+        recent = data.recent || emptyRecent();
+        // Own-deck filter: only decks this member has actually played, so no
+        // option ever leads to an empty history.
+        fillSelect(el('historyFilter'), 'All my decks', Object.keys(recent.deckCounts).sort((a, b) => a.localeCompare(b)));
+        paintFacedRivalDecks('historyRivalFilter', data.facedRivalDecks);
+        // Rival filter: everyone this member has a match against.
+        fillSelect(el('historyNameFilter'), 'Any rival', (data.rival.byRival || []).map(r => r.rival).sort((a, b) => a.localeCompare(b)));
+        applyPersonalStats(data.byDeck, data.rival);
+        paintHistoryPage(data.history);
+        paintForm();
+      })
+      .withFailureHandler(err => {
+        el('personalStats').innerHTML = `<p class="empty">Couldn't load your stats: ${esc(err.message)}</p>`;
+        el('personalStatsList').innerHTML = '';
+        el('historyList').innerHTML = '';
+      })
+      .getMemberScreen(token, deckFilter, rivalFilter, !opts.skipCatalog, el('historyNameFilter').value || 'All');
+  }
+
+  /** Managers: the deck catalog, the member list and the rival names. */
+  function loadAdminCatalogAndMembers() {
+    gs().withSuccessHandler(list => {
+      applyCatalog(list);
+      fillSelect(el('teamDeckFilter'), 'All decks', list.map(d => d.name).sort((a, b) => a.localeCompare(b)));
+      populateMergeSelects(list);
+      loadDeckEditList(list);
+    }).getDeckCatalog(token);
+
+    gs().withSuccessHandler(names => {
+      activeMembers = names;
+      fillSelect(el('teamPlayerFilter'), 'All members', names);
+      fillSelect(el('teamRivalMemberFilter'), 'All members', names);
+      paintPlayerPicker();
+      loadTeamHistory();
+      populateFacedRivalDecks('teamRivalDeckFilter', el('teamPlayerFilter').value || 'All');
+    }).getActiveMemberNames(token);
+
+    gs().withSuccessHandler(names => {
+      rivalCatalog = names;
+      populateRivalMergeSelects(names);
+      loadRivalEditList(names);
+      paintForm();
+    }).getRivalCatalog(token);
+  }
+
+  /** Managers: Log shortcuts for whoever is selected in the Player picker. */
+  function loadLogContext() {
+    if (!isManager()) return;
+    const player = form.player || myName;
+    const current = ticket('logContext');
+    gs().withSuccessHandler(r => {
+      if (!current() || (form.player || myName) !== player) return;   // superseded
+      recent = r || emptyRecent();
+      // form.deck is NOT cleared here: if the person already picked a deck
+      // while this was in flight, a late reply must not switch it back.
+      // (Changing the Player clears it before asking.)
+      paintForm();
+    }).getLogContext(token, player);
+  }
+
+  function paintPlayerPicker() {
+    const names = [myName].concat(activeMembers.filter(n => n !== myName));
+    const sel = el('logPlayer');
+    sel.innerHTML = '';
+    names.forEach(n => {
+      const op = document.createElement('option');
+      op.value = n; op.textContent = n === myName ? `${n} (me)` : n;
+      sel.appendChild(op);
+    });
+    sel.value = form.player || myName;
+  }
+  el('logPlayer').onchange = () => {
+    form.player = el('logPlayer').value;
+    form.deck = '';
+    recent = emptyRecent();
+    paintForm();
+    loadLogContext();
+  };
+
+  // ================= Log form =================
+
+  const forSelf = () => (form.player || myName) === myName;
+  const deckNames = () => catalog.map(d => d.name);
+
+  /** Deck to preselect: the player's most recent one still in the catalog. */
+  function ensureDeck() {
+    const names = deckNames();
+    if (form.deck && (names.indexOf(form.deck) !== -1 || form.editing)) return;
+    form.deck = recent.decks.find(d => names.indexOf(d) !== -1)
+      || names.slice().sort((a, b) => a.localeCompare(b))[0] || '';
+  }
+
+  function deckCountText(name) {
+    const n = recent.deckCounts[name] || 0;
+    return n === 0 ? 'No matches with it yet' : (n === 1 ? '1 match with it' : `${n} matches with it`);
+  }
+
+  function paintDeckPicker() {
+    ensureDeck();
+    el('formDeck').value = form.deck;
+    const box = el('deckPicker');
+    const names = deckNames();
+    if (!names.length) {
+      box.innerHTML = '<div class="chips"><button type="button" class="chip add" data-act="add">+ Add your first deck</button></div>';
+    } else if (names.length <= 3) {
+      // Few decks: plain chips, nothing to search.
+      box.innerHTML = '<div class="chips">' + names.map(n =>
+        `<button type="button" class="chip${n === form.deck ? ' on' : ''}" data-deck="${esc(n)}" aria-pressed="${n === form.deck}">${dot(n)}<span class="nm">${esc(n)}</span></button>`
+      ).join('') + '<button type="button" class="chip add" data-act="add">+ New deck</button></div>';
+    } else {
+      // Many decks: the current one as a card, two recent ones, the rest in a sheet.
+      const others = recent.decks.filter(d => d !== form.deck && names.indexOf(d) !== -1).slice(0, 2);
+      box.innerHTML = `
+        <button type="button" class="deck-card" id="btnDeckCurrent" data-act="open" aria-haspopup="dialog">
+          <span class="dot" style="background:${hexForDeck(form.deck)}"></span>
+          <span class="txt"><span class="nm">${esc(form.deck)}</span><span class="sub">${esc(deckCountText(form.deck))}</span></span>
+          <span class="chg">Change ▾</span>
+        </button>` +
+        (others.length ? '<div class="chips" id="deckRecent"><span class="chips-label">Recent:</span>' + others.map(n =>
+          `<button type="button" class="chip" data-deck="${esc(n)}">${dot(n)}<span class="nm">${esc(n)}</span></button>`).join('') + '</div>' : '');
+    }
+    box.querySelectorAll('[data-deck]').forEach(b => { b.onclick = () => setDeck(b.dataset.deck); });
+    box.querySelectorAll('[data-act="open"]').forEach(b => { b.onclick = () => openDeckSheet('list'); });
+    box.querySelectorAll('[data-act="add"]').forEach(b => { b.onclick = () => openDeckSheet('add'); });
+  }
+
+  function setDeck(name) {
+    form.deck = name;
+    paintDeckPicker();
+    updateSaveState();
+  }
+
+  function chipsHtml(values, current, attr) {
+    return values.map(v => `<button type="button" class="chip${v === current ? ' on' : ''}" ${attr}="${esc(v)}"><span class="nm">${esc(v)}</span></button>`).join('');
+  }
+
+  /**
+   * Rival deck helper under the input: matching catalog entries, a "Did you
+   * mean" when it's one typo from an existing deck, and a NEW tag when
+   * saving would add it to the catalog (which the server already does - now
+   * the person sees it before it happens).
+   */
+  function paintRivalAssist() {
+    const input = el('formRival');
+    const t = input.value.trim();
+    const box = el('rivalAssist');
+    const names = deckNames();
+    const la = lookAlike(t, names);
+    const rec = recent.rivalDecks.length ? recent.rivalDecks : names.filter(n => (catalog.find(d => d.name === n) || {}).type === 'Rival').slice(0, 3);
+    el('rivalRecent').innerHTML = (!t || (la && la.kind === 'same')) && rec.length
+      ? '<span class="chips-label">Recent:</span>' + chipsHtml(rec.slice(0, 3), la ? la.name : '', 'data-rival') : '';
+    el('rivalRecent').querySelectorAll('[data-rival]').forEach(b => { b.onclick = () => { input.value = b.dataset.rival; paintRivalAssist(); updateSaveState(); }; });
+
+    if (!t || (la && la.kind === 'same')) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    const lower = t.toLowerCase();
+    const hits = names.filter(n => n.toLowerCase().indexOf(lower) !== -1).slice(0, 5);
+    let html = hits.map(n => `<button type="button" class="assist-row" data-pick="${esc(n)}"><span>${dot(n)} ${esc(n)}</span><span class="meta">in catalog</span></button>`).join('');
+    if (la && (la.kind === 'exact' || la.kind === 'similar') && hits.indexOf(la.name) === -1) {
+      html += `<div class="assist-note warn"><span class="grow">Did you mean <b>${esc(la.name)}</b>?</span><button type="button" class="primary" data-pick="${esc(la.name)}">Use it</button></div>`;
+    }
+    if (!la) {
+      html += `<div class="assist-note"><span class="tag-new">NEW</span><span class="grow">“${esc(t)}” will be added to the catalog when you save.</span></div>`;
+    }
+    box.innerHTML = html;
+    box.classList.toggle('hidden', !html);
+    box.querySelectorAll('[data-pick]').forEach(b => { b.onclick = () => { input.value = b.dataset.pick; paintRivalAssist(); updateSaveState(); }; });
+  }
+
+  function paintNameAssist() {
+    const input = el('formRivalName');
+    const t = input.value.trim();
+    const box = el('nameAssist');
+    const la = lookAlike(t, rivalCatalog);
+    const rec = recent.rivalNames.slice(0, 3);
+    el('nameRecent').innerHTML = (!t || (la && la.kind === 'same')) && rec.length
+      ? '<span class="chips-label">Recent:</span>' + chipsHtml(rec, la ? la.name : '', 'data-name') : '';
+    el('nameRecent').querySelectorAll('[data-name]').forEach(b => { b.onclick = () => { input.value = b.dataset.name; paintNameAssist(); updateSaveState(); }; });
+    let html = '';
+    if (t && la && (la.kind === 'exact' || la.kind === 'similar')) {
+      html = `<div class="assist-note warn"><span class="grow">Did you mean <b>${esc(la.name)}</b>?</span><button type="button" class="primary" data-pick="${esc(la.name)}">Use it</button></div>`;
+    } else if (t && !la) {
+      html = `<div class="assist-note"><span class="tag-new">NEW</span><span class="grow">First match against ${esc(t)} — they’ll be added to the rivals list.</span></div>`;
+    }
+    box.innerHTML = html;
+    box.classList.toggle('hidden', !html);
+    box.querySelectorAll('[data-pick]').forEach(b => { b.onclick = () => { input.value = b.dataset.pick; paintNameAssist(); updateSaveState(); }; });
+  }
+  el('formRival').addEventListener('input', () => { paintRivalAssist(); updateSaveState(); });
+  el('formRivalName').addEventListener('input', () => { paintNameAssist(); updateSaveState(); });
+
+  // Radio semantics: tapping the chosen result again keeps it. A double tap
+  // out of nerves must not leave the match without a result.
+  function setResult(value) {
+    form.result = value;
+    paintToggles();
+    updateSaveState();
+  }
+  el('btnWin').onclick = () => setResult('Win');
+  el('btnLoss').onclick = () => setResult('Loss');
+
+  /** Paints a brick chip's ticked/unticked state. */
+  function paintCheckChip(id, on) {
+    el(id).classList.toggle('active', !!on);
+    el(id).setAttribute('aria-pressed', String(!!on));
+  }
+
+  function paintToggles() {
+    el('btnWin').setAttribute('aria-checked', String(form.result === 'Win'));
+    el('btnLoss').setAttribute('aria-checked', String(form.result === 'Loss'));
+    ['First', 'Second'].forEach(v => {
+      const b = el(v === 'First' ? 'btnFirst' : 'btnSecond');
+      b.classList.toggle('on', form.turn === v);
+      b.setAttribute('aria-pressed', String(form.turn === v));
+    });
+    paintCheckChip('btnOwnBrick', form.ownBrick);
+    paintCheckChip('btnRivalBrick', form.rivalBrick);
+    const parts = [];
+    if (form.turn) parts.push(form.turn === 'First' ? 'went 1st' : 'went 2nd');
+    if (form.ownBrick) parts.push(forSelf() ? 'I bricked' : 'they bricked');
+    if (form.rivalBrick) parts.push('rival bricked');
+    el('moreSummary').textContent = '· ' + (parts.length ? parts.join(', ') : 'optional');
+    el('morePanel').classList.toggle('hidden', !form.more);
+    el('btnMore').setAttribute('aria-expanded', String(form.more));
+  }
+  el('btnMore').onclick = () => { form.more = !form.more; paintToggles(); };
+  el('btnFirst').onclick = () => { form.turn = form.turn === 'First' ? '' : 'First'; paintToggles(); updateSaveState(); };
+  el('btnSecond').onclick = () => { form.turn = form.turn === 'Second' ? '' : 'Second'; paintToggles(); updateSaveState(); };
+  el('btnOwnBrick').onclick = () => { form.ownBrick = !form.ownBrick; paintToggles(); };
+  el('btnRivalBrick').onclick = () => { form.rivalBrick = !form.rivalBrick; paintToggles(); };
+
+  function missingForSave() {
+    const missing = [];
+    if (!form.deck) missing.push('your deck');
+    if (!el('formRival').value.trim()) missing.push('the rival deck');
+    if (!form.result) missing.push('Win or Loss');
+    return missing;
+  }
+
+  /** Save is only "lit" when it can actually save, and says what's missing. */
+  function updateSaveState() {
+    const missing = missingForSave();
+    const ready = missing.length === 0;
+    const btn = el('btnSave');
+    btn.classList.toggle('ready', ready && !form.saving);
+    btn.classList.toggle('busy', form.saving);
+    btn.setAttribute('aria-disabled', String(!ready || form.saving));
+    el('btnSaveText').textContent = form.saving ? 'Saving…' : (form.editing ? 'Save changes' : 'Save match');
+    const sum = el('saveSummary');
+    sum.classList.toggle('ready', ready);
+    if (form.saving) { sum.textContent = ''; return; }
+    if (ready) {
+      const rival = el('formRival').value.trim();
+      const la = lookAlike(rival, deckNames());
+      const name = el('formRivalName').value.trim();
+      const who = forSelf() ? '' : `${form.player}: `;
+      sum.textContent = `${who}${form.result} with ${form.deck} vs ${la && la.kind === 'same' ? la.name : rival}${name ? ' (' + name + ')' : ''}`;
+    } else {
+      sum.textContent = 'Still needed: ' + missing.join(' and ');
+    }
+  }
+
+  function paintToday() {
+    const t = recent.today || [];
+    if (!t.length || form.editing) { el('todayStrip').innerHTML = ''; return; }
+    const w = t.filter(r => r === 'W').length;
+    el('todayStrip').innerHTML = `Today <b>${w}–${t.length - w}</b>` +
+      t.slice(-8).map(r => `<span class="pip ${r === 'W' ? 'w' : 'l'}"></span>`).join('');
+  }
+
+  /** Repaints the whole Log form from `form` + `recent`. */
+  function paintForm() {
+    const self = forSelf();
+    el('deckLabel').textContent = self ? 'Your deck' : `${form.player}'s deck`;
+    el('nameLabel').textContent = self ? 'Who did you play?' : 'Who did they play?';
+    el('ownBrickLabel').textContent = self ? 'I bricked' : 'They bricked';
+    el('logTitle').lastChild.textContent = form.editing ? 'Edit match' : 'Log a match';
+    el('editBanner').classList.toggle('hidden', !form.editing);
+    if (form.editing) el('editBannerText').textContent = `Editing ${form.editing.player === myName ? 'your' : form.editing.player + '’s'} match from ${form.editing.date}`;
+    el('logPlayer').disabled = !!form.editing;
+    if (isManager() && el('logPlayer').options.length) el('logPlayer').value = form.player || myName;
+    paintToday();
+    paintDeckPicker();
+    paintRivalAssist();
+    paintNameAssist();
+    paintToggles();
+    updateSaveState();
+  }
+
+  function resetForm() {
+    el('formRival').value = '';
+    el('formRivalName').value = '';
+    Object.assign(form, { result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, saving: false });
+    el('formError').style.display = 'none';
+  }
+
+  el('btnSave').onclick = () => {
+    if (form.saving) return;
+    const missing = missingForSave();
+    if (missing.length) {
+      el('saveSummary').textContent = 'Still needed: ' + missing.join(' and ');
+      const first = !el('formRival').value.trim() ? el('formRival') : null;
+      if (first) first.focus();
+      return;
+    }
+    const deck = form.deck;
+    const rival = el('formRival').value.trim();
+    const rivalName = el('formRivalName').value.trim();
+    const prev = { rival: rival, rivalName: rivalName, result: form.result, turn: form.turn, ownBrick: form.ownBrick, rivalBrick: form.rivalBrick, deck: deck, player: form.player || myName };
+    const editing = form.editing;
+    el('formError').style.display = 'none';
+    form.saving = true;
+    updateSaveState();
+
+    const run = gs()
+      .withSuccessHandler(resp => {
+        form.saving = false;
+        if (!resp.ok) {
+          updateSaveState();
+          el('formError').textContent = resp.error;
+          el('formError').style.display = 'block';
+          return;
+        }
+        if (editing) {
+          resetForm();
+          form.player = myName;
+          paintForm();
+          showToast('Changes saved', null, false);
+          afterWrite(resp.catalogChanged, editing.player);
+          showView('history');
+          return;
+        }
+        lastSaved = { id: resp.id, prev: prev };
+        resetForm();
+        paintForm();
+        showToast(`Saved: ${prev.result === 'Win' ? 'win' : 'loss'} vs ${rival}`, prev.result, true);
+        afterWrite(resp.catalogChanged, form.player || myName);
+      })
+      .withFailureHandler(err => {
+        form.saving = false;
+        updateSaveState();
+        el('formError').textContent = failText(err);
+        el('formError').style.display = 'block';
+      });
+
+    if (editing) {
+      run.editMatch(token, editing.id, deck, rival, prev.result, prev.turn, rivalName, prev.ownBrick, prev.rivalBrick);
+    } else if (isManager()) {
+      run.adminRegisterMatchForMember(token, form.player || myName, deck, rival, prev.result, prev.turn, rivalName, prev.ownBrick, prev.rivalBrick);
+    } else {
+      run.registerMatch(token, deck, rival, prev.result, prev.turn, rivalName, prev.ownBrick, prev.rivalBrick);
+    }
+  };
+
+  /** What to reload after a match was saved, edited, undone or deleted. */
+  function afterWrite(catalogChanged) {
+    if (isManager()) {
+      if (catalogChanged) loadAdminCatalogAndMembers();
+      else loadTeamHistory();
+      loadTeamDashboard();
+      loadLogContext();
+    } else {
+      // Only refetch the catalogs when the server says they changed: most
+      // matches use decks the client already has.
+      loadCatalogAndForm({ skipCatalog: !catalogChanged });
+    }
+  }
+
+  // ================= Toast + Undo =================
+  function showToast(text, result, undoable) {
+    clearTimeout(toastTimer);
+    el('toastText').textContent = text;
+    el('toastPip').className = 'pip' + (result === 'Win' ? ' w' : result === 'Loss' ? ' l' : '');
+    el('toastPip').style.display = result ? '' : 'none';
+    el('btnUndo').classList.toggle('hidden', !undoable);
+    el('toast').classList.remove('hidden');
+    toastTimer = setTimeout(hideToast, undoable ? 9000 : 3500);
+  }
+  function hideToast() {
+    clearTimeout(toastTimer);
+    el('toast').classList.add('hidden');
+  }
+  el('btnUndo').onclick = () => {
+    const saved = lastSaved;
+    if (!saved) return;
+    el('btnUndo').disabled = true;
+    gs()
+      .withSuccessHandler(resp => {
+        el('btnUndo').disabled = false;
+        if (!resp.ok) { showToast(resp.error, null, false); return; }
+        lastSaved = null;
+        showToast('Undone — the match was removed', null, false);
+        afterWrite(resp.catalogChanged);
+        // Someone already started editing another match: leave that alone.
+        if (form.editing) return;
+        // Put the form back the way it was - for the SAME player - so a typo
+        // can be fixed and resaved without landing on someone else.
+        const playerChanged = (form.player || myName) !== saved.prev.player;
+        el('formRival').value = saved.prev.rival;
+        el('formRivalName').value = saved.prev.rivalName;
+        Object.assign(form, { player: saved.prev.player, deck: saved.prev.deck, result: saved.prev.result, turn: saved.prev.turn,
+          ownBrick: saved.prev.ownBrick, rivalBrick: saved.prev.rivalBrick, more: !!(saved.prev.turn || saved.prev.ownBrick || saved.prev.rivalBrick) });
+        paintForm();
+        if (playerChanged) loadLogContext();
+        showView('log');
+      })
+      .withFailureHandler(err => { el('btnUndo').disabled = false; showToast(failText(err), null, false); })
+      .undoMatch(token, saved.id);
+  };
+
+  // ================= Sheet (bottom sheet on phones, dialog on desktop) =================
+  let sheetOnBack = null;
+  function openSheet(title, bodyHtml, footHtml, onBack) {
+    el('sheetTitle').textContent = title;
+    el('sheetBody').innerHTML = bodyHtml;
+    el('sheetFoot').innerHTML = footHtml || '';
+    sheetOnBack = onBack || null;
+    el('sheetBack').classList.toggle('hidden', !onBack);
+    el('sheet').classList.remove('hidden');
+  }
+  function closeSheet() {
+    el('sheet').classList.add('hidden');
+    el('sheetBody').innerHTML = '';
+    el('sheetFoot').innerHTML = '';
+    sheetOnBack = null;
+  }
+  el('sheetClose').onclick = closeSheet;
+  el('sheetBack').onclick = () => { if (sheetOnBack) sheetOnBack(); };
+  el('sheet').addEventListener('click', e => { if (e.target === el('sheet')) closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !el('sheet').classList.contains('hidden')) closeSheet(); });
+
+  // ---- Deck sheet: pick from the whole catalog, or add a new deck ----
+  function openDeckSheet(mode, prefill) {
+    if (mode === 'add') { openAddDeck(prefill || ''); return; }
+    openSheet('Choose a deck', `
+      <input type="search" id="deckSheetSearch" placeholder="Search all decks" autocomplete="off" aria-label="Search all decks">
+      <div id="deckSheetList"></div>`,
+      '<button type="button" class="chip add" style="width:100%;justify-content:center;min-height:46px" id="btnSheetAddDeck">+ Add a new deck</button>');
+    const paint = () => {
+      const q = el('deckSheetSearch').value.trim().toLowerCase();
+      const names = deckNames();
+      const row = n => `<button type="button" class="sheet-row${n === form.deck ? ' on' : ''}" data-deck="${esc(n)}">${dot(n)}<span class="nm">${esc(n)}</span><span class="meta">${recent.deckCounts[n] ? recent.deckCounts[n] + ' played' : ''}</span></button>`;
+      let html = '';
+      if (!q) {
+        const rec = recent.decks.filter(d => names.indexOf(d) !== -1).slice(0, 3);
+        if (rec.length && names.length > 5) html += '<div class="sheet-sec">Recent</div>' + rec.map(row).join('');
+      }
+      const all = names.filter(n => !q || n.toLowerCase().indexOf(q) !== -1).sort((a, b) => a.localeCompare(b));
+      html += `<div class="sheet-sec">${q ? 'Results' : 'All decks (' + names.length + ')'}</div>` + all.map(row).join('');
+      if (!all.length) {
+        const raw = el('deckSheetSearch').value.trim();
+        html += `<p class="sheet-sub">No deck matches “${esc(raw)}”.</p>
+          <button type="button" class="primary" id="btnAddFromSearch">+ Add “${esc(raw)}” as a new deck</button>`;
+      }
+      el('deckSheetList').innerHTML = html;
+      el('deckSheetList').querySelectorAll('[data-deck]').forEach(b => { b.onclick = () => { setDeck(b.dataset.deck); closeSheet(); }; });
+      const fromSearch = el('btnAddFromSearch');
+      if (fromSearch) fromSearch.onclick = () => openAddDeck(el('deckSheetSearch').value.trim());
+    };
+    el('deckSheetSearch').oninput = paint;
+    el('btnSheetAddDeck').onclick = () => openAddDeck('');
+    paint();
+  }
+
+  const DECK_COLOR_CHOICES = ['Red', 'Blue', 'Green', 'Yellow', 'Purple'];
+  function openAddDeck(prefill) {
+    let color = '';
+    openSheet('New deck', `
+      <label for="newDeckName">Deck name</label>
+      <input id="newDeckName" autocomplete="off" placeholder="e.g. Reze Chainsaw Man Purple" value="${esc(prefill)}">
+      <p class="sheet-sub" style="margin-top:-8px">Name it the way the team knows it — main character, series, color.</p>
+      <label for="newDeckAnime">Series <span class="opt">(optional)</span></label>
+      <input id="newDeckAnime" autocomplete="off" placeholder="e.g. Chainsaw Man">
+      <div class="field-label">Color <span class="opt">(optional)</span></div>
+      <div class="color-row" id="newDeckColors" role="radiogroup" aria-label="Color">
+        ${DECK_COLOR_CHOICES.map(c => `<button type="button" class="chip" role="radio" aria-checked="false" data-color="${c}"><span class="dot" style="background:${HEX_MAP[c.toLowerCase()]}"></span>${c}</button>`).join('')}
+      </div>
+      <div id="newDeckAssist"></div>
+      <p class="error" id="newDeckError"></p>`,
+      '<button type="button" class="primary" id="btnSaveDeck">Add deck and use it</button>',
+      () => openDeckSheet('list'));
+    const paintColors = () => el('newDeckColors').querySelectorAll('[data-color]').forEach(b => {
+      b.classList.toggle('on', b.dataset.color === color);
+      b.setAttribute('aria-checked', String(b.dataset.color === color));
+    });
+    el('newDeckColors').querySelectorAll('[data-color]').forEach(b => { b.onclick = () => { color = color === b.dataset.color ? '' : b.dataset.color; paintColors(); }; });
+    const check = () => {
+      const name = el('newDeckName').value.trim();
+      const la = lookAlike(name, deckNames());
+      const box = el('newDeckAssist');
+      const btn = el('btnSaveDeck');
+      btn.disabled = !name || (la && la.kind !== 'similar');
+      btn.textContent = la && la.kind === 'similar' ? 'No, add mine' : 'Add deck and use it';
+      if (la && la.kind !== 'similar') {
+        box.innerHTML = `<div class="assist"><div class="assist-note block"><span class="grow">“${esc(la.name)}” is already in the catalog.</span><button type="button" class="primary" data-use="${esc(la.name)}">Use it</button></div></div>`;
+      } else if (la) {
+        box.innerHTML = `<div class="assist"><div class="assist-note warn"><span class="grow">Looks a lot like “${esc(la.name)}”. Same deck?</span><button type="button" class="primary" data-use="${esc(la.name)}">Yes, use it</button></div></div>`;
+      } else {
+        box.innerHTML = '';
+      }
+      box.querySelectorAll('[data-use]').forEach(b => { b.onclick = () => { setDeck(b.dataset.use); closeSheet(); }; });
+    };
+    el('newDeckName').oninput = check;
+    check();
+    setTimeout(() => el('newDeckName') && el('newDeckName').focus(), 50);
+    el('btnSaveDeck').onclick = () => {
+      const name = el('newDeckName').value.trim();
+      const anime = el('newDeckAnime').value.trim();
+      const errorEl = el('newDeckError');
+      errorEl.style.display = 'none';
+      if (!name) return;
+      el('btnSaveDeck').disabled = true;
+      gs()
+        .withSuccessHandler(resp => {
+          if (!el('btnSaveDeck')) return;
+          el('btnSaveDeck').disabled = false;
+          if (!resp.ok) {
+            errorEl.textContent = resp.error;
+            errorEl.style.display = 'block';
+            return;
+          }
+          const added = { name: resp.name || name, anime: anime, color: color, type: 'Own' };
+          catalog.push(added);
+          colorMap[added.name] = color;
+          closeSheet();
+          setDeck(added.name);
+          showToast(`Added ${added.name}`, null, false);
+          if (isManager()) loadAdminCatalogAndMembers();
+        })
+        .withFailureHandler(err => {
+          if (!el('btnSaveDeck')) return;
+          el('btnSaveDeck').disabled = false;
+          errorEl.textContent = failText(err);
+          errorEl.style.display = 'block';
+        })
+        .addOwnDeck(token, name, anime, color);
+    };
+  }
+
+  // ================= Editing a match (same screen as Log) =================
+  function startEdit(m) {
+    hideToast();
+    form.editing = m;
+    form.player = m.player;
+    form.deck = m.ownDeck;
+    form.result = m.result;
+    form.turn = m.turn || '';
+    // A match logged before brick tracking has null marks: both start
+    // unticked, and saving answers the question for it.
+    form.ownBrick = m.ownBrick === true;
+    form.rivalBrick = m.rivalBrick === true;
+    form.more = !!(form.turn || form.ownBrick || form.rivalBrick);
+    el('formRival').value = m.rivalDeck || '';
+    el('formRivalName').value = m.rivalName || '';
+    el('formError').style.display = 'none';
+    paintForm();
+    showView('log');
+  }
+  el('btnCancelEdit').onclick = () => {
+    resetForm();
+    form.player = myName;
+    paintForm();
+    if (isManager()) loadLogContext();
+    showView('history');
+  };
+
+
+  // ================= History =================
+
+  /** Paints one history page from a { items, hasMore } already in hand. */
+  function paintHistoryPage(resp) {
+    noteDayKeys(resp);
+    paintHistoryVs();
+    el('historyList').innerHTML = '';
+    if (!resp.items.length) {
+      el('historyList').innerHTML = historyOffset === 0
+        ? '<p class="empty">No matches for this filter.</p>'
+        : '<p class="empty">No more matches on this page.</p>';
+    } else {
+      renderHistoryRows(el('historyList'), resp.items, false);
+    }
+    appendPager(el('historyList'), historyOffset, resp.items.length, resp.hasMore, delta => {
+      historyOffset = Math.max(0, historyOffset + delta * HISTORY_PAGE_SIZE);
+      loadHistory(false);
+    });
+  }
+
+  /** One history page on its own: paging and filter changes. */
+  function loadHistory(reset) {
+    if (reset) historyOffset = 0;
+    el('historyList').innerHTML = '<div class="loading">Loading…</div>';
+    const filter = el('historyFilter').value || 'All';
+    const rivalFilter = el('historyRivalFilter').value || 'All';
+    const current = ticket('memberScreen');
+    gs()
+      .withSuccessHandler(resp => { if (current()) paintHistoryPage(resp); })
+      .getMatchHistory(token, filter, historyOffset, HISTORY_PAGE_SIZE, rivalFilter, el('historyNameFilter').value || 'All');
+  }
+  el('historyFilter').onchange = () => loadHistory(true);
+  el('historyRivalFilter').onchange = () => loadHistory(true);
+  el('historyNameFilter').onchange = () => loadHistory(true);
+
+  // The server sends dates as "MM/dd/yyyy HH:mm" in the team's time zone.
+  const pad2 = n => (n < 10 ? '0' : '') + n;
+  const dayOf = d => `${pad2(d.getMonth() + 1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // The team's today/yesterday, sent by the server with each history page.
+  // The phone's own clock is only a fallback.
+  let serverDays = null;
+  function noteDayKeys(resp) {
+    if (resp && resp.todayKey) serverDays = { today: resp.todayKey, yesterday: resp.yesterdayKey };
+  }
+  function dayLabel(key) {
+    const now = new Date();
+    const today = serverDays ? serverDays.today : dayOf(now);
+    const yesterday = serverDays ? serverDays.yesterday : dayOf(new Date(now.getTime() - 86400000));
+    if (key === today) return 'Today';
+    if (key === yesterday) return 'Yesterday';
+    const [mm, dd, yyyy] = key.split('/');
+    return `${MONTHS[Number(mm) - 1] || mm} ${Number(dd)}${String(now.getFullYear()) === yyyy ? '' : ', ' + yyyy}`;
+  }
+  function timeLabel(date) {
+    const hm = String(date || '').split(' ')[1] || '';
+    const [h, m] = hm.split(':').map(Number);
+    if (isNaN(h)) return '';
+    return `${((h + 11) % 12) + 1}:${pad2(m)} ${h < 12 ? 'AM' : 'PM'}`;
+  }
+
+  function turnBadgeHtml(turn) {
+    if (!turn) return '';
+    return `<span class="badge badge-turn">${turn === 'First' ? '1st' : '2nd'}</span>`;
+  }
+  /** Only what actually happened: no badge for "no brick" or unanswered. */
+  function brickBadgesHtml(m) {
+    let html = '';
+    if (m.ownBrick === true) html += '<span class="badge badge-brick">Brick</span>';
+    if (m.rivalBrick === true) html += '<span class="badge badge-brick">Rival brick</span>';
+    return html;
+  }
+
+  /**
+   * Match rows grouped by day, with each day's record. Edit and Delete live
+   * behind the "⋯" button: two always-visible icons per row were the
+   * easiest thing on the screen to hit by accident.
+   */
+  function renderHistoryRows(container, items, showPlayer) {
+    let lastDay = null;
+    const groups = [];
+    items.forEach(m => {
+      const day = String(m.date || '').split(' ')[0];
+      if (day !== lastDay) { groups.push({ day: day, items: [] }); lastDay = day; }
+      groups[groups.length - 1].items.push(m);
+    });
+    groups.forEach(g => {
+      const w = g.items.filter(m => m.result === 'Win').length;
+      const head = document.createElement('div');
+      head.className = 'hist-day';
+      head.innerHTML = `<span>${esc(dayLabel(g.day))}</span><span>${w}–${g.items.length - w}</span>`;
+      container.appendChild(head);
+      g.items.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'hist-row';
+        const win = m.result === 'Win';
+        const sub = [`${dot(m.ownDeck)}${esc(m.ownDeck)}`];
+        if (m.rivalName) sub.push(esc(m.rivalName));
+        row.innerHTML = `
+          <span class="res-badge ${win ? 'w' : 'l'}" aria-label="${win ? 'Win' : 'Loss'}">${win ? 'W' : 'L'}</span>
+          <div class="hist-main">
+            <div class="hist-title">${showPlayer ? `<span class="who">${esc(m.player)}</span> · ` : ''}vs ${esc(m.rivalDeck)}</div>
+            <div class="hist-sub">${sub.join(' · ')} ${turnBadgeHtml(m.turn)} ${brickBadgesHtml(m)}</div>
+          </div>
+          <span class="hist-time">${esc(timeLabel(m.date))}</span>
+          <button type="button" class="icon" data-action="menu" aria-label="Match options">${ICON_DOTS}</button>`;
+        row.querySelector('[data-action="menu"]').onclick = () => openMatchActions(m, showPlayer);
+        container.appendChild(row);
+      });
+    });
+  }
+
+  function openMatchActions(m, isTeamView) {
+    const who = isTeamView ? `${m.player} · ` : '';
+    openSheet(`${m.result} vs ${m.rivalDeck}`, `
+      <p class="sheet-sub">${esc(who)}${esc(m.ownDeck)}${m.rivalName ? ' · ' + esc(m.rivalName) : ''} · ${esc(m.date)}</p>
+      <button type="button" class="sheet-action" data-action="edit">${ICON_PENCIL} Edit match</button>
+      <button type="button" class="sheet-action danger" data-action="delete">${ICON_TRASH} Delete match</button>`);
+    el('sheetBody').querySelector('[data-action="edit"]').onclick = () => { closeSheet(); startEdit(m); };
+    el('sheetBody').querySelector('[data-action="delete"]').onclick = () => { closeSheet(); confirmDelete(m.id, isTeamView); };
+  }
+
+  function confirmDelete(id, isTeamView) {
+    if (!confirm('Delete this match? This action cannot be undone.')) return;
+    gs()
+      .withSuccessHandler(resp => {
+        if (!resp.ok) { alert(resp.error); return; }
+        showToast('Match deleted', null, false);
+        afterWrite(false);
+      })
+      .withFailureHandler(err => alert(failText(err)))
+      .deleteMatch(token, id);
+  }
+
+  /**
+   * Page controls: Previous / range / Next. "Showing 21-40" rather than
+   * "Page 2 of 7" on purpose - a total would mean scanning the whole sheet,
+   * which is exactly what the chunked reader avoids.
+   */
+  function appendPager(container, offset, shownCount, hasMore, onPage) {
+    if (offset === 0 && !hasMore) return;
+    const pager = document.createElement('div');
+    pager.className = 'pager';
+    const prev = document.createElement('button');
+    prev.type = 'button'; prev.className = 'pager-btn'; prev.textContent = '‹ Previous';
+    prev.disabled = offset === 0;
+    prev.onclick = () => onPage(-1);
+    const label = document.createElement('span');
+    label.className = 'pager-label';
+    label.textContent = shownCount ? `Showing ${offset + 1}–${offset + shownCount}` : `Page ${Math.floor(offset / HISTORY_PAGE_SIZE) + 1}`;
+    const next = document.createElement('button');
+    next.type = 'button'; next.className = 'pager-btn'; next.textContent = 'Next ›';
+    next.disabled = !hasMore;
+    next.onclick = () => onPage(1);
+    pager.appendChild(prev); pager.appendChild(label); pager.appendChild(next);
+    container.appendChild(pager);
+  }
+
+  // ================= Members (admin) =================
+
+  let membersCache = [];
+  function loadAdmin() {
+    el('adminList').innerHTML = '<div class="loading">Loading…</div>';
+    gs().withSuccessHandler(members => {
+      membersCache = members;
+      const roleOf = i => String(i.role || 'member').toLowerCase();
+      const row = i => `
+        <div class="member-row" data-row="${i.row}">
+          <span class="avatar" aria-hidden="true">${esc(String(i.name || '?').charAt(0).toUpperCase())}</span>
+          <div class="member-main">
+            <div class="member-name">${esc(i.name)}<span class="role-badge ${roleOf(i)}">${esc(roleOf(i))}</span></div>
+            <div class="member-sub">${i.name === myName ? 'You' : (i.hasPin ? 'PIN set' : 'No PIN yet')}</div>
+          </div>
+          ${i.active
+            ? `<button type="button" class="small" data-edit="${i.row}">Edit</button>`
+            : `<button type="button" class="small active-yes" data-reactivate="${i.row}">Reactivate</button>`}
+        </div>`;
+      const active = members.filter(i => i.active);
+      const inactive = members.filter(i => !i.active);
+      el('adminList').innerHTML = active.map(row).join('') || '<p class="empty">No members yet.</p>';
+      el('inactiveList').innerHTML = inactive.map(row).join('');
+      el('btnShowInactive').classList.toggle('hidden', !inactive.length);
+      el('btnShowInactive').textContent = `Inactive (${inactive.length})`;
+      document.querySelectorAll('#cardMembers [data-edit]').forEach(b => {
+        b.onclick = () => openMemberSheet(members.find(i => String(i.row) === b.dataset.edit));
+      });
+      document.querySelectorAll('#cardMembers [data-reactivate]').forEach(b => {
+        b.onclick = () => setActive(b.dataset.reactivate, true);
+      });
+    }).withFailureHandler(err => {
+      el('adminList').innerHTML = `<p class="empty">${esc(failText(err))}</p>`;
+    }).listMembersAdmin(token);
+  }
+  el('btnShowInactive').onclick = () => {
+    const open = el('inactiveList').classList.contains('hidden');
+    el('inactiveList').classList.toggle('hidden', !open);
+    el('btnShowInactive').setAttribute('aria-expanded', String(open));
+  };
+
+  function setActive(row, active) {
+    gs()
+      .withSuccessHandler(resp => {
+        if (resp && resp.ok === false) { alert(resp.error); return; }
+        closeSheet();
+        loadAdmin();
+        loadAdminCatalogAndMembers();
+      })
+      .withFailureHandler(err => { alert(failText(err)); loadAdmin(); })[active ? 'reactivateMember' : 'deactivateMember'](token, row);
+  }
+
+  /**
+   * Edit one member: name, a NEW PIN (the current one is never sent to the
+   * phone - leave it empty to keep it), role. Deactivate sits apart at the
+   * bottom so it isn't the easiest thing to tap.
+   */
+  function openMemberSheet(member) {
+    if (!member) return;
+    const self = member.name === myName;
+    const roleNow = String(member.role || 'member').toLowerCase();
+    openSheet(`Edit ${member.name}`, `
+      <label for="mName">Name</label>
+      <input id="mName" value="${esc(member.name)}" autocomplete="off">
+      <label for="mPin">New PIN <span class="opt">(leave empty to keep the current one)</span></label>
+      <input id="mPin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="New PIN">
+      <label for="mRole">Role</label>
+      <select id="mRole" ${self ? 'disabled' : ''}>
+        <option value="member"${roleNow === 'member' ? ' selected' : ''}>Member — logs own matches</option>
+        <option value="manager"${roleNow === 'manager' ? ' selected' : ''}>Manager — sees the whole team</option>
+        <option value="admin"${roleNow === 'admin' ? ' selected' : ''}>Admin — catalogs and members</option>
+      </select>
+      ${self ? '<p class="sheet-sub" style="margin-top:-8px">You can’t change your own role — ask another admin.</p>' : ''}
+      <p class="error" id="mError"></p>
+      ${self ? '' : `<button type="button" class="sheet-action danger" id="mDeactivate" style="margin-top:8px">Deactivate ${esc(member.name)}…</button>`}`,
+      '<button type="button" class="primary" id="mSave">Save changes</button>');
+    if (!self) el('mDeactivate').onclick = () => {
+      if (!confirm(`Deactivate ${member.name}? They won't be able to log in. Their matches stay.`)) return;
+      setActive(member.row, false);
+    };
+    el('mSave').onclick = () => {
+      const name = el('mName').value.trim();
+      const pin = el('mPin').value.trim();
+      const newRole = el('mRole').value;
+      const err = el('mError');
+      err.style.display = 'none';
+      if (!name) { err.textContent = 'Name cannot be empty.'; err.style.display = 'block'; return; }
+      if (pin && !/^[0-9]{4}$/.test(pin)) { err.textContent = 'PIN must be exactly 4 digits.'; err.style.display = 'block'; el('mPin').value = ''; return; }
+      el('mSave').disabled = true;
+      const fail = e => { if (!el('mSave')) return; el('mSave').disabled = false; err.textContent = failText(e); err.style.display = 'block'; };
+      const finish = msg => { closeSheet(); showToast(msg, null, false); loadAdmin(); loadAdminCatalogAndMembers(); };
+      const nameOrPinChanged = name !== member.name || pin;
+      const saveRole = after => {
+        if (self || newRole === roleNow) { after(); return; }
+        gs()
+          .withSuccessHandler(resp => { if (!resp.ok) { fail({ message: resp.error }); return; } after(); })
+          .withFailureHandler(fail)
+          .updateMemberRole(token, member.row, newRole);
+      };
+      const done = () => finish(pin ? `PIN updated for ${name}.` : 'Saved');
+      if (!nameOrPinChanged) { saveRole(done); return; }
+      gs()
+        .withSuccessHandler(() => saveRole(done))
+        .withFailureHandler(fail)
+        .updateMember(token, member.row, name, pin);
+    };
+  }
+
+  el('btnAddMember').onclick = () => {
+    openSheet('Add member', `
+      <label for="newMemberName">Name</label>
+      <input id="newMemberName" autocomplete="off">
+      <label for="newMemberPin">4-digit PIN</label>
+      <input id="newMemberPin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password">
+      <p class="error" id="newMemberError"></p>`,
+      '<button type="button" class="primary" id="btnCreateMember">Add member</button>');
+    el('btnCreateMember').onclick = () => {
+      const name = el('newMemberName').value.trim();
+      const pin = el('newMemberPin').value.trim();
+      const err = el('newMemberError');
+      err.style.display = 'none';
+      if (!name || !/^[0-9]{4}$/.test(pin)) { err.textContent = 'Enter a name and a 4-digit PIN.'; err.style.display = 'block'; return; }
+      el('btnCreateMember').disabled = true;
+      gs()
+        .withSuccessHandler(() => { closeSheet(); showToast(`Added ${name}`, null, false); loadAdmin(); loadAdminCatalogAndMembers(); })
+        .withFailureHandler(e => { el('btnCreateMember').disabled = false; err.textContent = failText(e); err.style.display = 'block'; })
+        .addMember(token, name, pin);
+    };
+  };
+
+  // ================= Stats rendering (unchanged from v2.13) =================
+  function statMatchupLineHtml(item, mode) {
+    const best = mode === 'deck' ? item.bestMatchup : item.bestDeck;
+    const worst = mode === 'deck' ? item.worstMatchup : item.worstDeck;
+    if (!best && !worst) {
+      const what = mode === 'deck' ? 'matchups' : "their decks";
+      return `<p class="matchup-none">Not enough matches yet to tell best/worst ${what}.</p>`;
+    }
+    const bestLabel = best ? (mode === 'deck' ? best.rivalDeck : best.deck) : null;
+    const worstLabel = worst ? (mode === 'deck' ? worst.rivalDeck : worst.deck) : null;
+    const bestHtml = best
+      ? `<span class="best">Best: ${esc(bestLabel)} ${best.winRate}% (${best.wins}/${best.total})</span>`
+      : '<span class="label">Best: not enough data</span>';
+    const worstHtml = worst
+      ? `<span class="worst">Worst: ${esc(worstLabel)} ${worst.winRate}% (${worst.wins}/${worst.total})</span>`
+      : '<span class="label">Worst: not enough data</span>';
+    return `<div class="matchup-line">${bestHtml}${worstHtml}</div>`;
+  }
+
+  function turnLineHtml(deck) {
+    if (!deck.firstTurn && !deck.secondTurn) return '';
+    const first = deck.firstTurn
+      ? `<span>1st: ${deck.firstTurn.winRate}% (${deck.firstTurn.wins}/${deck.firstTurn.total})</span>`
+      : '<span class="label">1st: not enough data</span>';
+    const second = deck.secondTurn
+      ? `<span>2nd: ${deck.secondTurn.winRate}% (${deck.secondTurn.wins}/${deck.secondTurn.total})</span>`
+      : '<span class="label">2nd: not enough data</span>';
+    return `<div class="matchup-line turn-line">${first}${second}</div>`;
+  }
+
+  /**
+   * Renders a list of win-rate rows shared by the personal and team
+   * dashboards, in either mode:
+   *  - 'deck': items shaped like getWinRateByDeck's output (own deck,
+   *    color dot, best/worst RIVAL matchup, turn split).
+   *  - 'rival': items shaped like getWinRateByRival's byRival (a named
+   *    rival, no color dot, best/worst deck THAT RIVAL used, no turn split).
+   */
+  function renderStatsList(container, items, mode, onOpenRival) {
+    if (!items.length) {
+      const emptyMsg = mode === 'deck'
+        ? "You haven't logged any matches yet."
+        : 'No rival names logged yet - add one next time you log a match.';
+      container.innerHTML = `<p class="empty">${emptyMsg}</p>`;
+      return;
+    }
+    container.innerHTML = items.map(item => {
+      const nameHtml = mode === 'deck' ? `${dot(item.deck)}${esc(item.deck)}` : esc(item.rival);
+      // Below FEW_GAMES matches a percentage swings wildly with each game
+      // (1 of 2 is 50%, the next loss makes it 33%). Say so instead of
+      // letting it read like a finding.
+      const few = item.total < FEW_GAMES;
+      if (mode === 'rival' && onOpenRival) {
+        // The whole row is one big tap target that opens "history vs this rival".
+        return `
+        <button type="button" class="deck-row row-link${few ? ' few' : ''}" data-rival="${esc(item.rival)}" aria-label="${esc(item.rival)}: ${item.winRate}%, ${item.wins} of ${item.total}. See matches">
+          <span class="deck-header">
+            <span class="deck-name">${nameHtml}</span>
+            <span class="wr"><strong>${item.winRate}%</strong> <span class="cnt">· ${item.wins} of ${item.total}</span></span>
+          </span>
+          <span class="bar-bg"><span class="bar-fill" style="display:block;width:${item.winRate}%"></span></span>
+          ${few ? '<span class="few-note">Few games — this can still change a lot.</span>' : ''}
+          ${statMatchupLineHtml(item, mode)}
+          <span class="open-hint">See matches ›</span>
+        </button>`;
+      }
+      return `
+        <div class="deck-row${few ? ' few' : ''}">
+          <div class="deck-header">
+            <span class="deck-name">${nameHtml}</span>
+            <span class="wr"><strong>${item.winRate}%</strong> <span class="cnt">· ${item.wins} of ${item.total}</span></span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" style="width:${item.winRate}%"></div></div>
+          ${few ? '<p class="few-note">Few games — this can still change a lot.</p>' : ''}
+          ${statMatchupLineHtml(item, mode)}
+          ${mode === 'deck' ? turnLineHtml(item) : ''}
+        </div>
+      `;
+    }).join('');
+    if (onOpenRival) container.querySelectorAll('[data-rival]').forEach(b => { b.onclick = () => onOpenRival(b.dataset.rival); });
+  }
+
+  // ---------- Rival search (My stats and Team → By rival) ----------
+
+  /** Rivals whose name contains the query, ignoring case and accents. */
+  function searchRivals(list, query) {
+    const q = normName(query);
+    return q ? list.filter(r => normName(r.rival).indexOf(q) !== -1) : list;
+  }
+  function renderRivalSearchResult(container, all, query, onOpen) {
+    const list = searchRivals(all, query);
+    if (query.trim() && !list.length) {
+      container.innerHTML = `<p class="empty">No rival matches “${esc(query.trim())}”.</p>`;
+      return;
+    }
+    renderStatsList(container, list, 'rival', onOpen);
+  }
+  function renderMemberRivals() {
+    renderRivalSearchResult(el('personalStatsList'), personalRivalStats.byRival, el('rivalStatsSearch').value, openHistoryVsRival);
+  }
+  el('rivalStatsSearch').addEventListener('input', renderMemberRivals);
+
+  /** Selects `value` in a select, adding it as an option if it isn't there. */
+  function ensureOption(sel, value) {
+    if (![...sel.options].some(o => o.value === value)) {
+      const op = document.createElement('option');
+      op.value = value; op.textContent = 'vs ' + value;
+      sel.appendChild(op);
+    }
+    sel.value = value;
+  }
+
+  /** My stats → tap a rival → History filtered to matches against them. */
+  function openHistoryVsRival(name) {
+    ensureOption(el('historyNameFilter'), name);
+    showView('history');
+    loadHistory(true);
+  }
+
+  /** Summary on top of "history vs rival": the same numbers as in My stats. */
+  function paintHistoryVs() {
+    const name = el('historyNameFilter').value || 'All';
+    const box = el('historyVs');
+    if (name === 'All') { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    const st = (personalRivalStats.byRival || []).find(r => normName(r.rival) === normName(name));
+    box.innerHTML = `<span>vs <b>${esc(name)}</b>${st ? ` <span class="muted">· ${st.winRate}% · ${st.wins} of ${st.total}</span>` : ''}</span>
+      <button type="button" class="link-btn" id="btnClearVs">Clear</button>`;
+    box.classList.remove('hidden');
+    el('btnClearVs').onclick = () => { el('historyNameFilter').value = 'All'; loadHistory(true); };
+  }
+
+  // ---------- Brick view (shared by the member and team screens) ----------
+
+  /**
+   * Renders the "Bricks" view: brick rate per deck, the win-rate split
+   * between bricked and clean games, and how often the rival bricked.
+   *
+   * This never touches the win-rate lists. The percentages shown here are
+   * computed server-side over the matches where the brick question was
+   * actually answered, which is why the coverage note at the top matters:
+   * on a team that logged a season before this existed, these numbers
+   * speak for a slice of the history, and saying so is the difference
+   * between a statistic and a guess.
+   *
+   * `showMembers` adds the per-member brick rate (team screen only).
+   */
+  function renderBrickList(container, brick, showMembers) {
+    if (!brick || !brick.coverage.marked) {
+      container.innerHTML = `
+        <p class="empty">No brick marks yet. Tick "I bricked" or "Rival bricked"
+        when you log a match - or edit an old one - and the numbers show up here.</p>`;
+      return;
+    }
+
+    const c = brick.coverage;
+    let html = `<p class="brick-note" style="margin-top:0">Based on ${c.marked} of ${c.total}
+      matches (${c.pct}% marked). Matches logged before brick tracking are left out.</p>`;
+
+    html += brick.byDeck.map(d => `
+      <div class="deck-row">
+        <div class="brick-head">
+          <span class="deck-name">${dot(d.deck)}${d.deck}</span>
+          <span><span class="pct">${d.brickRate}%</span>
+            <span class="pct-label">brick rate (${d.bricks}/${d.marked})</span></span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${d.brickRate}%"></div></div>
+        ${brickSplitHtml(d)}
+        <div class="brick-note">Rival bricked in ${d.rivalBrickRate}% (${d.rivalBricks}/${d.marked}) of these.</div>
+      </div>
+    `).join('');
+
+    if (showMembers && brick.byMember.length) {
+      html += '<div class="section-label">Brick rate by member</div>';
+      html += brick.byMember.map(m => `
+        <div class="member-summary-row">
+          <span>${m.player}</span>
+          <strong>${m.brickRate}% (${m.bricks}/${m.marked})</strong>
+        </div>
+      `).join('');
+    }
+
+    container.innerHTML = html;
+  }
+
+  /**
+   * The with-brick vs without-brick win rates. Either side can be null when
+   * the server judged the sample too small to mean anything - showing
+   * "0% (0/1)" there would read like a finding instead of one bad game.
+   */
+  function brickSplitHtml(d) {
+    if (!d.withBrick && !d.withoutBrick) return '';
+    function cell(stat, label) {
+      if (!stat) return `<div><div class="v na">Not enough data</div><div class="k">${label}</div></div>`;
+      const tone = stat.winRate >= 50 ? 'good' : 'bad';
+      return `<div><div class="v ${tone}">${stat.winRate}%</div>
+        <div class="k">${label} (${stat.wins}/${stat.total})</div></div>`;
+    }
+    return `<div class="brick-split">
+      ${cell(d.withBrick, 'WR with brick')}
+      ${cell(d.withoutBrick, 'WR clean')}
+    </div>`;
+  }
+
+  // ---------- Member: personal stats (by deck / by rival toggle) ----------
+
+  /**
+   * Paints the member's stats from data that already arrived with the
+   * screen. Both halves land together now, so the header no longer has to
+   * be drawn twice while it waits for the second response.
+   */
+  function applyPersonalStats(byDeck, rival) {
+    personalDeckStats = byDeck;
+    personalRivalStats = rival;
+    renderPersonalStatsTop();
+
+    // The brick tab is the one thing still fetched on its own, on purpose:
+    // it needs its own pass over Matches and most visits never open it.
+    personalBrickStats = null;
+    if (personalStatsView === 'brick') {
+      el('personalStatsList').innerHTML = '<div class="loading">Loading…</div>';
+      gs().withSuccessHandler(data => {
+        personalBrickStats = data;
+        if (personalStatsView === 'brick') renderBrickList(el('personalStatsList'), data, false);
+      }).getBrickStats(token);
+      return;
+    }
+
+    if (personalStatsView === 'rival') {
+      renderMemberRivals();
+    } else {
+      renderStatsList(el('personalStatsList'), personalDeckStats, 'deck');
+    }
+  }
+
+  /**
+   * Header of the member's win-rate card: their overall numbers on top, and
+   * their best/worst rival below.
+   *
+   * The overall figures are summed from personalDeckStats rather than asked
+   * of the server: every match belongs to exactly one own deck, so adding up
+   * the per-deck totals gives the exact same result with no extra round trip.
+   * Called from both loaders, so whichever response lands second fills in the
+   * part the other one didn't have.
+   */
+  function renderPersonalStatsTop() {
+    let matches = 0, wins = 0;
+    personalDeckStats.forEach(d => { matches += d.total; wins += d.wins; });
+    const overall = matches ? Math.round((wins / matches) * 100) : 0;
+    const last = (recent.last10 || []);
+    const lw = last.filter(r => r === 'W').length;
+    const rivalTile = (r, label, tone) => r
+      ? `<div class="stat-value sm" style="color:var(--${tone})">${esc(r.rival)} · ${r.winRate}%</div><div class="stat-sub">${r.wins} of ${r.total}</div><div class="stat-label">${label}</div>`
+      : `<div class="stat-value sm muted">Not enough data</div><div class="stat-label">${label}</div>`;
+    el('personalStats').innerHTML = `
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-value">${overall}%</div><div class="stat-sub">${wins} W · ${matches - wins} L</div><div class="stat-label">Overall win rate</div></div>
+        <div class="stat-card"><div class="stat-value">${last.length ? lw + '–' + (last.length - lw) : '—'}</div>
+          <div class="pips">${last.slice().reverse().map(r => `<span class="sq ${r === 'W' ? 'w' : 'l'}"></span>`).join('')}</div>
+          <div class="stat-label">Last ${last.length || 10}</div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card">${rivalTile(personalRivalStats.bestRival, 'Best vs. rival', 'green')}</div>
+        <div class="stat-card">${rivalTile(personalRivalStats.worstRival, 'Toughest rival', 'red')}</div>
+      </div>
+      <p class="stat-foot">${matches} matches played${recent.weekCount ? ' · ' + recent.weekCount + ' this week' : ''}</p>
+    `;
+  }
+
+  function setMemberStatsView(view) {
+    personalStatsView = view;
+    el('rivalStatsSearch').classList.toggle('hidden', view !== 'rival');
+    ['memberViewByDeck', 'memberViewByRival', 'memberViewBricks'].forEach(id => {
+      el(id).classList.remove('active');
+    });
+    el(view === 'deck' ? 'memberViewByDeck' : view === 'rival' ? 'memberViewByRival' : 'memberViewBricks')
+      .classList.add('active');
+  }
+
+  el('memberViewByDeck').onclick = () => {
+    setMemberStatsView('deck');
+    renderStatsList(el('personalStatsList'), personalDeckStats, 'deck');
+  };
+  el('memberViewByRival').onclick = () => {
+    setMemberStatsView('rival');
+    renderMemberRivals();
+  };
+  el('memberViewBricks').onclick = () => {
+    setMemberStatsView('brick');
+    // Fetched the first time the tab is opened, then reused. Brick stats
+    // need their own pass over the Matches sheet, and most visits to this
+    // screen are to log a match or check a win rate - paying for that read
+    // on every load, for a tab nobody opened, is the kind of waste that
+    // shows up as a slow screen once the sheet grows.
+    if (personalBrickStats) {
+      renderBrickList(el('personalStatsList'), personalBrickStats, false);
+      return;
+    }
+    el('personalStatsList').innerHTML = '<div class="loading">Loading…</div>';
+    gs()
+      .withSuccessHandler(data => {
+        personalBrickStats = data;
+        if (personalStatsView === 'brick') renderBrickList(el('personalStatsList'), data, false);
+      })
+      .withFailureHandler(err => {
+        el('personalStatsList').innerHTML =
+          `<p class="empty">Couldn't load brick stats: ${err.message}</p>`;
+      })
+      .getBrickStats(token);
+  };
+
+  // ---------- Admin: team dashboard ----------
+
+  function loadTeamDashboard() {
+    el('teamStats').innerHTML = '<div class="loading">Loading…</div>';
+    el('teamStatsList').innerHTML = '<div class="loading">Loading…</div>';
+    el('teamByMember').innerHTML = '';
+    const current = ticket('teamDashboard');
+    gs().withSuccessHandler(data => {
+      if (!current()) return;
+      teamDashboardData = data;
+      fillSelect(el('teamNameFilter'), 'Any rival', (data.byRival || []).map(r => r.rival).sort((a, b) => a.localeCompare(b)));
+
+      const bestRival = data.bestRival;
+      const worstRival = data.worstRival;
+      const bestRivalText = bestRival ? `${bestRival.rival} · ${bestRival.winRate}%` : 'Not enough data';
+      const worstRivalText = worstRival ? `${worstRival.rival} · ${worstRival.winRate}%` : 'Not enough data';
+      const tw = data.totalWins !== undefined ? data.totalWins : Math.round(data.totalMatches * data.teamWinRate / 100);
+      const cov = data.brick && data.brick.coverage;
+      const rivalSub = r => r ? `<div class="stat-sub">${r.wins} of ${r.total}</div>` : '';
+      el('teamStats').innerHTML = `
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-value">${data.totalMatches}</div><div class="stat-sub">${data.weekCount !== undefined ? data.weekCount + ' this week' : '&nbsp;'}</div><div class="stat-label">Total matches</div></div>
+          <div class="stat-card"><div class="stat-value">${data.teamWinRate}%</div><div class="stat-sub">${tw} W · ${data.totalMatches - tw} L</div><div class="stat-label">Team win rate</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-value sm" style="color:var(--green);">${esc(bestRivalText)}</div>${rivalSub(bestRival)}<div class="stat-label">Best vs. rival</div></div>
+          <div class="stat-card"><div class="stat-value sm" style="color:var(--red);">${esc(worstRivalText)}</div>${rivalSub(worstRival)}<div class="stat-label">Toughest rival</div></div>
+        </div>
+        ${cov && cov.total ? `<p class="stat-foot">Brick answered in ${cov.marked} of ${cov.total} matches</p>` : ''}
+      `;
+
+      renderTeamStatsView();
+
+      if (!data.byMember.length) {
+        el('teamByMember').innerHTML = '<p class="empty">No matches logged yet.</p>';
+      } else {
+        el('teamByMember').innerHTML = data.byMember.map(m => `
+          <div class="member-summary-row">
+            <span>${esc(m.player)}</span>
+            <span><strong>${m.winRate}%</strong> <span class="cnt" style="color:var(--text-sec)">· ${m.wins} of ${m.total}</span></span>
+          </div>
+        `).join('');
+      }
+    }).getTeamDashboard(token);
+  }
+
+  // The rival list currently shown in Team → By rival (whole team or one member).
+  let teamRivalList = [];
+  function renderTeamRivals() {
+    renderRivalSearchResult(el('teamStatsList'), teamRivalList, el('teamRivalSearch').value, openTeamHistoryVsRival);
+  }
+  el('teamRivalSearch').addEventListener('input', renderTeamRivals);
+
+  /** Team → tap a rival → Team history vs that rival (for the member picked, if any). */
+  function openTeamHistoryVsRival(name) {
+    const who = el('teamRivalMemberFilter').value || 'All';
+    if (who !== 'All' && el('teamPlayerFilter').value !== who) {
+      el('teamPlayerFilter').value = who;
+      populateFacedRivalDecks('teamRivalDeckFilter', who);
+    }
+    ensureOption(el('teamNameFilter'), name);
+    showView('history');
+    loadTeamHistory(true);
+  }
+
+  function paintTeamHistoryVs() {
+    const name = el('teamNameFilter').value || 'All';
+    const who = el('teamPlayerFilter').value || 'All';
+    const box = el('teamHistoryVs');
+    if (name === 'All') { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    box.innerHTML = `<span>${who !== 'All' ? esc(who) + ' ' : ''}vs <b>${esc(name)}</b></span>
+      <button type="button" class="link-btn" id="btnClearTeamVs">Clear</button>`;
+    box.classList.remove('hidden');
+    el('btnClearTeamVs').onclick = () => { el('teamNameFilter').value = 'All'; loadTeamHistory(true); };
+  }
+
+  function renderTeamStatsView() {
+    if (!teamDashboardData) return;
+    const container = el('teamStatsList');
+    el('teamRivalFilterRow').classList.toggle('hidden', teamStatsView !== 'rival');
+    el('teamRivalSearch').classList.toggle('hidden', teamStatsView !== 'rival');
+    if (teamStatsView === 'deck') {
+      renderStatsList(container, teamDashboardData.byDeck, 'deck');
+      return;
+    }
+    if (teamStatsView === 'brick') {
+      // Already part of the dashboard payload, computed from the rows it
+      // had read anyway - no extra call and no extra sheet read.
+      renderBrickList(container, teamDashboardData.brick, true);
+      return;
+    }
+    // "All members" is already in teamDashboardData, so only a real member
+    // filter needs a server call.
+    const who = el('teamRivalMemberFilter').value || 'All';
+    if (who === 'All') {
+      teamRivalList = teamDashboardData.byRival;
+      renderTeamRivals();
+      return;
+    }
+    container.innerHTML = '<div class="loading">Loading…</div>';
+    gs()
+      .withSuccessHandler(data => {
+        // Ignore a response that arrived after the admin changed the filter
+        // again - otherwise a slow reply can overwrite a newer one.
+        if ((el('teamRivalMemberFilter').value || 'All') !== who) return;
+        teamRivalList = data.byRival;
+        renderTeamRivals();
+      })
+      .withFailureHandler(err => {
+        container.innerHTML = `<p class="empty">Couldn't load that member's rivals: ${err.message}</p>`;
+      })
+      .getTeamRivalStats(token, who);
+  }
+
+  el('teamRivalMemberFilter').onchange = () => renderTeamStatsView();
+
+  function setTeamStatsView(view) {
+    teamStatsView = view;
+    ['teamViewByDeck', 'teamViewByRival', 'teamViewBricks'].forEach(id => {
+      el(id).classList.remove('active');
+    });
+    el(view === 'deck' ? 'teamViewByDeck' : view === 'rival' ? 'teamViewByRival' : 'teamViewBricks')
+      .classList.add('active');
+    renderTeamStatsView();
+  }
+
+  el('teamViewByDeck').onclick = () => setTeamStatsView('deck');
+  el('teamViewByRival').onclick = () => setTeamStatsView('rival');
+  el('teamViewBricks').onclick = () => setTeamStatsView('brick');
+
+  // ---------- Admin: repair spelling drift in saved matches ----------
+
+  el('btnPreviewRepair').onclick = () => {
+    el('repairError').style.display = 'none';
+    el('repairHint').style.display = 'none';
+    el('repairPreview').innerHTML = '<div class="loading">Checking…</div>';
+    el('btnPreviewRepair').disabled = true;
+
+    gs()
+      .withSuccessHandler(pv => {
+        el('btnPreviewRepair').disabled = false;
+        if (!pv.total) {
+          el('repairPreview').innerHTML = '';
+          el('repairHint').textContent = 'Nothing to fix — every saved match already matches the catalog.';
+          el('repairHint').style.display = 'block';
+          return;
+        }
+        const rows = pv.changes.map(c => `
+          <div class="repair-row">
+            <span class="repair-from">${c.from}</span>
+            <span class="repair-arrow">→</span>
+            <span class="repair-to">${c.to}</span>
+            <span class="repair-count">${c.count}×  ${c.field}</span>
+          </div>`).join('');
+        el('repairPreview').innerHTML = `
+          <p class="filter-note">${pv.total} cell(s) would change:</p>
+          ${rows}
+          <button type="button" class="primary btn-apply-repair" style="margin-top:12px;">
+            Apply these ${pv.total} fix(es)
+          </button>`;
+        el('repairPreview').querySelector('.btn-apply-repair').onclick = () => {
+          if (!confirm(`Update ${pv.total} cell(s) to match the catalog spelling? A backup copy of the sheet will be made first.`)) return;
+          applyRepair();
+        };
+      })
+      .withFailureHandler(err => {
+        el('btnPreviewRepair').disabled = false;
+        el('repairPreview').innerHTML = '';
+        el('repairError').textContent = failText(err);
+        el('repairError').style.display = 'block';
+      })
+      .previewCatalogSpellingRepair(token);
+  };
+
+  function applyRepair() {
+    el('repairPreview').innerHTML = '<div class="loading">Applying…</div>';
+    gs()
+      .withSuccessHandler(res => {
+        el('repairPreview').innerHTML = '';
+        el('repairHint').textContent = res.rowsUpdated
+          ? `Done — ${res.rowsUpdated} cell(s) updated. Backup saved as "${res.backupName}".`
+          : 'Nothing needed fixing.';
+        el('repairHint').style.display = 'block';
+        // The stats change as a result, so refresh what's behind this card.
+        loadAdminCatalogAndMembers();
+        loadDeckMaintenance();
+        loadRivalMaintenance();
+        loadTeamDashboard();
+      })
+      .withFailureHandler(err => {
+        el('repairPreview').innerHTML = '';
+        el('repairError').textContent = failText(err);
+        el('repairError').style.display = 'block';
+      })
+      .applyCatalogSpellingRepair(token);
+  }
+
+  // ---------- Admin: deck catalog maintenance (duplicates & merging) ----------
+
+  const DECK_COLORS = ['', 'Red', 'Blue', 'Green', 'Yellow', 'Purple'];
+
+  /**
+   * Renders the editable deck list, filtered by the search box. The full
+   * catalog is kept in allDecksForEdit so typing filters instantly without
+   * another server round trip - and so a rename/remove can re-render from
+   * the same data.
+   */
+  /**
+   * Shared shell for both catalogs: filter, page, collapsed rows, pager.
+   *
+   * The whole catalog is already in memory (it arrives in one call), so the
+   * paging here is purely client-side - no extra round trip, unlike the
+   * match history where paging exists to avoid reading the sheet.
+   *
+   * cfg.items      already filtered list
+   * cfg.container  where to render
+   * cfg.offset     current page offset
+   * cfg.onPage(d)  called with -1/+1 to change page
+   * cfg.closedHtml(item)   the one-line summary
+   * cfg.buildEditor(item, panel)  fills the panel shown when the row opens
+   */
+  const CATALOG_PAGE_SIZE = 20;
+
+  function renderCatalogPage(cfg) {
+    const page = cfg.items.slice(cfg.offset, cfg.offset + CATALOG_PAGE_SIZE);
+    cfg.container.innerHTML = '';
+
+    page.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'cat-row';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cat-open';
+      btn.innerHTML = cfg.closedHtml(item) + '<span class="chev">&#9660;</span>';
+      row.appendChild(btn);
+
+      const wrap = document.createElement('div');
+      wrap.appendChild(row);
+
+      let panel = null;
+      btn.onclick = () => {
+        if (panel) {                       // open -> close
+          panel.remove(); panel = null;
+          btn.querySelector('.chev').innerHTML = '&#9660;';
+          return;
+        }
+        panel = document.createElement('div');
+        panel.className = 'cat-edit';
+        cfg.buildEditor(item, panel);
+        wrap.appendChild(panel);
+        btn.querySelector('.chev').innerHTML = '&#9650;';
+      };
+
+      cfg.container.appendChild(wrap);
+    });
+
+    appendPager(cfg.container, cfg.offset, page.length,
+      cfg.offset + CATALOG_PAGE_SIZE < cfg.items.length, cfg.onPage);
+  }
+
+  function loadDeckEditList(list) {
+    if (list) allDecksForEdit = list;
+    list = allDecksForEdit;
+    const cont = el('deckEditList');
+    const note = el('deckFilterNote');
+    if (!list.length) {
+      cont.innerHTML = '<p class="empty">No decks in the catalog yet.</p>';
+      note.textContent = '';
+      return;
+    }
+    const q = el('deckSearch').value.trim().toLowerCase();
+    const shown = q ? list.filter(d => d.name.toLowerCase().indexOf(q) !== -1) : list;
+    if (deckCatalogOffset >= shown.length) deckCatalogOffset = 0;
+    note.textContent = q ? `Showing ${shown.length} of ${list.length}` : `${list.length} decks`;
+    if (!shown.length) {
+      cont.innerHTML = '<p class="empty">No decks match that filter.</p>';
+      return;
+    }
+
+    renderCatalogPage({
+      items: shown,
+      container: cont,
+      offset: deckCatalogOffset,
+      onPage: d => { deckCatalogOffset += d * CATALOG_PAGE_SIZE; loadDeckEditList(); },
+      closedHtml: d => `${dot(d.name)}<span class="nm">${d.name}</span><span class="meta">${d.type}</span>`,
+      buildEditor: buildDeckEditor,
+    });
+  }
+
+  function buildDeckEditor(d, row) {
+    {
+      row.innerHTML = `
+        <input class="de-name" value="${d.name}">
+        <div class="de-fields">
+          <input class="de-anime" value="${d.anime}" placeholder="Anime">
+          <select class="de-color">
+            ${DECK_COLORS.map(c => `<option value="${c}" ${c === d.color ? 'selected' : ''}>${c || '—'}</option>`).join('')}
+          </select>
+          <select class="de-type">
+            <option value="Own" ${d.type === 'Own' ? 'selected' : ''}>Own</option>
+            <option value="Rival" ${d.type === 'Rival' ? 'selected' : ''}>Rival</option>
+          </select>
+          <button type="button" class="small active-no de-remove" title="Remove">${ICON_TRASH}</button>
+        </div>
+      `;
+      let originalName = d.name;
+      const save = () => {
+        const newName = row.querySelector('.de-name').value.trim();
+        const anime = row.querySelector('.de-anime').value.trim();
+        const color = row.querySelector('.de-color').value;
+        const type = row.querySelector('.de-type').value;
+        gs()
+          .withSuccessHandler(resp => {
+            if (!resp.ok) {
+              alert(resp.error);
+              return;
+            }
+            originalName = newName;
+            if (resp.renamed) {
+              loadAdminCatalogAndMembers();
+              loadDeckMaintenance();
+              loadTeamHistory();
+              loadTeamDashboard();
+            }
+          })
+          .withFailureHandler(err => alert(failText(err)))
+          .updateDeck(token, originalName, newName, anime, color, type);
+      };
+      row.querySelector('.de-name').onchange = save;
+      row.querySelector('.de-anime').onchange = save;
+      row.querySelector('.de-color').onchange = save;
+      row.querySelector('.de-type').onchange = save;
+      row.querySelector('.de-remove').onclick = () => {
+        if (!confirm(`Remove "${originalName}" from the catalog? This only works if no match uses it yet.`)) return;
+        gs()
+          .withSuccessHandler(resp => {
+            if (!resp.ok) { alert(resp.error); return; }
+            loadAdminCatalogAndMembers();
+            loadDeckMaintenance();
+          })
+          .withFailureHandler(err => alert(failText(err)))
+          .removeDeck(token, originalName);
+      };
+    }
+  }
+
+  function populateMergeSelects(list) {
+    const fromSel = el('mergeFrom');
+    const intoSel = el('mergeInto');
+    [fromSel, intoSel].forEach(sel => { sel.innerHTML = ''; });
+    list.forEach(d => {
+      [fromSel, intoSel].forEach(sel => {
+        const op = document.createElement('option');
+        op.value = d.name; op.textContent = d.name;
+        sel.appendChild(op);
+      });
+    });
+  }
+
+  /**
+   * Renders duplicate suggestions grouped by confidence. The backend
+   * returns [{confidence:'exact'|'fuzzy', items:[...]}]; "exact" means the
+   * names are identical once case, accents, punctuation and spacing are
+   * ignored, while "fuzzy" means they're within one typo of each other and
+   * deserve a second look. Showing them under separate headings keeps the
+   * admin from merging a likely typo with the same confidence as an obvious
+   * duplicate. onMerge(keepName, otherNames) does the actual work.
+   */
+  function renderDuplicateGroups(container, groups, nameOf, onMerge, label) {
+    if (!groups.length) {
+      container.innerHTML = `<p class="empty">No possible duplicates found.</p>`;
+      return;
+    }
+    container.innerHTML = '';
+    let lastConfidence = null;
+    groups.forEach(group => {
+      if (group.confidence !== lastConfidence) {
+        lastConfidence = group.confidence;
+        const head = document.createElement('p');
+        head.className = 'dup-tier ' + group.confidence;
+        head.textContent = group.confidence === 'exact'
+          ? 'Almost certainly the same'
+          : 'Possible typos — check before merging';
+        container.appendChild(head);
+      }
+      const names = group.items.map(nameOf);
+      const div = document.createElement('div');
+      div.className = 'dup-group';
+      div.innerHTML = `
+        <div class="dup-names">${names.join('  /  ')}</div>
+        <div class="dup-choices">
+          ${names.map(n => `<button type="button" class="small" data-keep="${n}">Keep "${n}"</button>`).join('')}
+        </div>
+      `;
+      names.forEach(n => {
+        div.querySelector(`[data-keep="${n}"]`).onclick = () => {
+          const others = names.filter(x => x !== n);
+          if (!confirm(`Merge ${others.join(', ')} into "${n}"? This cannot be undone (a backup copy of the sheet will be made first).`)) return;
+          onMerge(n, others);
+        };
+      });
+      container.appendChild(div);
+    });
+  }
+
+  function loadDeckMaintenance() {
+    gs().withSuccessHandler(groups => {
+      renderDuplicateGroups(el('duplicatesList'), groups, d => d.name,
+        (keep, others) => mergeSequence(keep, others, 0), 'decks');
+    }).findPossibleDuplicateDecks(token);
+  }
+
+  function mergeSequence(keepName, namesToMerge, index) {
+    if (index >= namesToMerge.length) {
+      loadAdminCatalogAndMembers();
+      loadDeckMaintenance();
+      loadTeamHistory();
+      loadTeamDashboard();
+      return;
+    }
+    gs()
+      .withSuccessHandler(resp => {
+        if (!resp.ok) { alert(resp.error); return; }
+        mergeSequence(keepName, namesToMerge, index + 1);
+      })
+      .withFailureHandler(err => alert(failText(err)))
+      .mergeDecks(token, keepName, namesToMerge[index]);
+  }
+
+  el('btnMerge').onclick = () => {
+    const mergeFrom = el('mergeFrom').value;
+    const mergeInto = el('mergeInto').value;
+    el('mergeError').style.display = 'none';
+    el('mergeHint').style.display = 'none';
+
+    if (!mergeFrom || !mergeInto || mergeFrom === mergeInto) {
+      el('mergeError').textContent = 'Pick two different decks.';
+      el('mergeError').style.display = 'block';
+      return;
+    }
+    if (!confirm(`Merge "${mergeFrom}" into "${mergeInto}"? This cannot be undone (a backup copy of the sheet will be made first).`)) return;
+
+    el('btnMerge').disabled = true;
+    gs()
+      .withSuccessHandler(resp => {
+        el('btnMerge').disabled = false;
+        if (!resp.ok) {
+          el('mergeError').textContent = resp.error;
+          el('mergeError').style.display = 'block';
+          return;
+        }
+        el('mergeHint').textContent = `Done — ${resp.rowsUpdated} match row(s) updated. Backup saved as "${resp.backupName}".`;
+        el('mergeHint').style.display = 'block';
+        loadAdminCatalogAndMembers();
+        loadDeckMaintenance();
+        loadTeamHistory();
+        loadTeamDashboard();
+      })
+      .withFailureHandler(err => {
+        el('btnMerge').disabled = false;
+        el('mergeError').textContent = failText(err);
+        el('mergeError').style.display = 'block';
+      })
+      .mergeDecks(token, mergeInto, mergeFrom);
+  };
+
+  // ---------- Admin: rival catalog maintenance (duplicates & merging) ----------
+
+  function loadRivalEditList(names) {
+    if (names) allRivalsForEdit = names;
+    names = allRivalsForEdit;
+    const cont = el('rivalEditList');
+    const note = el('rivalFilterNote');
+    if (!names.length) {
+      cont.innerHTML = '<p class="empty">No rivals in the catalog yet.</p>';
+      note.textContent = '';
+      return;
+    }
+    const q = el('rivalSearch').value.trim().toLowerCase();
+    const shown = q ? names.filter(n => n.toLowerCase().indexOf(q) !== -1) : names;
+    if (rivalCatalogOffset >= shown.length) rivalCatalogOffset = 0;
+    note.textContent = q ? `Showing ${shown.length} of ${names.length}` : `${names.length} rivals`;
+    if (!shown.length) {
+      cont.innerHTML = '<p class="empty">No rivals match that filter.</p>';
+      return;
+    }
+
+    renderCatalogPage({
+      items: shown,
+      container: cont,
+      offset: rivalCatalogOffset,
+      onPage: d => { rivalCatalogOffset += d * CATALOG_PAGE_SIZE; loadRivalEditList(); },
+      closedHtml: n => `<span class="nm">${n}</span>`,
+      buildEditor: buildRivalEditor,
+    });
+  }
+
+  function buildRivalEditor(name, row) {
+    {
+      row.innerHTML = `
+        <input class="de-name" value="${name}">
+        <div class="de-fields">
+          <button type="button" class="small active-no de-remove" title="Remove">${ICON_TRASH}</button>
+        </div>
+      `;
+      let originalName = name;
+      row.querySelector('.de-name').onchange = () => {
+        const newName = row.querySelector('.de-name').value.trim();
+        gs()
+          .withSuccessHandler(resp => {
+            if (!resp.ok) { alert(resp.error); return; }
+            originalName = newName;
+            if (resp.renamed) {
+              loadAdminCatalogAndMembers();
+              loadRivalMaintenance();
+              loadTeamHistory();
+              loadTeamDashboard();
+            }
+          })
+          .withFailureHandler(err => alert(failText(err)))
+          .updateRivalName(token, originalName, newName);
+      };
+      row.querySelector('.de-remove').onclick = () => {
+        if (!confirm(`Remove "${originalName}" from the catalog? This only works if no match uses it yet.`)) return;
+        gs()
+          .withSuccessHandler(resp => {
+            if (!resp.ok) { alert(resp.error); return; }
+            loadAdminCatalogAndMembers();
+            loadRivalMaintenance();
+          })
+          .withFailureHandler(err => alert(failText(err)))
+          .removeRivalName(token, originalName);
+      };
+    }
+  }
+
+  function populateRivalMergeSelects(names) {
+    const fromSel = el('rivalMergeFrom');
+    const intoSel = el('rivalMergeInto');
+    [fromSel, intoSel].forEach(sel => { sel.innerHTML = ''; });
+    names.forEach(name => {
+      [fromSel, intoSel].forEach(sel => {
+        const op = document.createElement('option');
+        op.value = name; op.textContent = name;
+        sel.appendChild(op);
+      });
+    });
+  }
+
+  function loadRivalMaintenance() {
+    gs().withSuccessHandler(groups => {
+      // Rival items are plain strings, decks are objects - hence the
+      // different nameOf accessor; everything else is shared.
+      renderDuplicateGroups(el('rivalDuplicatesList'), groups, n => n,
+        (keep, others) => mergeRivalSequence(keep, others, 0), 'rivals');
+    }).findPossibleDuplicateRivalNames(token);
+  }
+
+  function mergeRivalSequence(keepName, namesToMerge, index) {
+    if (index >= namesToMerge.length) {
+      loadAdminCatalogAndMembers();
+      loadRivalMaintenance();
+      loadTeamHistory();
+      loadTeamDashboard();
+      return;
+    }
+    gs()
+      .withSuccessHandler(resp => {
+        if (!resp.ok) { alert(resp.error); return; }
+        mergeRivalSequence(keepName, namesToMerge, index + 1);
+      })
+      .withFailureHandler(err => alert(failText(err)))
+      .mergeRivalNames(token, keepName, namesToMerge[index]);
+  }
+
+  el('btnMergeRival').onclick = () => {
+    const mergeFrom = el('rivalMergeFrom').value;
+    const mergeInto = el('rivalMergeInto').value;
+    el('rivalMergeError').style.display = 'none';
+    el('rivalMergeHint').style.display = 'none';
+
+    if (!mergeFrom || !mergeInto || mergeFrom === mergeInto) {
+      el('rivalMergeError').textContent = 'Pick two different rivals.';
+      el('rivalMergeError').style.display = 'block';
+      return;
+    }
+    if (!confirm(`Merge "${mergeFrom}" into "${mergeInto}"? This cannot be undone (a backup copy of the sheet will be made first).`)) return;
+
+    el('btnMergeRival').disabled = true;
+    gs()
+      .withSuccessHandler(resp => {
+        el('btnMergeRival').disabled = false;
+        if (!resp.ok) {
+          el('rivalMergeError').textContent = resp.error;
+          el('rivalMergeError').style.display = 'block';
+          return;
+        }
+        el('rivalMergeHint').textContent = `Done — ${resp.rowsUpdated} match row(s) updated. Backup saved as "${resp.backupName}".`;
+        el('rivalMergeHint').style.display = 'block';
+        loadAdminCatalogAndMembers();
+        loadRivalMaintenance();
+        loadTeamHistory();
+        loadTeamDashboard();
+      })
+      .withFailureHandler(err => {
+        el('btnMergeRival').disabled = false;
+        el('rivalMergeError').textContent = failText(err);
+        el('rivalMergeError').style.display = 'block';
+      })
+      .mergeRivalNames(token, mergeInto, mergeFrom);
+  };
+
+  // ---------- Admin: PDF reports ----------
+
+  el('btnGenerateReport').onclick = () => {
+    el('reportError').style.display = 'none';
+    el('reportHint').style.display = 'none';
+    el('btnGenerateReport').disabled = true;
+    el('btnGenerateReport').textContent = 'Generating…';
+
+    // Safety net: if neither handler below ever fires (which can happen if
+    // the call gets stuck before Code.gs even returns), don't leave the
+    // button stuck on "Generating…" forever.
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      el('btnGenerateReport').disabled = false;
+      el('btnGenerateReport').textContent = 'Generate PDF report';
+      el('reportError').textContent =
+        'This is taking longer than expected — it may be a permissions issue the first time this ' +
+        'runs (see the technical guide\'s "Reportes en PDF" troubleshooting note). Check the Drive ' +
+        'folder next to the spreadsheet before trying again, in case it did finish.';
+      el('reportError').style.display = 'block';
+    }, 45000);
+
+    gs()
+      .withSuccessHandler(resp => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        el('btnGenerateReport').disabled = false;
+        el('btnGenerateReport').textContent = 'Generate PDF report';
+        if (!resp.ok) {
+          el('reportError').textContent = resp.error;
+          el('reportError').style.display = 'block';
+          return;
+        }
+        el('reportHint').innerHTML = `Done — <a href="${resp.url}" target="_blank" rel="noopener" style="color:var(--gold);">open "${resp.name}"</a> (it also opened in a new tab).`;
+        el('reportHint').style.display = 'block';
+        window.open(resp.url, '_blank');
+      })
+      .withFailureHandler(err => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        el('btnGenerateReport').disabled = false;
+        el('btnGenerateReport').textContent = 'Generate PDF report';
+        el('reportError').textContent = failText(err);
+        el('reportError').style.display = 'block';
+      })
+      .generateTeamReportPdf(token);
+  };
+
+  // ---------- Admin: team match history ----------
+
+  el('teamPlayerFilter').onchange = () => {
+    // The rival-deck options depend on who's selected, so rebuild them.
+    populateFacedRivalDecks('teamRivalDeckFilter', el('teamPlayerFilter').value || 'All');
+    loadTeamHistory(true);
+  };
+  el('teamDeckFilter').onchange = () => loadTeamHistory(true);
+  el('teamRivalDeckFilter').onchange = () => loadTeamHistory(true);
+  el('teamNameFilter').onchange = () => loadTeamHistory(true);
+
+  function loadTeamHistory(reset) {
+    if (reset) teamHistoryOffset = 0;
+    el('teamHistoryList').innerHTML = '<div class="loading">Loading…</div>';
+    const playerFilter = el('teamPlayerFilter').value || 'All';
+    const deckFilter = el('teamDeckFilter').value || 'All';
+    const rivalDeckFilter = el('teamRivalDeckFilter').value || 'All';
+    const current = ticket('teamHistory');
+    gs().withSuccessHandler(resp => {
+      if (!current()) return;
+      noteDayKeys(resp);
+      paintTeamHistoryVs();
+      el('teamHistoryList').innerHTML = '';
+      if (!resp.items.length) {
+        el('teamHistoryList').innerHTML = teamHistoryOffset === 0
+          ? '<p class="empty">No matches for this filter.</p>'
+          : '<p class="empty">No more matches on this page.</p>';
+      } else {
+        renderHistoryRows(el('teamHistoryList'), resp.items, true);
+      }
+      appendPager(el('teamHistoryList'), teamHistoryOffset, resp.items.length, resp.hasMore, delta => {
+        teamHistoryOffset = Math.max(0, teamHistoryOffset + delta * HISTORY_PAGE_SIZE);
+        loadTeamHistory(false);
+      });
+    }).getTeamMatchHistory(token, playerFilter, deckFilter, teamHistoryOffset, HISTORY_PAGE_SIZE, rivalDeckFilter, el('teamNameFilter').value || 'All');
+  }
+</script>
+</body>
+</html>
