@@ -9,6 +9,6 @@
  *   Se usa solo abriendo la página con ?qa al final del link.
  */
 window.UAT_CONFIG = {
-  apiUrl: '',
+  apiUrl: 'https://script.google.com/macros/s/AKfycbwxRwXc0WgSdFhN8NVr8XeagWsmfbLo5Ol_NKyqlVE08qIghZ1NHigk5WyBj_HSxJiGVA/exec',
   qaApiUrl: 'https://script.google.com/macros/s/AKfycbybJybG3MsLTQXF7bDs4Z77eHKWymEb5O5wudX9OcxRilmQCtK6H6PDaZCoFZVtUlAhyg/exec'
 };
