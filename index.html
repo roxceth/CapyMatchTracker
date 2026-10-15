@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 08f32cd. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 9999976. No editar aquí: los cambios se hacen en el repo privado. -->
 <html>
 <head>
   <meta charset="utf-8">
@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.16","commit":"08f32cd"};</script>
+  <script>window.UAT_BUILD = {"version":"2.18","commit":"9999976"};</script>
   <script src="config.js?v=106d84726c"></script>
-  <script src="demo.js?v=c8cd415acc"></script>
+  <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -574,6 +574,18 @@
     .toast .grow { flex: 1; min-width: 0; }
     .toast .pip { width: 10px; height: 10px; }
     .toast button { width: auto; min-height: 40px; padding: 0 14px; color: var(--gold); font-weight: 600; background: none; }
+    /* Errors stay until dismissed (v2.18): easy to miss at a tournament table. */
+    .toast.err { border-color: #7a3440; background: #2e1d24; }
+    .toast.err .grow { color: #ffd2d7; }
+    .toast .toast-close { min-width: 44px; min-height: 44px; padding: 0; color: var(--text-sec); font-size: 16px; }
+    .assist-row.add { color: var(--gold); font-weight: 600; }
+    .confirm-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(8,7,12,0.66); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .confirm-box { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 20px; }
+    .confirm-box h3 { margin: 0 0 8px; font-family: 'Rajdhani', 'Inter', sans-serif; font-size: 20px; letter-spacing: .02em; }
+    .confirm-box p { margin: 0 0 18px; color: var(--text-sec); font-size: 14px; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 10px; }
+    .confirm-actions button { flex: 1; min-height: 48px; }
+    .confirm-actions .danger-solid { background: #b8384a; border-color: #b8384a; color: #fff; font-weight: 700; }
 
     @media (min-width: 960px) {
       #app { display: grid; grid-template-columns: 236px minmax(0, 1fr); grid-template-rows: auto 1fr; }
@@ -618,7 +630,7 @@
     <select id="loginName"></select>
     <label for="loginPin">PIN</label>
     <input id="loginPin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="&#8226;&#8226;&#8226;&#8226;">
-    <p class="error" id="loginError"></p>
+    <p class="error" role="alert" id="loginError"></p>
     <button class="primary" id="btnLogin">Log in</button>
   </div>
 </div>
@@ -694,7 +706,7 @@
       <div class="card">
         <h2><span class="bar"></span>Reports</h2>
         <p class="sheet-sub">A PDF styled like the app: win rate by deck and by member, matchups, rival meta and named rivals.</p>
-        <p class="error" id="reportError"></p>
+        <p class="error" role="alert" id="reportError"></p>
         <p class="hint" id="reportHint"></p>
         <button class="primary" id="btnGenerateReport">Generate PDF report</button>
       </div>
@@ -764,7 +776,7 @@
           </div>
         </div>
 
-        <p class="error" id="formError"></p>
+        <p class="error" role="alert" id="formError"></p>
         <button type="button" class="save-btn" id="btnSave" aria-disabled="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>
           <span id="btnSaveText">Save match</span>
@@ -834,7 +846,7 @@
         <select id="mergeFrom"></select>
         <label for="mergeInto">Merge into (keeps this name)</label>
         <select id="mergeInto"></select>
-        <p class="error" id="mergeError"></p>
+        <p class="error" role="alert" id="mergeError"></p>
         <p class="hint" id="mergeHint"></p>
         <button id="btnMerge">Merge decks</button>
       </div>
@@ -850,7 +862,7 @@
         <select id="rivalMergeFrom"></select>
         <label for="rivalMergeInto">Merge into (keeps this name)</label>
         <select id="rivalMergeInto"></select>
-        <p class="error" id="rivalMergeError"></p>
+        <p class="error" role="alert" id="rivalMergeError"></p>
         <p class="hint" id="rivalMergeHint"></p>
         <button id="btnMergeRival">Merge rivals</button>
       </div>
@@ -863,7 +875,7 @@
           (for example "kenji" when the catalog says "Kenji"), which splits one rival or deck
           into two in the stats. This finds those and lines them up with the catalog.
         </p>
-        <p class="error" id="repairError"></p>
+        <p class="error" role="alert" id="repairError"></p>
         <p class="hint" id="repairHint"></p>
         <div id="repairPreview"></div>
         <button id="btnPreviewRepair">Check for spelling drift</button>
@@ -888,6 +900,20 @@
     <span class="pip" id="toastPip"></span>
     <span class="grow" id="toastText"></span>
     <button type="button" id="btnUndo">Undo</button>
+    <button type="button" id="btnToastClose" class="toast-close hidden" aria-label="Dismiss">✕</button>
+  </div>
+
+  <!-- In-app confirmation for destructive admin actions (v2.18): replaces the
+       browser's confirm(), which looked like a different app. -->
+  <div id="confirm" class="confirm-backdrop hidden">
+    <div class="confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <h3 id="confirmTitle"></h3>
+      <p id="confirmText"></p>
+      <div class="confirm-actions">
+        <button type="button" id="confirmCancel">Cancel</button>
+        <button type="button" id="confirmOk" class="danger-solid"></button>
+      </div>
+    </div>
   </div>
 
   <div id="sheet" class="sheet-backdrop hidden">
@@ -939,7 +965,10 @@
 
   // The Log form. One form for every role and for editing, so there is one
   // screen to learn and one to test.
-  const form = { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false };
+  const form = { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false,
+    // Text the person explicitly chose to add as a NEW catalog entry (v2.18).
+    // Anything else not in the catalog has to be picked from the list first.
+    addRival: '', addName: '' };
   let lastSaved = null;     // { id, prev } - what Undo needs
   let toastTimer = null;
 
@@ -1168,8 +1197,8 @@
     personalStatsView = 'deck'; personalBrickStats = null;
     teamDashboardData = null; teamStatsView = 'deck';
     recent = emptyRecent();
-    Object.assign(form, { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false });
-    lastSaved = null;
+    Object.assign(form, { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false, addRival: '', addName: '' });
+    lastSaved = null; lastDeleted = null; closeConfirm(false);
     hideToast(); closeSheet(); closeAccountMenu();
     el('formRival').value = ''; el('formRivalName').value = '';
     ['memberViewByRival', 'memberViewBricks', 'teamViewByRival', 'teamViewBricks'].forEach(id => el(id).classList.remove('active'));
@@ -1469,10 +1498,28 @@
   }
 
   /**
-   * Rival deck helper under the input: matching catalog entries, a "Did you
-   * mean" when it's one typo from an existing deck, and a NEW tag when
-   * saving would add it to the catalog (which the server already does - now
-   * the person sees it before it happens).
+   * Is what's typed OK to save? In the catalog (same spelling, any case - the
+   * server stores the catalog spelling), or explicitly added as new with the
+   * "+ Add" row. Half-typed text ("Ti") or a near-miss ("Titan-Ramp") is not:
+   * saving it used to create a junk catalog entry (v2.18).
+   */
+  function rivalResolved() {
+    const t = el('formRival').value.trim();
+    if (!t) return false;
+    const la = lookAlike(t, deckNames());
+    return !!(la && la.kind === 'same') || form.addRival === t;
+  }
+  function nameResolved() {
+    const t = el('formRivalName').value.trim();
+    if (!t) return true;
+    const la = lookAlike(t, rivalCatalog);
+    return !!(la && la.kind === 'same') || form.addName === t;
+  }
+
+  /**
+   * Rival deck helper under the input: matching catalog entries first, a
+   * "Did you mean" when it's one typo from an existing deck, and adding a
+   * NEW deck only through its own explicit row.
    */
   function paintRivalAssist() {
     const input = el('formRival');
@@ -1480,6 +1527,7 @@
     const box = el('rivalAssist');
     const names = deckNames();
     const la = lookAlike(t, names);
+    if (form.addRival && form.addRival !== t) form.addRival = '';
     const rec = recent.rivalDecks.length ? recent.rivalDecks : names.filter(n => (catalog.find(d => d.name === n) || {}).type === 'Rival').slice(0, 3);
     el('rivalRecent').innerHTML = (!t || (la && la.kind === 'same')) && rec.length
       ? '<span class="chips-label">Recent:</span>' + chipsHtml(rec.slice(0, 3), la ? la.name : '', 'data-rival') : '';
@@ -1492,12 +1540,15 @@
     if (la && (la.kind === 'exact' || la.kind === 'similar') && hits.indexOf(la.name) === -1) {
       html += `<div class="assist-note warn"><span class="grow">Did you mean <b>${esc(la.name)}</b>?</span><button type="button" class="primary" data-pick="${esc(la.name)}">Use it</button></div>`;
     }
-    if (!la) {
+    if (form.addRival === t) {
       html += `<div class="assist-note"><span class="tag-new">NEW</span><span class="grow">“${esc(t)}” will be added to the catalog when you save.</span></div>`;
+    } else {
+      html += `<button type="button" class="assist-row add" data-add><span>+ Add “${esc(t)}” as a new deck</span></button>`;
     }
     box.innerHTML = html;
     box.classList.toggle('hidden', !html);
     box.querySelectorAll('[data-pick]').forEach(b => { b.onclick = () => { input.value = b.dataset.pick; paintRivalAssist(); updateSaveState(); }; });
+    box.querySelectorAll('[data-add]').forEach(b => { b.onclick = () => { form.addRival = t; paintRivalAssist(); updateSaveState(); }; });
   }
 
   function paintNameAssist() {
@@ -1505,19 +1556,27 @@
     const t = input.value.trim();
     const box = el('nameAssist');
     const la = lookAlike(t, rivalCatalog);
+    if (form.addName && form.addName !== t) form.addName = '';
     const rec = recent.rivalNames.slice(0, 3);
     el('nameRecent').innerHTML = (!t || (la && la.kind === 'same')) && rec.length
       ? '<span class="chips-label">Recent:</span>' + chipsHtml(rec, la ? la.name : '', 'data-name') : '';
     el('nameRecent').querySelectorAll('[data-name]').forEach(b => { b.onclick = () => { input.value = b.dataset.name; paintNameAssist(); updateSaveState(); }; });
     let html = '';
-    if (t && la && (la.kind === 'exact' || la.kind === 'similar')) {
-      html = `<div class="assist-note warn"><span class="grow">Did you mean <b>${esc(la.name)}</b>?</span><button type="button" class="primary" data-pick="${esc(la.name)}">Use it</button></div>`;
-    } else if (t && !la) {
-      html = `<div class="assist-note"><span class="tag-new">NEW</span><span class="grow">First match against ${esc(t)} — they’ll be added to the rivals list.</span></div>`;
+    if (t && !(la && la.kind === 'same')) {
+      const lower = t.toLowerCase();
+      const hits = rivalCatalog.filter(n => String(n).toLowerCase().indexOf(lower) !== -1).slice(0, 5);
+      html = hits.map(n => `<button type="button" class="assist-row" data-pick="${esc(n)}"><span>${esc(n)}</span><span class="meta">in rivals list</span></button>`).join('');
+      if (la && (la.kind === 'exact' || la.kind === 'similar') && hits.indexOf(la.name) === -1) {
+        html += `<div class="assist-note warn"><span class="grow">Did you mean <b>${esc(la.name)}</b>?</span><button type="button" class="primary" data-pick="${esc(la.name)}">Use it</button></div>`;
+      }
+      html += form.addName === t
+        ? `<div class="assist-note"><span class="tag-new">NEW</span><span class="grow">First match against ${esc(t)} — they’ll be added to the rivals list.</span></div>`
+        : `<button type="button" class="assist-row add" data-add><span>+ Add “${esc(t)}” as a new rival</span></button>`;
     }
     box.innerHTML = html;
     box.classList.toggle('hidden', !html);
     box.querySelectorAll('[data-pick]').forEach(b => { b.onclick = () => { input.value = b.dataset.pick; paintNameAssist(); updateSaveState(); }; });
+    box.querySelectorAll('[data-add]').forEach(b => { b.onclick = () => { form.addName = t; paintNameAssist(); updateSaveState(); }; });
   }
   el('formRival').addEventListener('input', () => { paintRivalAssist(); updateSaveState(); });
   el('formRivalName').addEventListener('input', () => { paintNameAssist(); updateSaveState(); });
@@ -1566,6 +1625,8 @@
     const missing = [];
     if (!form.deck) missing.push('your deck');
     if (!el('formRival').value.trim()) missing.push('the rival deck');
+    else if (!rivalResolved()) missing.push('pick the rival deck from the list or add it as new');
+    if (!nameResolved()) missing.push('pick the rival’s name from the list or add it as new');
     if (!form.result) missing.push('Win or Loss');
     return missing;
   }
@@ -1623,7 +1684,7 @@
   function resetForm() {
     el('formRival').value = '';
     el('formRivalName').value = '';
-    Object.assign(form, { result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, saving: false });
+    Object.assign(form, { result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, saving: false, addRival: '', addName: '' });
     el('formError').style.display = 'none';
   }
 
@@ -1632,7 +1693,7 @@
     const missing = missingForSave();
     if (missing.length) {
       el('saveSummary').textContent = 'Still needed: ' + missing.join(' and ');
-      const first = !el('formRival').value.trim() ? el('formRival') : null;
+      const first = !rivalResolved() ? el('formRival') : (!nameResolved() ? el('formRivalName') : null);
       if (first) first.focus();
       return;
     }
@@ -1664,6 +1725,7 @@
           return;
         }
         lastSaved = { id: resp.id, prev: prev };
+        lastDeleted = null;
         resetForm();
         paintForm();
         showToast(`Saved: ${prev.result === 'Win' ? 'win' : 'loss'} vs ${rival}`, prev.result, true);
@@ -1700,27 +1762,40 @@
   }
 
   // ================= Toast + Undo =================
-  function showToast(text, result, undoable) {
+  // Success notes fade on their own; errors (opts.error) stay until the
+  // person dismisses them and are announced right away (role=alert).
+  function showToast(text, result, undoable, opts) {
+    const error = !!(opts && opts.error);
     clearTimeout(toastTimer);
+    const t = el('toast');
+    t.classList.toggle('err', error);
+    t.setAttribute('role', error ? 'alert' : 'status');
     el('toastText').textContent = text;
     el('toastPip').className = 'pip' + (result === 'Win' ? ' w' : result === 'Loss' ? ' l' : '');
     el('toastPip').style.display = result ? '' : 'none';
     el('btnUndo').classList.toggle('hidden', !undoable);
-    el('toast').classList.remove('hidden');
-    toastTimer = setTimeout(hideToast, undoable ? 9000 : 3500);
+    el('btnToastClose').classList.toggle('hidden', !error);
+    t.classList.remove('hidden');
+    if (!error) toastTimer = setTimeout(hideToast, undoable ? 9000 : 3500);
   }
+  function showError(text) { showToast(text, null, false, { error: true }); }
   function hideToast() {
     clearTimeout(toastTimer);
     el('toast').classList.add('hidden');
   }
+  el('btnToastClose').onclick = hideToast;
+
+  // What the toast's Undo button undoes: the match just saved, or just deleted.
+  let lastDeleted = null;   // { id } - set by a delete, cleared by a save
   el('btnUndo').onclick = () => {
+    if (lastDeleted) { undoDelete(); return; }
     const saved = lastSaved;
     if (!saved) return;
     el('btnUndo').disabled = true;
     gs()
       .withSuccessHandler(resp => {
         el('btnUndo').disabled = false;
-        if (!resp.ok) { showToast(resp.error, null, false); return; }
+        if (!resp.ok) { showError(resp.error); return; }
         lastSaved = null;
         showToast('Undone — the match was removed', null, false);
         afterWrite(resp.catalogChanged);
@@ -1732,14 +1807,66 @@
         el('formRival').value = saved.prev.rival;
         el('formRivalName').value = saved.prev.rivalName;
         Object.assign(form, { player: saved.prev.player, deck: saved.prev.deck, result: saved.prev.result, turn: saved.prev.turn,
-          ownBrick: saved.prev.ownBrick, rivalBrick: saved.prev.rivalBrick, more: !!(saved.prev.turn || saved.prev.ownBrick || saved.prev.rivalBrick) });
+          ownBrick: saved.prev.ownBrick, rivalBrick: saved.prev.rivalBrick, more: !!(saved.prev.turn || saved.prev.ownBrick || saved.prev.rivalBrick),
+          addRival: saved.prev.rival, addName: saved.prev.rivalName });
         paintForm();
         if (playerChanged) loadLogContext();
         showView('log');
       })
-      .withFailureHandler(err => { el('btnUndo').disabled = false; showToast(failText(err), null, false); })
+      .withFailureHandler(err => { el('btnUndo').disabled = false; showError(failText(err)); })
       .undoMatch(token, saved.id);
   };
+
+  function undoDelete() {
+    const del = lastDeleted;
+    el('btnUndo').disabled = true;
+    gs()
+      .withSuccessHandler(resp => {
+        el('btnUndo').disabled = false;
+        if (!resp.ok) { showError(resp.error); return; }
+        lastDeleted = null;
+        showToast('Restored — the match is back', null, false);
+        afterWrite(false);
+        if (del.reload) del.reload();
+      })
+      .withFailureHandler(err => { el('btnUndo').disabled = false; showError(failText(err)); })
+      .restoreMatch(token, del.id);
+  }
+
+  /**
+   * In-app confirmation (replaces confirm()). Resolves true/false. Focus goes
+   * to Cancel - the safe choice - and comes back where it was afterwards.
+   */
+  let confirmResolve = null, confirmReturnFocus = null;
+  function askConfirm(title, text, okLabel) {
+    if (confirmResolve) confirmResolve(false);
+    confirmReturnFocus = document.activeElement;
+    el('confirmTitle').textContent = title;
+    el('confirmText').textContent = text;
+    el('confirmOk').textContent = okLabel || 'Confirm';
+    el('confirm').classList.remove('hidden');
+    el('confirmCancel').focus();
+    return new Promise(resolve => { confirmResolve = resolve; });
+  }
+  function closeConfirm(answer) {
+    if (!confirmResolve) return;
+    const resolve = confirmResolve;
+    confirmResolve = null;
+    el('confirm').classList.add('hidden');
+    if (confirmReturnFocus && document.contains(confirmReturnFocus)) confirmReturnFocus.focus();
+    resolve(answer);
+  }
+  el('confirmCancel').onclick = () => closeConfirm(false);
+  el('confirmOk').onclick = () => closeConfirm(true);
+  el('confirm').addEventListener('click', e => { if (e.target === el('confirm')) closeConfirm(false); });
+  el('confirm').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeConfirm(false); return; }
+    if (e.key === 'Tab') {   // keep Tab inside the two buttons
+      const a = el('confirmCancel'), b = el('confirmOk');
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); b.focus(); }
+      else if (!e.shiftKey && document.activeElement === b) { e.preventDefault(); a.focus(); }
+    }
+  });
 
   // ================= Sheet (bottom sheet on phones, dialog on desktop) =================
   let sheetOnBack = null;
@@ -1760,7 +1887,7 @@
   el('sheetClose').onclick = closeSheet;
   el('sheetBack').onclick = () => { if (sheetOnBack) sheetOnBack(); };
   el('sheet').addEventListener('click', e => { if (e.target === el('sheet')) closeSheet(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !el('sheet').classList.contains('hidden')) closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && el('confirm').classList.contains('hidden') && !el('sheet').classList.contains('hidden')) closeSheet(); });
 
   // ---- Deck sheet: pick from the whole catalog, or add a new deck ----
   function openDeckSheet(mode, prefill) {
@@ -1809,7 +1936,7 @@
         ${DECK_COLOR_CHOICES.map(c => `<button type="button" class="chip" role="radio" aria-checked="false" data-color="${c}"><span class="dot" style="background:${HEX_MAP[c.toLowerCase()]}"></span>${c}</button>`).join('')}
       </div>
       <div id="newDeckAssist"></div>
-      <p class="error" id="newDeckError"></p>`,
+      <p class="error" role="alert" id="newDeckError"></p>`,
       '<button type="button" class="primary" id="btnSaveDeck">Add deck and use it</button>',
       () => openDeckSheet('list'));
     const paintColors = () => el('newDeckColors').querySelectorAll('[data-color]').forEach(b => {
@@ -1885,6 +2012,9 @@
     form.more = !!(form.turn || form.ownBrick || form.rivalBrick);
     el('formRival').value = m.rivalDeck || '';
     el('formRivalName').value = m.rivalName || '';
+    // What the match already has was saved before: no need to confirm it again.
+    form.addRival = String(m.rivalDeck || '').trim();
+    form.addName = String(m.rivalName || '').trim();
     el('formError').style.display = 'none';
     paintForm();
     showView('log');
@@ -2020,15 +2150,18 @@
     el('sheetBody').querySelector('[data-action="delete"]').onclick = () => { closeSheet(); confirmDelete(m.id, isTeamView); };
   }
 
+  // Delete right away, with Undo in the toast - the same pattern as saving
+  // (v2.18). The server keeps the row for 10 minutes so Undo can restore it.
   function confirmDelete(id, isTeamView) {
-    if (!confirm('Delete this match? This action cannot be undone.')) return;
     gs()
       .withSuccessHandler(resp => {
-        if (!resp.ok) { alert(resp.error); return; }
-        showToast('Match deleted', null, false);
+        if (!resp.ok) { showError(resp.error); return; }
+        lastSaved = null;
+        lastDeleted = { id: id };
+        showToast('Match deleted', null, !!resp.undoable);
         afterWrite(false);
       })
-      .withFailureHandler(err => alert(failText(err)))
+      .withFailureHandler(err => showError(failText(err)))
       .deleteMatch(token, id);
   }
 
@@ -2100,12 +2233,12 @@
   function setActive(row, active) {
     gs()
       .withSuccessHandler(resp => {
-        if (resp && resp.ok === false) { alert(resp.error); return; }
+        if (resp && resp.ok === false) { showError(resp.error); return; }
         closeSheet();
         loadAdmin();
         loadAdminCatalogAndMembers();
       })
-      .withFailureHandler(err => { alert(failText(err)); loadAdmin(); })[active ? 'reactivateMember' : 'deactivateMember'](token, row);
+      .withFailureHandler(err => { showError(failText(err)); loadAdmin(); })[active ? 'reactivateMember' : 'deactivateMember'](token, row);
   }
 
   /**
@@ -2134,7 +2267,7 @@
         <option value="admin"${roleNow === 'admin' ? ' selected' : ''}>Admin — catalogs and members</option>
       </select>
       ${self ? '<p class="sheet-sub" style="margin-top:-8px">You can’t change your own role — ask another admin.</p>' : ''}
-      <p class="error" id="mError"></p>
+      <p class="error" role="alert" id="mError"></p>
       ${self ? '' : `<button type="button" class="sheet-action danger" id="mDeactivate" style="margin-top:8px">Deactivate ${esc(member.name)}…</button>`}`,
       '<button type="button" class="primary" id="mSave">Save changes</button>');
     if (member.lockedMinutes) el('mUnlock').onclick = () => {
@@ -2148,8 +2281,8 @@
         })
         .unlockMember(token, member.row);
     };
-    if (!self) el('mDeactivate').onclick = () => {
-      if (!confirm(`Deactivate ${member.name}? They won't be able to log in. Their matches stay.`)) return;
+    if (!self) el('mDeactivate').onclick = async () => {
+      if (!(await askConfirm(`Deactivate ${member.name}?`, `${member.name} won't be able to log in. Their matches stay, and you can reactivate them later.`, 'Deactivate'))) return;
       setActive(member.row, false);
     };
     el('mSave').onclick = () => {
@@ -2186,7 +2319,7 @@
       <input id="newMemberName" autocomplete="off">
       <label for="newMemberPin">4-digit PIN</label>
       <input id="newMemberPin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password">
-      <p class="error" id="newMemberError"></p>`,
+      <p class="error" role="alert" id="newMemberError"></p>`,
       '<button type="button" class="primary" id="btnCreateMember">Add member</button>');
     el('btnCreateMember').onclick = () => {
       const name = el('newMemberName').value.trim();
@@ -2672,8 +2805,8 @@
           <button type="button" class="primary btn-apply-repair" style="margin-top:12px;">
             Apply these ${pv.total} fix(es)
           </button>`;
-        el('repairPreview').querySelector('.btn-apply-repair').onclick = () => {
-          if (!confirm(`Update ${pv.total} cell(s) to match the catalog spelling? A backup copy of the sheet will be made first.`)) return;
+        el('repairPreview').querySelector('.btn-apply-repair').onclick = async () => {
+          if (!(await askConfirm('Fix spelling in saved matches?', `${pv.total} cell(s) in Matches will change to the catalog spelling. A backup copy of the sheet is made first.`, `Update ${pv.total}`))) return;
           applyRepair();
         };
       })
@@ -2826,7 +2959,7 @@
         gs()
           .withSuccessHandler(resp => {
             if (!resp.ok) {
-              alert(resp.error);
+              showError(resp.error);
               return;
             }
             originalName = newName;
@@ -2837,22 +2970,22 @@
               loadTeamDashboard();
             }
           })
-          .withFailureHandler(err => alert(failText(err)))
+          .withFailureHandler(err => showError(failText(err)))
           .updateDeck(token, originalName, newName, anime, color, type);
       };
       row.querySelector('.de-name').onchange = save;
       row.querySelector('.de-anime').onchange = save;
       row.querySelector('.de-color').onchange = save;
       row.querySelector('.de-type').onchange = save;
-      row.querySelector('.de-remove').onclick = () => {
-        if (!confirm(`Remove "${originalName}" from the catalog? This only works if no match uses it yet.`)) return;
+      row.querySelector('.de-remove').onclick = async () => {
+        if (!(await askConfirm(`Remove “${originalName}”?`, 'It leaves the catalog. This only works if no match uses it yet.', 'Remove'))) return;
         gs()
           .withSuccessHandler(resp => {
-            if (!resp.ok) { alert(resp.error); return; }
+            if (!resp.ok) { showError(resp.error); return; }
             loadAdminCatalogAndMembers();
             loadDeckMaintenance();
           })
-          .withFailureHandler(err => alert(failText(err)))
+          .withFailureHandler(err => showError(failText(err)))
           .removeDeck(token, originalName);
       };
     }
@@ -2907,9 +3040,9 @@
         </div>
       `;
       names.forEach(n => {
-        div.querySelector(`[data-keep="${n}"]`).onclick = () => {
+        div.querySelector(`[data-keep="${n}"]`).onclick = async () => {
           const others = names.filter(x => x !== n);
-          if (!confirm(`Merge ${others.join(', ')} into "${n}"? This cannot be undone (a backup copy of the sheet will be made first).`)) return;
+          if (!(await askConfirm(`Merge into “${n}”?`, `Every match that says ${others.map(o => '“' + o + '”').join(', ')} will say “${n}”, and ${others.length === 1 ? 'that entry leaves' : 'those entries leave'} the catalog. This can’t be undone; a backup copy of the sheet is made first.`, 'Merge'))) return;
           onMerge(n, others);
         };
       });
@@ -2934,14 +3067,14 @@
     }
     gs()
       .withSuccessHandler(resp => {
-        if (!resp.ok) { alert(resp.error); return; }
+        if (!resp.ok) { showError(resp.error); return; }
         mergeSequence(keepName, namesToMerge, index + 1);
       })
-      .withFailureHandler(err => alert(failText(err)))
+      .withFailureHandler(err => showError(failText(err)))
       .mergeDecks(token, keepName, namesToMerge[index]);
   }
 
-  el('btnMerge').onclick = () => {
+  el('btnMerge').onclick = async () => {
     const mergeFrom = el('mergeFrom').value;
     const mergeInto = el('mergeInto').value;
     el('mergeError').style.display = 'none';
@@ -2952,7 +3085,7 @@
       el('mergeError').style.display = 'block';
       return;
     }
-    if (!confirm(`Merge "${mergeFrom}" into "${mergeInto}"? This cannot be undone (a backup copy of the sheet will be made first).`)) return;
+    if (!(await askConfirm(`Merge into “${mergeInto}”?`, `Every match that says “${mergeFrom}” will say “${mergeInto}”, and “${mergeFrom}” leaves the catalog. This can’t be undone; a backup copy of the sheet is made first.`, 'Merge'))) return;
 
     el('btnMerge').disabled = true;
     gs()
@@ -3022,7 +3155,7 @@
         const newName = row.querySelector('.de-name').value.trim();
         gs()
           .withSuccessHandler(resp => {
-            if (!resp.ok) { alert(resp.error); return; }
+            if (!resp.ok) { showError(resp.error); return; }
             originalName = newName;
             if (resp.renamed) {
               loadAdminCatalogAndMembers();
@@ -3031,18 +3164,18 @@
               loadTeamDashboard();
             }
           })
-          .withFailureHandler(err => alert(failText(err)))
+          .withFailureHandler(err => showError(failText(err)))
           .updateRivalName(token, originalName, newName);
       };
-      row.querySelector('.de-remove').onclick = () => {
-        if (!confirm(`Remove "${originalName}" from the catalog? This only works if no match uses it yet.`)) return;
+      row.querySelector('.de-remove').onclick = async () => {
+        if (!(await askConfirm(`Remove “${originalName}”?`, 'It leaves the catalog. This only works if no match uses it yet.', 'Remove'))) return;
         gs()
           .withSuccessHandler(resp => {
-            if (!resp.ok) { alert(resp.error); return; }
+            if (!resp.ok) { showError(resp.error); return; }
             loadAdminCatalogAndMembers();
             loadRivalMaintenance();
           })
-          .withFailureHandler(err => alert(failText(err)))
+          .withFailureHandler(err => showError(failText(err)))
           .removeRivalName(token, originalName);
       };
     }
@@ -3080,14 +3213,14 @@
     }
     gs()
       .withSuccessHandler(resp => {
-        if (!resp.ok) { alert(resp.error); return; }
+        if (!resp.ok) { showError(resp.error); return; }
         mergeRivalSequence(keepName, namesToMerge, index + 1);
       })
-      .withFailureHandler(err => alert(failText(err)))
+      .withFailureHandler(err => showError(failText(err)))
       .mergeRivalNames(token, keepName, namesToMerge[index]);
   }
 
-  el('btnMergeRival').onclick = () => {
+  el('btnMergeRival').onclick = async () => {
     const mergeFrom = el('rivalMergeFrom').value;
     const mergeInto = el('rivalMergeInto').value;
     el('rivalMergeError').style.display = 'none';
@@ -3098,7 +3231,7 @@
       el('rivalMergeError').style.display = 'block';
       return;
     }
-    if (!confirm(`Merge "${mergeFrom}" into "${mergeInto}"? This cannot be undone (a backup copy of the sheet will be made first).`)) return;
+    if (!(await askConfirm(`Merge into “${mergeInto}”?`, `Every match that says “${mergeFrom}” will say “${mergeInto}”, and “${mergeFrom}” leaves the catalog. This can’t be undone; a backup copy of the sheet is made first.`, 'Merge'))) return;
 
     el('btnMergeRival').disabled = true;
     gs()
