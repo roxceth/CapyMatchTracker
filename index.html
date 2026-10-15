@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 9999976. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 577d21c. No editar aquí: los cambios se hacen en el repo privado. -->
 <html>
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.18","commit":"9999976"};</script>
+  <script>window.UAT_BUILD = {"version":"2.18","commit":"577d21c"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -579,6 +579,8 @@
     .toast.err .grow { color: #ffd2d7; }
     .toast .toast-close { min-width: 44px; min-height: 44px; padding: 0; color: var(--text-sec); font-size: 16px; }
     .assist-row.add { color: var(--gold); font-weight: 600; }
+    .deck-card.loading { cursor: default; border-style: dashed; border-color: var(--border-strong); background: none; }
+    .deck-card.loading .nm { color: var(--text-sec); font-weight: 500; }
     .confirm-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(8,7,12,0.66); display: flex; align-items: center; justify-content: center; padding: 16px; }
     .confirm-box { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 20px; }
     .confirm-box h3 { margin: 0 0 8px; font-family: 'Rajdhani', 'Inter', sans-serif; font-size: 20px; letter-spacing: .02em; }
@@ -1193,6 +1195,7 @@
     token = null; role = null; myName = null; currentView = null;
     historyOffset = 0; teamHistoryOffset = 0;
     catalog = []; colorMap = {}; rivalCatalog = []; activeMembers = [];
+    catalogState = 'loading'; rivalsReady = false;
     personalDeckStats = []; personalRivalStats = { byRival: [], bestRival: null, worstRival: null };
     personalStatsView = 'deck'; personalBrickStats = null;
     teamDashboardData = null; teamStatsView = 'deck';
@@ -1308,7 +1311,9 @@
   // ================= Loading data =================
 
   function applyCatalog(list) {
+    list = list.map(d => Object.assign({}, d, { name: String(d.name) }));
     catalog = list;
+    catalogState = 'ready';
     colorMap = {};
     list.forEach(m => { colorMap[m.name] = m.color; });
     paintForm();
@@ -1358,35 +1363,46 @@
     gs()
       .withSuccessHandler(data => {
         if (!current()) return;
-        if (data.catalog) catalog = data.catalog;
-        if (data.rivalNames) rivalCatalog = data.rivalNames;
+        if (data.catalog) { catalog = data.catalog.map(d => Object.assign({}, d, { name: String(d.name) })); catalogState = 'ready'; }
+        if (data.rivalNames) { rivalCatalog = data.rivalNames.map(String); rivalsReady = true; }
         if (data.catalog) { colorMap = {}; catalog.forEach(m => { colorMap[m.name] = m.color; }); }
         recent = data.recent || emptyRecent();
         // Own-deck filter: only decks this member has actually played, so no
         // option ever leads to an empty history.
-        fillSelect(el('historyFilter'), 'All my decks', Object.keys(recent.deckCounts).sort((a, b) => a.localeCompare(b)));
+        fillSelect(el('historyFilter'), 'All my decks', Object.keys(recent.deckCounts).sort(byText));
         paintFacedRivalDecks('historyRivalFilter', data.facedRivalDecks);
         // Rival filter: everyone this member has a match against.
-        fillSelect(el('historyNameFilter'), 'Any rival', (data.rival.byRival || []).map(r => r.rival).sort((a, b) => a.localeCompare(b)));
+        fillSelect(el('historyNameFilter'), 'Any rival', (data.rival.byRival || []).map(r => r.rival).sort(byText));
         applyPersonalStats(data.byDeck, data.rival);
         paintHistoryPage(data.history);
         paintForm();
       })
       .withFailureHandler(err => {
+        if (!current()) return;
         el('personalStats').innerHTML = `<p class="empty">Couldn't load your stats: ${esc(err.message)}</p>`;
         el('personalStatsList').innerHTML = '';
         el('historyList').innerHTML = '';
+        if (catalogState !== 'ready') { catalogState = 'error'; paintForm(); }
       })
       .getMemberScreen(token, deckFilter, rivalFilter, !opts.skipCatalog, el('historyNameFilter').value || 'All');
+  }
+
+  /** Retry after a failed first load (the "Retry" in the deck picker). */
+  function reloadCatalog() {
+    if (isManager()) loadAdminCatalogAndMembers();
+    else loadCatalogAndForm();
   }
 
   /** Managers: the deck catalog, the member list and the rival names. */
   function loadAdminCatalogAndMembers() {
     gs().withSuccessHandler(list => {
       applyCatalog(list);
-      fillSelect(el('teamDeckFilter'), 'All decks', list.map(d => d.name).sort((a, b) => a.localeCompare(b)));
+      list = catalog;
+      fillSelect(el('teamDeckFilter'), 'All decks', list.map(d => d.name).sort(byText));
       populateMergeSelects(list);
       loadDeckEditList(list);
+    }).withFailureHandler(() => {
+      if (catalogState !== 'ready') { catalogState = 'error'; paintForm(); }
     }).getDeckCatalog(token);
 
     gs().withSuccessHandler(names => {
@@ -1399,7 +1415,9 @@
     }).getActiveMemberNames(token);
 
     gs().withSuccessHandler(names => {
+      names = names.map(String);
       rivalCatalog = names;
+      rivalsReady = true;
       populateRivalMergeSelects(names);
       loadRivalEditList(names);
       paintForm();
@@ -1443,14 +1461,27 @@
   // ================= Log form =================
 
   const forSelf = () => (form.player || myName) === myName;
-  const deckNames = () => catalog.map(d => d.name);
+  // String(): a name the sheet stored as a number must never break the lists.
+  const deckNames = () => catalog.map(d => String(d.name));
+  /** Alphabetical order that never throws, whatever the sheet stored. */
+  const byText = (a, b) => String(a).localeCompare(String(b));
+
+  // Is the deck catalog here yet? Until it is, the picker says "Loading…"
+  // instead of "+ Add your first deck" - on GitHub Pages the first load takes
+  // a second or two, and tapping that button opened "New deck" (v2.18.1).
+  let catalogState = 'loading';   // 'loading' | 'ready' | 'error'
+  let rivalsReady = false;        // rival NAMES list loaded
 
   /** Deck to preselect: the player's most recent one still in the catalog. */
+  // form.deckAuto: the deck was picked here, not by the person. Then it is
+  // picked again when the player's recent decks arrive - the catalog can come
+  // first (managers), which used to leave "the first deck A-Z" selected.
   function ensureDeck() {
     const names = deckNames();
-    if (form.deck && (names.indexOf(form.deck) !== -1 || form.editing)) return;
+    if (form.deck && !form.deckAuto && (names.indexOf(form.deck) !== -1 || form.editing)) return;
     form.deck = recent.decks.find(d => names.indexOf(d) !== -1)
-      || names.slice().sort((a, b) => a.localeCompare(b))[0] || '';
+      || names.slice().sort(byText)[0] || '';
+    form.deckAuto = true;
   }
 
   function deckCountText(name) {
@@ -1463,6 +1494,15 @@
     el('formDeck').value = form.deck;
     const box = el('deckPicker');
     const names = deckNames();
+    if (!names.length && catalogState === 'loading') {
+      box.innerHTML = '<div class="deck-card loading" aria-busy="true"><span class="txt"><span class="nm">Loading your decks…</span></span></div>';
+      return;
+    }
+    if (!names.length && catalogState === 'error') {
+      box.innerHTML = '<div class="assist-note warn"><span class="grow">Couldn’t load the decks.</span><button type="button" class="primary" data-act="retry">Retry</button></div>';
+      box.querySelector('[data-act="retry"]').onclick = () => { catalogState = 'loading'; paintDeckPicker(); reloadCatalog(); };
+      return;
+    }
     if (!names.length) {
       box.innerHTML = '<div class="chips"><button type="button" class="chip add" data-act="add">+ Add your first deck</button></div>';
     } else if (names.length <= 3) {
@@ -1489,6 +1529,7 @@
 
   function setDeck(name) {
     form.deck = name;
+    form.deckAuto = false;
     paintDeckPicker();
     updateSaveState();
   }
@@ -1534,6 +1575,11 @@
     el('rivalRecent').querySelectorAll('[data-rival]').forEach(b => { b.onclick = () => { input.value = b.dataset.rival; paintRivalAssist(); updateSaveState(); }; });
 
     if (!t || (la && la.kind === 'same')) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    if (catalogState !== 'ready') {
+      box.innerHTML = '<div class="assist-note"><span class="grow">Loading the deck list…</span></div>';
+      box.classList.remove('hidden');
+      return;
+    }
     const lower = t.toLowerCase();
     const hits = names.filter(n => n.toLowerCase().indexOf(lower) !== -1).slice(0, 5);
     let html = hits.map(n => `<button type="button" class="assist-row" data-pick="${esc(n)}"><span>${dot(n)} ${esc(n)}</span><span class="meta">in catalog</span></button>`).join('');
@@ -1562,7 +1608,9 @@
       ? '<span class="chips-label">Recent:</span>' + chipsHtml(rec, la ? la.name : '', 'data-name') : '';
     el('nameRecent').querySelectorAll('[data-name]').forEach(b => { b.onclick = () => { input.value = b.dataset.name; paintNameAssist(); updateSaveState(); }; });
     let html = '';
-    if (t && !(la && la.kind === 'same')) {
+    if (t && !(la && la.kind === 'same') && !rivalsReady) {
+      html = '<div class="assist-note"><span class="grow">Loading the rivals list…</span></div>';
+    } else if (t && !(la && la.kind === 'same')) {
       const lower = t.toLowerCase();
       const hits = rivalCatalog.filter(n => String(n).toLowerCase().indexOf(lower) !== -1).slice(0, 5);
       html = hits.map(n => `<button type="button" class="assist-row" data-pick="${esc(n)}"><span>${esc(n)}</span><span class="meta">in rivals list</span></button>`).join('');
@@ -1806,7 +1854,7 @@
         const playerChanged = (form.player || myName) !== saved.prev.player;
         el('formRival').value = saved.prev.rival;
         el('formRivalName').value = saved.prev.rivalName;
-        Object.assign(form, { player: saved.prev.player, deck: saved.prev.deck, result: saved.prev.result, turn: saved.prev.turn,
+        Object.assign(form, { player: saved.prev.player, deck: saved.prev.deck, deckAuto: false, result: saved.prev.result, turn: saved.prev.turn,
           ownBrick: saved.prev.ownBrick, rivalBrick: saved.prev.rivalBrick, more: !!(saved.prev.turn || saved.prev.ownBrick || saved.prev.rivalBrick),
           addRival: saved.prev.rival, addName: saved.prev.rivalName });
         paintForm();
@@ -1905,7 +1953,7 @@
         const rec = recent.decks.filter(d => names.indexOf(d) !== -1).slice(0, 3);
         if (rec.length && names.length > 5) html += '<div class="sheet-sec">Recent</div>' + rec.map(row).join('');
       }
-      const all = names.filter(n => !q || n.toLowerCase().indexOf(q) !== -1).sort((a, b) => a.localeCompare(b));
+      const all = names.filter(n => !q || n.toLowerCase().indexOf(q) !== -1).sort(byText);
       html += `<div class="sheet-sec">${q ? 'Results' : 'All decks (' + names.length + ')'}</div>` + all.map(row).join('');
       if (!all.length) {
         const raw = el('deckSheetSearch').value.trim();
@@ -2003,6 +2051,7 @@
     form.editing = m;
     form.player = m.player;
     form.deck = m.ownDeck;
+    form.deckAuto = false;
     form.result = m.result;
     form.turn = m.turn || '';
     // A match logged before brick tracking has null marks: both start
@@ -2655,7 +2704,7 @@
     gs().withSuccessHandler(data => {
       if (!current()) return;
       teamDashboardData = data;
-      fillSelect(el('teamNameFilter'), 'Any rival', (data.byRival || []).map(r => r.rival).sort((a, b) => a.localeCompare(b)));
+      fillSelect(el('teamNameFilter'), 'Any rival', (data.byRival || []).map(r => r.rival).sort(byText));
 
       const bestRival = data.bestRival;
       const worstRival = data.worstRival;
