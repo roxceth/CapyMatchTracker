@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 577d21c. No editar aquí: los cambios se hacen en el repo privado. -->
-<html>
+<!-- GENERADO por tools/build.mjs desde Index.html @ e7c2c8d. No editar aquí: los cambios se hacen en el repo privado. -->
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Union Arena Tracker</title>
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.18","commit":"577d21c"};</script>
+  <script>window.UAT_BUILD = {"version":"2.19","commit":"e7c2c8d"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -33,6 +33,8 @@
       --text-muted: #8f8a9c;
       --gold: #e4b73f;
       --red: #e6485a;
+      --red-text: #ff8b97;      /* red for TEXT on dark: 7:1 (the fill red is 4.2:1) */
+      --field-border: #7c7591;  /* input outlines: 3.7:1 against the field (was 1.6:1) */
       --green: #35c780;
       --stripe: linear-gradient(90deg, #e6485a, #f4a300, #35c780, #35a7e6, #9b5de5);
     }
@@ -87,10 +89,16 @@
 
     select, input {
       width: 100%; padding: 10px 12px; margin-bottom: 14px;
-      border: 1px solid var(--border-strong); border-radius: 8px; font-size: 14px;
+      border: 1px solid var(--field-border); border-radius: 8px; font-size: 14px;
       background: var(--surface-2); color: var(--text); font-family: inherit;
     }
     select:focus, input:focus { outline: none; border-color: var(--gold); }
+    select:focus-visible, input:focus-visible { box-shadow: 0 0 0 2px rgba(228,183,63,0.35); }
+    /* Keyboard focus, one look everywhere (v2.19). Mouse/touch taps don't show it. */
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    input:focus-visible, select:focus-visible { outline: none; }
+    ::selection { background: rgba(228,183,63,0.35); color: var(--text); }
+    html { accent-color: var(--gold); caret-color: var(--gold); }
     input::placeholder { color: var(--text-muted); }
 
     button {
@@ -103,7 +111,7 @@
     button.primary:hover { background: #edc25a; }
     button.half { width: 48%; display: inline-block; }
     button.active-yes { border-color: var(--green); color: var(--green); }
-    button.active-no { border-color: var(--red); color: var(--red); }
+    button.active-no { border-color: var(--red); color: var(--red-text); }
     button.small { width: auto; padding: 8px 10px; min-height: 34px; font-size: 12px; }
     button.icon { width: 38px; min-height: 38px; padding: 6px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; }
 
@@ -123,7 +131,7 @@
     }
     .inline-form .button-row { display: flex; gap: 8px; margin-top: 4px; }
 
-    .error { color: var(--red); font-size: 12.5px; margin: -6px 0 12px; display: none; }
+    .error { color: var(--red-text); font-size: 12.5px; margin: -6px 0 12px; display: none; }
     .hint { color: var(--green); font-size: 12.5px; margin: -6px 0 12px; display: none; }
     .hidden { display: none !important; }
 
@@ -148,7 +156,7 @@
     .deck-header .deck-name { display: flex; align-items: center; gap: 7px; }
     .matchup-line { display: flex; justify-content: space-between; font-size: 11.5px; margin-top: 8px; gap: 8px; }
     .matchup-line .best { color: var(--green); }
-    .matchup-line .worst { color: var(--red); }
+    .matchup-line .worst { color: var(--red-text); }
     .matchup-line .label { color: var(--text-muted); }
     .matchup-none { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
     .turn-line { color: var(--text-sec); margin-top: 4px; }
@@ -162,7 +170,7 @@
     .hist-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
     .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
     .badge-win { background: rgba(53,199,128,0.15); color: var(--green); }
-    .badge-loss { background: rgba(230,72,90,0.15); color: var(--red); }
+    .badge-loss { background: rgba(230,72,90,0.15); color: var(--red-text); }
     .badge-turn { background: var(--surface-2); color: var(--text-sec); border: 1px solid var(--border-strong); }
     .hist-actions { display: flex; gap: 6px; }
     .hist-edit { margin-top: 10px; padding: 12px; background: var(--surface-2); border-radius: 8px; border: 1px solid var(--border-strong); }
@@ -219,7 +227,7 @@
     }
     .brick-split .v { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; }
     .brick-split .v.good { color: var(--green); }
-    .brick-split .v.bad { color: var(--red); }
+    .brick-split .v.bad { color: var(--red-text); }
     .brick-split .v.na { font-size: 12px; color: var(--text-muted); font-family: inherit; font-weight: 500; }
     .brick-split .k { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-top: 2px; }
     .brick-note { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
@@ -255,7 +263,7 @@
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       font-size: 12.5px; padding: 7px 0; border-top: 1px solid var(--border);
     }
-    .repair-from { color: var(--red); }
+    .repair-from { color: var(--red-text); }
     .repair-arrow { color: var(--text-muted); }
     .repair-to { color: var(--green); }
     .repair-count { color: var(--text-muted); font-size: 11px; margin-left: auto; }
@@ -327,7 +335,7 @@
     .stat-foot { font-size: 12px; color: var(--text-sec); text-align: center; margin: -6px 0 14px; }
     .pips { display: flex; gap: 3px; justify-content: center; margin: 5px 0 2px; flex-wrap: wrap; }
     .pips .sq { width: 9px; height: 9px; border-radius: 2px; }
-    .pips .sq.w { background: var(--green); } .pips .sq.l { background: var(--red); }
+    .pips .sq.w { background: var(--green); } .pips .sq.l { background: none; box-shadow: inset 0 0 0 2px var(--red); }
     .deck-header .wr { white-space: nowrap; }
     .deck-header .cnt { color: var(--text-sec); font-weight: 400; }
     .deck-row.few .bar-fill { background: #6f6a7a; }
@@ -419,9 +427,17 @@
     .log-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     .log-head h2 { margin: 0; }
     .today { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-sec); }
-    .today b { color: var(--text); font-weight: 600; }
+    .today b { color: var(--text); font-weight: 600; display: inline-block; }
+    .pips-inline { display: inline-flex; align-items: center; gap: 5px; }
+    /* Save lands: the record pops and the new pip drops in (v2.19). */
+    .today.bump b { animation: todayBump .55s cubic-bezier(.16, 1, .3, 1); }
+    .today .pip.new { animation: pipIn .5s cubic-bezier(.16, 1, .3, 1); }
+    @keyframes todayBump { 0% { transform: scale(1.4); color: var(--gold); } 100% { transform: scale(1); } }
+    @keyframes pipIn { 0% { transform: scale(2.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .today.bump b, .today .pip.new { animation: none; } }
     .today .pip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .pip.w { background: var(--green); } .pip.l { background: var(--red); }
+    /* A loss is a ring and a win a dot: readable without telling red from green (v2.19). */
+    .pip.w { background: var(--green); } .pip.l { background: none; box-shadow: inset 0 0 0 2px var(--red); }
     .field { margin-bottom: 16px; }
     .field > label, .field-label {
       font-size: 11.5px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-sec);
@@ -902,7 +918,7 @@
     <span class="pip" id="toastPip"></span>
     <span class="grow" id="toastText"></span>
     <button type="button" id="btnUndo">Undo</button>
-    <button type="button" id="btnToastClose" class="toast-close hidden" aria-label="Dismiss">✕</button>
+    <button type="button" id="btnToastClose" class="toast-close hidden" aria-label="Dismiss"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
 
   <!-- In-app confirmation for destructive admin actions (v2.18): replaces the
@@ -919,7 +935,7 @@
   </div>
 
   <div id="sheet" class="sheet-backdrop hidden">
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1">
       <div class="sheet-grip"></div>
       <div class="sheet-head">
         <button type="button" id="sheetBack" class="hidden" aria-label="Back">&#8249; Back</button>
@@ -970,7 +986,9 @@
   const form = { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false,
     // Text the person explicitly chose to add as a NEW catalog entry (v2.18).
     // Anything else not in the catalog has to be picked from the list first.
-    addRival: '', addName: '' };
+    addRival: '', addName: '',
+    // false right after a save: "Still needed…" waits until the next match is started.
+    touched: true };
   let lastSaved = null;     // { id, prev } - what Undo needs
   let toastTimer = null;
 
@@ -1200,7 +1218,7 @@
     personalStatsView = 'deck'; personalBrickStats = null;
     teamDashboardData = null; teamStatsView = 'deck';
     recent = emptyRecent();
-    Object.assign(form, { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false, addRival: '', addName: '' });
+    Object.assign(form, { deck: '', result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, player: '', saving: false, addRival: '', addName: '', touched: true });
     lastSaved = null; lastDeleted = null; closeConfirm(false);
     hideToast(); closeSheet(); closeAccountMenu();
     el('formRival').value = ''; el('formRivalName').value = '';
@@ -1220,6 +1238,15 @@
     loadLoginNames();
   }
 
+  // ================= Segmented toggles (By deck / By rival / Bricks…) =================
+  // The active one was shown only by its gold fill. aria-pressed now follows
+  // the .active class wherever the code changes it (v2.19).
+  document.querySelectorAll('.toggle-btn').forEach(b => {
+    const sync = () => b.setAttribute('aria-pressed', String(b.classList.contains('active')));
+    sync();
+    new MutationObserver(sync).observe(b, { attributes: true, attributeFilter: ['class'] });
+  });
+
   // ================= Account menu =================
   function closeAccountMenu() {
     el('accountMenu').classList.add('hidden');
@@ -1233,6 +1260,9 @@
   };
   document.addEventListener('click', e => {
     if (!el('accountMenu').classList.contains('hidden') && !el('accountMenu').contains(e.target)) closeAccountMenu();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !el('accountMenu').classList.contains('hidden')) { closeAccountMenu(); el('btnAccount').focus(); }
   });
 
   el('btnRefresh').onclick = () => {
@@ -1626,6 +1656,9 @@
     box.querySelectorAll('[data-pick]').forEach(b => { b.onclick = () => { input.value = b.dataset.pick; paintNameAssist(); updateSaveState(); }; });
     box.querySelectorAll('[data-add]').forEach(b => { b.onclick = () => { form.addName = t; paintNameAssist(); updateSaveState(); }; });
   }
+  // "Still needed…" only once the person starts on the next match, not the
+  // instant a save lands (v2.19). Any tap or typing in the Log view counts.
+  ['click', 'input'].forEach(t => el('viewLog').addEventListener(t, () => { form.touched = true; }, true));
   el('formRival').addEventListener('input', () => { paintRivalAssist(); updateSaveState(); });
   el('formRivalName').addEventListener('input', () => { paintNameAssist(); updateSaveState(); });
 
@@ -1638,6 +1671,13 @@
   }
   el('btnWin').onclick = () => setResult('Win');
   el('btnLoss').onclick = () => setResult('Loss');
+  ['btnWin', 'btnLoss'].forEach(id => el(id).addEventListener('keydown', e => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+    e.preventDefault();
+    const next = id === 'btnWin' ? 'Loss' : 'Win';
+    setResult(next);
+    el(next === 'Win' ? 'btnWin' : 'btnLoss').focus();
+  }));
 
   /** Paints a brick chip's ticked/unticked state. */
   function paintCheckChip(id, on) {
@@ -1648,6 +1688,9 @@
   function paintToggles() {
     el('btnWin').setAttribute('aria-checked', String(form.result === 'Win'));
     el('btnLoss').setAttribute('aria-checked', String(form.result === 'Loss'));
+    // One Tab stop for the pair (radio pattern): the chosen one, or Win.
+    el('btnWin').tabIndex = form.result === 'Loss' ? -1 : 0;
+    el('btnLoss').tabIndex = form.result === 'Loss' ? 0 : -1;
     ['First', 'Second'].forEach(v => {
       const b = el(v === 'First' ? 'btnFirst' : 'btnSecond');
       b.classList.toggle('on', form.turn === v);
@@ -1698,16 +1741,18 @@
       const who = forSelf() ? '' : `${form.player}: `;
       sum.textContent = `${who}${form.result} with ${form.deck} vs ${la && la.kind === 'same' ? la.name : rival}${name ? ' (' + name + ')' : ''}`;
     } else {
-      sum.textContent = 'Still needed: ' + missing.join(' and ');
+      sum.textContent = form.touched ? 'Still needed: ' + missing.join(' and ') : '';
     }
   }
 
-  function paintToday() {
+  function paintToday(opts) {
     const t = recent.today || [];
     if (!t.length || form.editing) { el('todayStrip').innerHTML = ''; return; }
     const w = t.filter(r => r === 'W').length;
     el('todayStrip').innerHTML = `Today <b>${w}–${t.length - w}</b>` +
-      t.slice(-8).map(r => `<span class="pip ${r === 'W' ? 'w' : 'l'}"></span>`).join('');
+      `<span class="pips-inline" role="img" aria-label="Today: ${t.slice(-8).join(' ')}">` +
+      t.slice(-8).map((r, i, a) => `<span class="pip ${r === 'W' ? 'w' : 'l'}${opts && opts.bump && i === a.length - 1 ? ' new' : ''}"></span>`).join('') + '</span>';
+    el('todayStrip').classList.toggle('bump', !!(opts && opts.bump));
   }
 
   /** Repaints the whole Log form from `form` + `recent`. */
@@ -1732,7 +1777,7 @@
   function resetForm() {
     el('formRival').value = '';
     el('formRivalName').value = '';
-    Object.assign(form, { result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, saving: false, addRival: '', addName: '' });
+    Object.assign(form, { result: '', turn: '', ownBrick: false, rivalBrick: false, more: false, editing: null, saving: false, addRival: '', addName: '', touched: false });
     el('formError').style.display = 'none';
   }
 
@@ -1775,7 +1820,14 @@
         lastSaved = { id: resp.id, prev: prev };
         lastDeleted = null;
         resetForm();
+        // The save lands where the eye is: back to the top, and today's record
+        // ticks up right away (the server's numbers follow a second later).
+        const savedFor = prev.player;
+        if (savedFor === (form.player || myName)) recent.today = (recent.today || []).concat(prev.result === 'Win' ? 'W' : 'L');
         paintForm();
+        paintToday({ bump: true });
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
         showToast(`Saved: ${prev.result === 'Win' ? 'win' : 'loss'} vs ${rival}`, prev.result, true);
         afterWrite(resp.catalogChanged, form.player || myName);
       })
@@ -1856,7 +1908,7 @@
         el('formRivalName').value = saved.prev.rivalName;
         Object.assign(form, { player: saved.prev.player, deck: saved.prev.deck, deckAuto: false, result: saved.prev.result, turn: saved.prev.turn,
           ownBrick: saved.prev.ownBrick, rivalBrick: saved.prev.rivalBrick, more: !!(saved.prev.turn || saved.prev.ownBrick || saved.prev.rivalBrick),
-          addRival: saved.prev.rival, addName: saved.prev.rivalName });
+          addRival: saved.prev.rival, addName: saved.prev.rivalName, touched: true });
         paintForm();
         if (playerChanged) loadLogContext();
         showView('log');
@@ -1917,21 +1969,50 @@
   });
 
   // ================= Sheet (bottom sheet on phones, dialog on desktop) =================
-  let sheetOnBack = null;
+  let sheetOnBack = null, sheetReturnFocus = null;
+  // While a sheet is open the page behind it is inert (not focusable, not read
+  // out), focus moves into the sheet, Tab stays inside it, and closing puts
+  // focus back on the button that opened it (v2.19). Focus goes to the sheet
+  // itself, not its first field, so phones don't pop the keyboard open.
+  const SHEET_BACKGROUND = ['appMain', 'appNav'];
+  function setBackgroundInert(on) {
+    SHEET_BACKGROUND.forEach(id => { const n = el(id); if (n) n.inert = on; });
+    const bar = document.querySelector('#app > .appbar'); if (bar) bar.inert = on;
+  }
   function openSheet(title, bodyHtml, footHtml, onBack) {
+    const wasOpen = !el('sheet').classList.contains('hidden');
+    if (!wasOpen) sheetReturnFocus = document.activeElement;
     el('sheetTitle').textContent = title;
     el('sheetBody').innerHTML = bodyHtml;
     el('sheetFoot').innerHTML = footHtml || '';
     sheetOnBack = onBack || null;
     el('sheetBack').classList.toggle('hidden', !onBack);
     el('sheet').classList.remove('hidden');
+    setBackgroundInert(true);
+    document.querySelector('#sheet .sheet').focus({ preventScroll: true });
   }
   function closeSheet() {
+    const wasOpen = !el('sheet').classList.contains('hidden');
     el('sheet').classList.add('hidden');
     el('sheetBody').innerHTML = '';
     el('sheetFoot').innerHTML = '';
     sheetOnBack = null;
+    setBackgroundInert(false);
+    if (wasOpen && sheetReturnFocus && document.contains(sheetReturnFocus) && !sheetReturnFocus.closest('#sheet')) {
+      try { sheetReturnFocus.focus({ preventScroll: true }); } catch (e) {}
+    }
+    sheetReturnFocus = null;
   }
+  el('sheet').addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const box = document.querySelector('#sheet .sheet');
+    const items = [...box.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')]
+      .filter(n => !n.disabled && n.offsetParent !== null);
+    if (!items.length) { e.preventDefault(); return; }
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === box)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   el('sheetClose').onclick = closeSheet;
   el('sheetBack').onclick = () => { if (sheetOnBack) sheetOnBack(); };
   el('sheet').addEventListener('click', e => { if (e.target === el('sheet')) closeSheet(); });
@@ -2545,7 +2626,7 @@
     html += brick.byDeck.map(d => `
       <div class="deck-row">
         <div class="brick-head">
-          <span class="deck-name">${dot(d.deck)}${d.deck}</span>
+          <span class="deck-name">${dot(d.deck)}${esc(d.deck)}</span>
           <span><span class="pct">${d.brickRate}%</span>
             <span class="pct-label">brick rate (${d.bricks}/${d.marked})</span></span>
         </div>
@@ -2559,7 +2640,7 @@
       html += '<div class="section-label">Brick rate by member</div>';
       html += brick.byMember.map(m => `
         <div class="member-summary-row">
-          <span>${m.player}</span>
+          <span>${esc(m.player)}</span>
           <strong>${m.brickRate}% (${m.bricks}/${m.marked})</strong>
         </div>
       `).join('');
@@ -2641,12 +2722,12 @@
       <div class="stat-row">
         <div class="stat-card"><div class="stat-value">${overall}%</div><div class="stat-sub">${wins} W · ${matches - wins} L</div><div class="stat-label">Overall win rate</div></div>
         <div class="stat-card"><div class="stat-value">${last.length ? lw + '–' + (last.length - lw) : '—'}</div>
-          <div class="pips">${last.slice().reverse().map(r => `<span class="sq ${r === 'W' ? 'w' : 'l'}"></span>`).join('')}</div>
+          <div class="pips" role="img" aria-label="Last ${last.length}, oldest first: ${last.slice().reverse().join(' ')}">${last.slice().reverse().map(r => `<span class="sq ${r === 'W' ? 'w' : 'l'}"></span>`).join('')}</div>
           <div class="stat-label">Last ${last.length || 10}</div></div>
       </div>
       <div class="stat-row">
         <div class="stat-card">${rivalTile(personalRivalStats.bestRival, 'Best vs. rival', 'green')}</div>
-        <div class="stat-card">${rivalTile(personalRivalStats.worstRival, 'Toughest rival', 'red')}</div>
+        <div class="stat-card">${rivalTile(personalRivalStats.worstRival, 'Toughest rival', 'red-text')}</div>
       </div>
       <p class="stat-foot">${matches} matches played${recent.weekCount ? ' · ' + recent.weekCount + ' this week' : ''}</p>
     `;
@@ -2720,7 +2801,7 @@
         </div>
         <div class="stat-row">
           <div class="stat-card"><div class="stat-value sm" style="color:var(--green);">${esc(bestRivalText)}</div>${rivalSub(bestRival)}<div class="stat-label">Best vs. rival</div></div>
-          <div class="stat-card"><div class="stat-value sm" style="color:var(--red);">${esc(worstRivalText)}</div>${rivalSub(worstRival)}<div class="stat-label">Toughest rival</div></div>
+          <div class="stat-card"><div class="stat-value sm" style="color:var(--red-text);">${esc(worstRivalText)}</div>${rivalSub(worstRival)}<div class="stat-label">Toughest rival</div></div>
         </div>
         ${cov && cov.total ? `<p class="stat-foot">Brick answered in ${cov.marked} of ${cov.total} matches</p>` : ''}
       `;
@@ -2978,7 +3059,7 @@
       container: cont,
       offset: deckCatalogOffset,
       onPage: d => { deckCatalogOffset += d * CATALOG_PAGE_SIZE; loadDeckEditList(); },
-      closedHtml: d => `${dot(d.name)}<span class="nm">${d.name}</span><span class="meta">${d.type}</span>`,
+      closedHtml: d => `${dot(d.name)}<span class="nm">${esc(d.name)}</span><span class="meta">${esc(d.type)}</span>`,
       buildEditor: buildDeckEditor,
     });
   }
@@ -2986,9 +3067,9 @@
   function buildDeckEditor(d, row) {
     {
       row.innerHTML = `
-        <input class="de-name" value="${d.name}">
+        <input class="de-name" value="${esc(d.name)}" aria-label="Deck name">
         <div class="de-fields">
-          <input class="de-anime" value="${d.anime}" placeholder="Anime">
+          <input class="de-anime" value="${esc(d.anime)}" placeholder="Anime" aria-label="Anime">
           <select class="de-color">
             ${DECK_COLORS.map(c => `<option value="${c}" ${c === d.color ? 'selected' : ''}>${c || '—'}</option>`).join('')}
           </select>
@@ -3085,11 +3166,11 @@
       div.innerHTML = `
         <div class="dup-names">${names.join('  /  ')}</div>
         <div class="dup-choices">
-          ${names.map(n => `<button type="button" class="small" data-keep="${n}">Keep "${n}"</button>`).join('')}
+          ${names.map(n => `<button type="button" class="small" data-keep="${esc(n)}">Keep "${esc(n)}"</button>`).join('')}
         </div>
       `;
       names.forEach(n => {
-        div.querySelector(`[data-keep="${n}"]`).onclick = async () => {
+        div.querySelector(`[data-keep="${CSS.escape(n)}"]`).onclick = async () => {
           const others = names.filter(x => x !== n);
           if (!(await askConfirm(`Merge into “${n}”?`, `Every match that says ${others.map(o => '“' + o + '”').join(', ')} will say “${n}”, and ${others.length === 1 ? 'that entry leaves' : 'those entries leave'} the catalog. This can’t be undone; a backup copy of the sheet is made first.`, 'Merge'))) return;
           onMerge(n, others);
@@ -3186,7 +3267,7 @@
       container: cont,
       offset: rivalCatalogOffset,
       onPage: d => { rivalCatalogOffset += d * CATALOG_PAGE_SIZE; loadRivalEditList(); },
-      closedHtml: n => `<span class="nm">${n}</span>`,
+      closedHtml: n => `<span class="nm">${esc(n)}</span>`,
       buildEditor: buildRivalEditor,
     });
   }
@@ -3194,7 +3275,7 @@
   function buildRivalEditor(name, row) {
     {
       row.innerHTML = `
-        <input class="de-name" value="${name}">
+        <input class="de-name" value="${esc(name)}" aria-label="Rival name">
         <div class="de-fields">
           <button type="button" class="small active-no de-remove" title="Remove">${ICON_TRASH}</button>
         </div>
