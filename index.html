@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ aa5db31. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 814bacb. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.19","commit":"aa5db31"};</script>
+  <script>window.UAT_BUILD = {"version":"2.19","commit":"814bacb"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -306,6 +306,10 @@
     .cat-edit .de-anime { flex: 1 1 100%; }
     .cat-edit .de-color, .cat-edit .de-type { flex: 1 1 96px; min-width: 96px; }
     .cat-edit .de-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .merge-toggle { margin-top: 18px; min-height: 44px; background: none; color: var(--text-sec); border-style: dashed; }
+    .merge-toggle[aria-expanded="true"] { color: var(--text); border-style: solid; }
+    .merge-box { margin-top: 12px; }
+    .merge-box button:disabled { opacity: .45; cursor: default; }
     .cat-edit .de-actions button { min-height: 44px; }
     .cat-edit .de-actions .de-remove { width: 48px; flex: 0 0 48px; margin-right: auto; }
     .cat-edit .de-actions .de-cancel, .cat-edit .de-actions .de-save { width: auto; flex: 0 1 120px; }
@@ -865,14 +869,18 @@
         <div id="deckEditList" class="loading">Loading…</div>
         <p class="section-label">Possible duplicates</p>
         <div id="duplicatesList" class="loading">Loading…</div>
-        <p class="section-label">Merge manually</p>
-        <label for="mergeFrom">Deck to merge (will be removed)</label>
-        <select id="mergeFrom"></select>
-        <label for="mergeInto">Merge into (keeps this name)</label>
-        <select id="mergeInto"></select>
-        <p class="error" role="alert" id="mergeError"></p>
-        <p class="hint" id="mergeHint"></p>
-        <button id="btnMerge">Merge decks</button>
+        <!-- v2.19.2: tucked away and starts empty - a merge can't be undone, and
+             both lists used to start on a real deck, ready to be removed. -->
+        <button type="button" class="merge-toggle" id="btnShowMerge" aria-expanded="false" aria-controls="mergeBox">Merge two decks…</button>
+        <div id="mergeBox" class="merge-box hidden">
+          <label for="mergeFrom">Deck to merge (will be removed)</label>
+          <select id="mergeFrom"></select>
+          <label for="mergeInto">Merge into (keeps this name)</label>
+          <select id="mergeInto"></select>
+          <p class="error" role="alert" id="mergeError"></p>
+          <p class="hint" id="mergeHint"></p>
+          <button id="btnMerge" disabled>Merge decks</button>
+        </div>
       </div>
         <div id="catalogRivals" class="hidden">
         <p class="section-label" style="margin-top:0;">Edit rivals</p>
@@ -881,14 +889,18 @@
         <div id="rivalEditList" class="loading">Loading…</div>
         <p class="section-label">Possible duplicates</p>
         <div id="rivalDuplicatesList" class="loading">Loading…</div>
-        <p class="section-label">Merge manually</p>
-        <label for="rivalMergeFrom">Rival to merge (will be removed)</label>
-        <select id="rivalMergeFrom"></select>
-        <label for="rivalMergeInto">Merge into (keeps this name)</label>
-        <select id="rivalMergeInto"></select>
-        <p class="error" role="alert" id="rivalMergeError"></p>
-        <p class="hint" id="rivalMergeHint"></p>
-        <button id="btnMergeRival">Merge rivals</button>
+        <!-- v2.19.2: tucked away and starts empty - a merge can't be undone, and
+             both lists used to start on a real rival, ready to be removed. -->
+        <button type="button" class="merge-toggle" id="btnShowRivalMerge" aria-expanded="false" aria-controls="rivalMergeBox">Merge two rivals…</button>
+        <div id="rivalMergeBox" class="merge-box hidden">
+          <label for="rivalMergeFrom">Rival to merge (will be removed)</label>
+          <select id="rivalMergeFrom"></select>
+          <label for="rivalMergeInto">Merge into (keeps this name)</label>
+          <select id="rivalMergeInto"></select>
+          <p class="error" role="alert" id="rivalMergeError"></p>
+          <p class="hint" id="rivalMergeHint"></p>
+          <button id="btnMergeRival" disabled>Merge rivals</button>
+        </div>
       </div>
       </div>
 
@@ -3155,17 +3167,48 @@
     };
   }
 
-  function populateMergeSelects(list) {
-    const fromSel = el('mergeFrom');
-    const intoSel = el('mergeInto');
-    [fromSel, intoSel].forEach(sel => { sel.innerHTML = ''; });
-    list.forEach(d => {
-      [fromSel, intoSel].forEach(sel => {
+  /**
+   * Both merge lists start on "Choose…" (v2.19.2): they used to start on the
+   * first entry of the catalog, so changing only "Merge into" merged - and
+   * removed - an entry nobody picked. A choice still in the catalog survives
+   * a reload; Merge stays off until two different entries are picked.
+   */
+  function fillMergeSelects(fromSel, intoSel, names, placeholder) {
+    [fromSel, intoSel].forEach(sel => {
+      const keep = sel.value;
+      sel.innerHTML = '';
+      const ph = document.createElement('option');
+      ph.value = ''; ph.textContent = placeholder;
+      sel.appendChild(ph);
+      names.forEach(n => {
         const op = document.createElement('option');
-        op.value = d.name; op.textContent = d.name;
+        op.value = n; op.textContent = n;
         sel.appendChild(op);
       });
+      sel.value = names.indexOf(keep) !== -1 ? keep : '';
     });
+    refreshMergeButtons();
+  }
+  function mergeReady(fromId, intoId) {
+    const a = el(fromId).value, b = el(intoId).value;
+    return !!(a && b && a !== b);
+  }
+  function refreshMergeButtons() {
+    el('btnMerge').disabled = !mergeReady('mergeFrom', 'mergeInto');
+    el('btnMergeRival').disabled = !mergeReady('rivalMergeFrom', 'rivalMergeInto');
+  }
+  ['mergeFrom', 'mergeInto', 'rivalMergeFrom', 'rivalMergeInto'].forEach(id => el(id).addEventListener('change', refreshMergeButtons));
+  [['btnShowMerge', 'mergeBox', 'decks'], ['btnShowRivalMerge', 'rivalMergeBox', 'rivals']].forEach(([b, box, what]) => {
+    el(b).onclick = () => {
+      const open = el(box).classList.contains('hidden');
+      el(box).classList.toggle('hidden', !open);
+      el(b).setAttribute('aria-expanded', String(open));
+      el(b).textContent = open ? 'Hide merge' : `Merge two ${what}…`;
+    };
+  });
+
+  function populateMergeSelects(list) {
+    fillMergeSelects(el('mergeFrom'), el('mergeInto'), list.map(d => d.name), 'Choose a deck…');
   }
 
   /**
@@ -3254,7 +3297,7 @@
     el('btnMerge').disabled = true;
     gs()
       .withSuccessHandler(resp => {
-        el('btnMerge').disabled = false;
+        refreshMergeButtons();
         if (!resp.ok) {
           el('mergeError').textContent = resp.error;
           el('mergeError').style.display = 'block';
@@ -3262,13 +3305,14 @@
         }
         el('mergeHint').textContent = `Done — ${resp.rowsUpdated} match row(s) updated. Backup saved as "${resp.backupName}".`;
         el('mergeHint').style.display = 'block';
+        el('mergeFrom').value = ''; el('mergeInto').value = ''; refreshMergeButtons();
         loadAdminCatalogAndMembers();
         loadDeckMaintenance();
         loadTeamHistory();
         loadTeamDashboard();
       })
       .withFailureHandler(err => {
-        el('btnMerge').disabled = false;
+        refreshMergeButtons();
         el('mergeError').textContent = failText(err);
         el('mergeError').style.display = 'block';
       })
@@ -3357,16 +3401,7 @@
   }
 
   function populateRivalMergeSelects(names) {
-    const fromSel = el('rivalMergeFrom');
-    const intoSel = el('rivalMergeInto');
-    [fromSel, intoSel].forEach(sel => { sel.innerHTML = ''; });
-    names.forEach(name => {
-      [fromSel, intoSel].forEach(sel => {
-        const op = document.createElement('option');
-        op.value = name; op.textContent = name;
-        sel.appendChild(op);
-      });
-    });
+    fillMergeSelects(el('rivalMergeFrom'), el('rivalMergeInto'), names, 'Choose a rival…');
   }
 
   function loadRivalMaintenance() {
@@ -3411,7 +3446,7 @@
     el('btnMergeRival').disabled = true;
     gs()
       .withSuccessHandler(resp => {
-        el('btnMergeRival').disabled = false;
+        refreshMergeButtons();
         if (!resp.ok) {
           el('rivalMergeError').textContent = resp.error;
           el('rivalMergeError').style.display = 'block';
@@ -3419,13 +3454,14 @@
         }
         el('rivalMergeHint').textContent = `Done — ${resp.rowsUpdated} match row(s) updated. Backup saved as "${resp.backupName}".`;
         el('rivalMergeHint').style.display = 'block';
+        el('rivalMergeFrom').value = ''; el('rivalMergeInto').value = ''; refreshMergeButtons();
         loadAdminCatalogAndMembers();
         loadRivalMaintenance();
         loadTeamHistory();
         loadTeamDashboard();
       })
       .withFailureHandler(err => {
-        el('btnMergeRival').disabled = false;
+        refreshMergeButtons();
         el('rivalMergeError').textContent = failText(err);
         el('rivalMergeError').style.display = 'block';
       })
