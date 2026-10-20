@@ -99,6 +99,17 @@ try:
         check('admin ve el tablero del equipo', 'TEAM DASHBOARD' in pg.inner_text('#appMain').upper())
         pg.click('#navMembers'); pg.wait_for_timeout(1200)
         check('admin ve Members', 'Ana' in pg.inner_text('#appMain'))
+        # v2.19.1: editar color y serie de un mazo se guarda en la hoja y se ve al reabrir.
+        pg.click('#navCatalogs'); pg.wait_for_timeout(1200)
+        pg.fill('#deckSearch', 'Titan'); pg.wait_for_timeout(300)
+        pg.click('#deckEditList .cat-open'); pg.wait_for_timeout(300)
+        pg.select_option('#deckEditList .de-color', 'Green'); pg.fill('#deckEditList .de-anime', 'AOT')
+        pg.click('#deckEditList .de-save'); pg.wait_for_timeout(1500)
+        cat = pg.evaluate(f"""fetch('{EXEC}', {{method:'POST', body: JSON.stringify({{fn:'getDeckCatalog', args:[JSON.parse(localStorage.getItem('uat.session.v1')).token]}})}}).then(r => r.json())""")
+        t = [d for d in cat['result'] if d['name'] == 'Titan Ramp'][0]
+        check('editar color y serie de un mazo queda en la hoja', t['color'] == 'Green' and t['anime'] == 'AOT', t)
+        pg.click('#deckEditList .cat-open'); pg.wait_for_timeout(300)
+        check('y al reabrir el editor muestra lo guardado', pg.input_value('#deckEditList .de-color') == 'Green' and pg.input_value('#deckEditList .de-anime') == 'AOT')
         check('sin errores (admin)', len(errs) == 0, errs)
         ctx.close()
         ctx, pg, errs, pre = page(b)
