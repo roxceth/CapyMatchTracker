@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ e7c2c8d. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ aa5db31. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.19","commit":"e7c2c8d"};</script>
+  <script>window.UAT_BUILD = {"version":"2.19","commit":"aa5db31"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -305,6 +305,12 @@
     .cat-edit .de-fields { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .cat-edit .de-anime { flex: 1 1 100%; }
     .cat-edit .de-color, .cat-edit .de-type { flex: 1 1 96px; min-width: 96px; }
+    .cat-edit .de-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .cat-edit .de-actions button { min-height: 44px; }
+    .cat-edit .de-actions .de-remove { width: 48px; flex: 0 0 48px; margin-right: auto; }
+    .cat-edit .de-actions .de-cancel, .cat-edit .de-actions .de-save { width: auto; flex: 0 1 120px; }
+    .cat-edit .de-save:disabled { opacity: .45; cursor: default; }
+    .cat-edit .error { margin: 8px 0 0; }
 
     .deck-edit-row { padding: 10px 0; border-top: 1px solid var(--border); }
     .deck-edit-row:first-child { border-top: none; }
@@ -3002,7 +3008,8 @@
     const page = cfg.items.slice(cfg.offset, cfg.offset + CATALOG_PAGE_SIZE);
     cfg.container.innerHTML = '';
 
-    page.forEach(item => {
+    page.forEach(pageItem => {
+      let item = pageItem;
       const row = document.createElement('div');
       row.className = 'cat-row';
       const btn = document.createElement('button');
@@ -3015,15 +3022,24 @@
       wrap.appendChild(row);
 
       let panel = null;
+      const close = () => {
+        if (!panel) return;
+        panel.remove(); panel = null;
+        btn.querySelector('.chev').innerHTML = '&#9660;';
+      };
+      // After a save the editor hands back the saved values: the row shows them
+      // and the next time it opens it starts from them, not from the values the
+      // list was first drawn with (v2.19.1).
+      const saved = updated => {
+        item = updated;
+        btn.innerHTML = cfg.closedHtml(item) + '<span class="chev">&#9660;</span>';
+        panel = null;
+      };
       btn.onclick = () => {
-        if (panel) {                       // open -> close
-          panel.remove(); panel = null;
-          btn.querySelector('.chev').innerHTML = '&#9660;';
-          return;
-        }
+        if (panel) { close(); return; }
         panel = document.createElement('div');
         panel.className = 'cat-edit';
-        cfg.buildEditor(item, panel);
+        cfg.buildEditor(item, panel, { close: close, saved: updated => { if (panel) panel.remove(); saved(updated); } });
         wrap.appendChild(panel);
         btn.querySelector('.chev').innerHTML = '&#9650;';
       };
@@ -3064,61 +3080,79 @@
     });
   }
 
-  function buildDeckEditor(d, row) {
-    {
-      row.innerHTML = `
-        <input class="de-name" value="${esc(d.name)}" aria-label="Deck name">
-        <div class="de-fields">
-          <input class="de-anime" value="${esc(d.anime)}" placeholder="Anime" aria-label="Anime">
-          <select class="de-color">
-            ${DECK_COLORS.map(c => `<option value="${c}" ${c === d.color ? 'selected' : ''}>${c || '—'}</option>`).join('')}
-          </select>
-          <select class="de-type">
-            <option value="Own" ${d.type === 'Own' ? 'selected' : ''}>Own</option>
-            <option value="Rival" ${d.type === 'Rival' ? 'selected' : ''}>Rival</option>
-          </select>
-          <button type="button" class="small active-no de-remove" title="Remove">${ICON_TRASH}</button>
-        </div>
-      `;
-      let originalName = d.name;
-      const save = () => {
-        const newName = row.querySelector('.de-name').value.trim();
-        const anime = row.querySelector('.de-anime').value.trim();
-        const color = row.querySelector('.de-color').value;
-        const type = row.querySelector('.de-type').value;
-        gs()
-          .withSuccessHandler(resp => {
-            if (!resp.ok) {
-              showError(resp.error);
-              return;
-            }
-            originalName = newName;
-            if (resp.renamed) {
-              loadAdminCatalogAndMembers();
-              loadDeckMaintenance();
-              loadTeamHistory();
-              loadTeamDashboard();
-            }
-          })
-          .withFailureHandler(err => showError(failText(err)))
-          .updateDeck(token, originalName, newName, anime, color, type);
-      };
-      row.querySelector('.de-name').onchange = save;
-      row.querySelector('.de-anime').onchange = save;
-      row.querySelector('.de-color').onchange = save;
-      row.querySelector('.de-type').onchange = save;
-      row.querySelector('.de-remove').onclick = async () => {
-        if (!(await askConfirm(`Remove “${originalName}”?`, 'It leaves the catalog. This only works if no match uses it yet.', 'Remove'))) return;
-        gs()
-          .withSuccessHandler(resp => {
-            if (!resp.ok) { showError(resp.error); return; }
+  /**
+   * Edit one deck (v2.19.1). Changes are kept in the form until "Save" - the
+   * old editor saved on every change, said nothing, and reopened with the
+   * values the list was first drawn with, so a later edit could write the old
+   * color or series back. A rename rewrites every match with that name, so it
+   * asks first.
+   */
+  function buildDeckEditor(d, row, ctl) {
+    row.innerHTML = `
+      <input class="de-name" value="${esc(d.name)}" aria-label="Deck name">
+      <div class="de-fields">
+        <input class="de-anime" value="${esc(d.anime)}" placeholder="Series (e.g. Chainsaw Man)" aria-label="Series">
+        <select class="de-color" aria-label="Color">
+          ${DECK_COLORS.map(c => `<option value="${c}" ${c === (d.color || '') ? 'selected' : ''}>${c || 'No color'}</option>`).join('')}
+        </select>
+        <select class="de-type" aria-label="Type">
+          <option value="Own" ${d.type === 'Own' ? 'selected' : ''}>Own</option>
+          <option value="Rival" ${d.type !== 'Own' ? 'selected' : ''}>Rival</option>
+        </select>
+      </div>
+      <p class="error" role="alert"></p>
+      <div class="de-actions">
+        <button type="button" class="small active-no de-remove" aria-label="Remove ${esc(d.name)}">${ICON_TRASH}</button>
+        <button type="button" class="small de-cancel">Cancel</button>
+        <button type="button" class="primary small de-save" disabled>Save</button>
+      </div>`;
+    const q = c => row.querySelector(c);
+    const values = () => ({ name: q('.de-name').value.trim(), anime: q('.de-anime').value.trim(), color: q('.de-color').value, type: q('.de-type').value });
+    const changed = () => { const v = values(); return v.name !== d.name || v.anime !== (d.anime || '') || v.color !== (d.color || '') || v.type !== (d.type === 'Own' ? 'Own' : 'Rival'); };
+    const err = q('.error');
+    const refresh = () => { q('.de-save').disabled = !changed() || !values().name; };
+    row.querySelectorAll('input, select').forEach(n => { n.addEventListener('input', refresh); n.addEventListener('change', refresh); });
+    q('.de-cancel').onclick = ctl.close;
+    q('.de-save').onclick = async () => {
+      const v = values();
+      err.style.display = 'none';
+      // Only a real rename rewrites matches; a case-only fix just updates the catalog.
+      const renaming = v.name.toLowerCase() !== d.name.toLowerCase();
+      if (renaming && !(await askConfirm(`Rename “${d.name}”?`,
+        `Every match that says “${d.name}” will say “${v.name}”. A backup copy of the sheet is made first.`, 'Rename'))) return;
+      q('.de-save').disabled = true; q('.de-save').textContent = 'Saving…';
+      gs()
+        .withSuccessHandler(resp => {
+          if (!resp.ok) { err.textContent = resp.error; err.style.display = 'block'; q('.de-save').textContent = 'Save'; refresh(); return; }
+          const saved = { name: v.name, anime: v.anime, color: v.color, type: v.type };
+          // Keep every local copy in step: the editor list, the catalog the
+          // pickers use and the colour dots.
+          [allDecksForEdit, catalog].forEach(list => list.forEach((x, i) => { if (x.name === d.name) list[i] = Object.assign({}, x, saved); }));
+          delete colorMap[d.name]; colorMap[saved.name] = saved.color;
+          ctl.saved(saved);
+          showToast(v.name !== d.name ? `Renamed to ${saved.name}` : `Saved ${saved.name}`, null, false);
+          paintForm();
+          if (resp.renamed) {
             loadAdminCatalogAndMembers();
             loadDeckMaintenance();
-          })
-          .withFailureHandler(err => showError(failText(err)))
-          .removeDeck(token, originalName);
-      };
-    }
+            loadTeamHistory();
+            loadTeamDashboard();
+          }
+        })
+        .withFailureHandler(e => { err.textContent = failText(e); err.style.display = 'block'; q('.de-save').textContent = 'Save'; refresh(); })
+        .updateDeck(token, d.name, v.name, v.anime, v.color, v.type);
+    };
+    q('.de-remove').onclick = async () => {
+      if (!(await askConfirm(`Remove “${d.name}”?`, 'It leaves the catalog. This only works if no match uses it yet.', 'Remove'))) return;
+      gs()
+        .withSuccessHandler(resp => {
+          if (!resp.ok) { showError(resp.error); return; }
+          loadAdminCatalogAndMembers();
+          loadDeckMaintenance();
+        })
+        .withFailureHandler(e => showError(failText(e)))
+        .removeDeck(token, d.name);
+    };
   }
 
   function populateMergeSelects(list) {
@@ -3272,43 +3306,54 @@
     });
   }
 
-  function buildRivalEditor(name, row) {
-    {
-      row.innerHTML = `
-        <input class="de-name" value="${esc(name)}" aria-label="Rival name">
-        <div class="de-fields">
-          <button type="button" class="small active-no de-remove" title="Remove">${ICON_TRASH}</button>
-        </div>
-      `;
-      let originalName = name;
-      row.querySelector('.de-name').onchange = () => {
-        const newName = row.querySelector('.de-name').value.trim();
-        gs()
-          .withSuccessHandler(resp => {
-            if (!resp.ok) { showError(resp.error); return; }
-            originalName = newName;
-            if (resp.renamed) {
-              loadAdminCatalogAndMembers();
-              loadRivalMaintenance();
-              loadTeamHistory();
-              loadTeamDashboard();
-            }
-          })
-          .withFailureHandler(err => showError(failText(err)))
-          .updateRivalName(token, originalName, newName);
-      };
-      row.querySelector('.de-remove').onclick = async () => {
-        if (!(await askConfirm(`Remove “${originalName}”?`, 'It leaves the catalog. This only works if no match uses it yet.', 'Remove'))) return;
-        gs()
-          .withSuccessHandler(resp => {
-            if (!resp.ok) { showError(resp.error); return; }
+  /** Edit one rival name (v2.19.1): Save button, and a rename asks first. */
+  function buildRivalEditor(name, row, ctl) {
+    row.innerHTML = `
+      <input class="de-name" value="${esc(name)}" aria-label="Rival name">
+      <p class="error" role="alert"></p>
+      <div class="de-actions">
+        <button type="button" class="small active-no de-remove" aria-label="Remove ${esc(name)}">${ICON_TRASH}</button>
+        <button type="button" class="small de-cancel">Cancel</button>
+        <button type="button" class="primary small de-save" disabled>Save</button>
+      </div>`;
+    const q = c => row.querySelector(c);
+    const err = q('.error');
+    const refresh = () => { const v = q('.de-name').value.trim(); q('.de-save').disabled = !v || v === name; };
+    q('.de-name').addEventListener('input', refresh);
+    q('.de-cancel').onclick = ctl.close;
+    q('.de-save').onclick = async () => {
+      const newName = q('.de-name').value.trim();
+      err.style.display = 'none';
+      if (!(await askConfirm(`Rename “${name}”?`, `Every match against “${name}” will say “${newName}”.`, 'Rename'))) return;
+      q('.de-save').disabled = true; q('.de-save').textContent = 'Saving…';
+      gs()
+        .withSuccessHandler(resp => {
+          if (!resp.ok) { err.textContent = resp.error; err.style.display = 'block'; q('.de-save').textContent = 'Save'; refresh(); return; }
+          rivalCatalog = rivalCatalog.map(n => n === name ? newName : n);
+          ctl.saved(newName);
+          showToast(`Renamed to ${newName}`, null, false);
+          paintForm();
+          if (resp.renamed) {
             loadAdminCatalogAndMembers();
             loadRivalMaintenance();
-          })
-          .withFailureHandler(err => showError(failText(err)))
-          .removeRivalName(token, originalName);
-      };
-    }
+            loadTeamHistory();
+            loadTeamDashboard();
+          }
+        })
+        .withFailureHandler(e => { err.textContent = failText(e); err.style.display = 'block'; q('.de-save').textContent = 'Save'; refresh(); })
+        .updateRivalName(token, name, newName);
+    };
+    q('.de-remove').onclick = async () => {
+      if (!(await askConfirm(`Remove “${name}”?`, 'It leaves the catalog. This only works if no match uses it yet.', 'Remove'))) return;
+      gs()
+        .withSuccessHandler(resp => {
+          if (!resp.ok) { showError(resp.error); return; }
+          loadAdminCatalogAndMembers();
+          loadRivalMaintenance();
+        })
+        .withFailureHandler(e => showError(failText(e)))
+        .removeRivalName(token, name);
+    };
   }
 
   function populateRivalMergeSelects(names) {
