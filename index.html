@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 814bacb. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 14805e8. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.19","commit":"814bacb"};</script>
+  <script>window.UAT_BUILD = {"version":"2.20","commit":"14805e8"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -41,7 +41,8 @@
     * { box-sizing: border-box; }
     body {
       font-family: 'Inter', Arial, sans-serif;
-      background: radial-gradient(circle at 50% -10%, #1e1a2b 0%, var(--bg) 55%);
+      background: var(--bg);   /* flat (v2.20): the radial glow added nothing */
+      font-variant-numeric: tabular-nums;   /* records and % don't jiggle as they change */
       margin: 0;
       padding: 18px 14px 40px;
       color: var(--text);
@@ -106,9 +107,9 @@
       background: var(--surface-2); color: var(--text); font-size: 14px; font-weight: 500;
       cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s;
     }
-    button:hover { border-color: var(--border-strong); background: #262231; }
+    @media (hover: hover) and (pointer: fine) { button:hover { border-color: var(--border-strong); background: #262231; } }
     button.primary { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
-    button.primary:hover { background: #edc25a; }
+    @media (hover: hover) and (pointer: fine) { button.primary:hover { background: #edc25a; } }
     button.half { width: 48%; display: inline-block; }
     button.active-yes { border-color: var(--green); color: var(--green); }
     button.active-no { border-color: var(--red); color: var(--red-text); }
@@ -123,7 +124,7 @@
       color: var(--gold); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px;
       cursor: pointer;
     }
-    .link-toggle:hover { background: none; border: none; color: #edc25a; }
+    @media (hover: hover) and (pointer: fine) { .link-toggle:hover { background: none; border: none; color: #edc25a; } }
 
     .inline-form {
       background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px;
@@ -202,7 +203,7 @@
       background: var(--surface-2); color: var(--text-sec);
       font-family: inherit; font-size: 12.5px; text-align: left; cursor: pointer;
     }
-    .check-chip:hover { background: #262231; }
+    @media (hover: hover) and (pointer: fine) { .check-chip:hover { background: #262231; } }
     .check-chip .box {
       width: 18px; height: 18px; flex: 0 0 auto;
       border-radius: 4px; border: 1.5px solid var(--border-strong);
@@ -249,7 +250,7 @@
       background: var(--surface-2); color: var(--text-sec); font-size: 13px; text-align: center;
       font-family: inherit; cursor: pointer;
     }
-    .nav-btn:hover { background: #262231; }
+    @media (hover: hover) and (pointer: fine) { .nav-btn:hover { background: #262231; } }
     .nav-btn.active { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
 
     .member-summary-row {
@@ -294,7 +295,7 @@
       background: none; border: none; padding: 6px 0; color: var(--text);
       font-family: inherit; font-size: 13px; text-align: left; cursor: pointer;
     }
-    .cat-open:hover { background: none; border: none; color: var(--gold); }
+    @media (hover: hover) and (pointer: fine) { .cat-open:hover { background: none; border: none; color: var(--gold); } }
     .cat-open .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cat-open .meta { font-size: 11px; color: var(--text-muted); flex: 0 0 auto; }
     .cat-open .chev { color: var(--text-muted); font-size: 11px; flex: 0 0 auto; }
@@ -358,8 +359,8 @@
       border-bottom: 1px solid var(--border); padding: 0 0 12px; margin: 0 0 14px; color: inherit; font: inherit; cursor: pointer;
     }
     .row-link:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .row-link:hover { background: none; border-color: var(--border); }
-    .row-link:hover .deck-name { color: var(--gold); }
+    @media (hover: hover) and (pointer: fine) { .row-link:hover { background: none; border-color: var(--border); } }
+    @media (hover: hover) and (pointer: fine) { .row-link:hover .deck-name { color: var(--gold); } }
     .row-link .bar-bg, .row-link .few-note { display: block; }
     .row-link .open-hint { display: block; text-align: right; font-size: 12px; font-weight: 600; color: var(--gold); margin-top: 6px; }
     .vs-banner {
@@ -377,7 +378,7 @@
     body.in-app { padding: 0; }
     .login-wrap { max-width: 440px; margin: 0 auto; }
 
-    #app { min-height: 100vh; }
+    #app { min-height: 100vh; min-height: 100dvh; }
     .appbar {
       position: sticky; top: 0; z-index: 20;
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -394,7 +395,7 @@
       width: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
       padding: 4px 4px 4px 10px; background: none; border: 1px solid transparent; color: var(--text-sec); font-size: 13px;
     }
-    #btnAccount:hover { border-color: var(--border); background: none; }
+    @media (hover: hover) and (pointer: fine) { #btnAccount:hover { border-color: var(--border); background: none; } }
     .avatar {
       width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto;
       display: inline-flex; align-items: center; justify-content: center;
@@ -408,7 +409,7 @@
     .menu-who { padding: 8px 10px 10px; font-size: 13px; color: var(--text-sec); border-bottom: 1px solid var(--border); margin-bottom: 6px; }
     .menu-who b { color: var(--text); font-weight: 600; }
     .menu button { text-align: left; border: none; background: none; min-height: 44px; padding: 0 10px; border-radius: 8px; }
-    .menu button:hover { background: var(--surface-2); border: none; }
+    @media (hover: hover) and (pointer: fine) { .menu button:hover { background: var(--surface-2); border: none; } }
 
     #appNav {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
@@ -422,7 +423,7 @@
       background: none; border: none; border-radius: 10px; color: var(--text-sec);
       font-size: 11.5px; font-weight: 500;
     }
-    .nav-item:hover { background: none; border: none; color: var(--text); }
+    @media (hover: hover) and (pointer: fine) { .nav-item:hover { background: none; border: none; color: var(--text); } }
     .nav-item svg { width: 22px; height: 22px; }
     .nav-item[aria-current="page"] { color: var(--gold); font-weight: 600; }
     .nav-item .lbl-wide { display: none; }
@@ -440,10 +441,11 @@
     .today b { color: var(--text); font-weight: 600; display: inline-block; }
     .pips-inline { display: inline-flex; align-items: center; gap: 5px; }
     /* Save lands: the record pops and the new pip drops in (v2.19). */
-    .today.bump b { animation: todayBump .55s cubic-bezier(.16, 1, .3, 1); }
-    .today .pip.new { animation: pipIn .5s cubic-bezier(.16, 1, .3, 1); }
-    @keyframes todayBump { 0% { transform: scale(1.4); color: var(--gold); } 100% { transform: scale(1); } }
-    @keyframes pipIn { 0% { transform: scale(2.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    /* v2.20: shorter and subtler - it plays on every save during a tournament. */
+    .today.bump b { animation: todayBump .3s cubic-bezier(.23, 1, .32, 1); }
+    .today .pip.new { animation: pipIn .3s cubic-bezier(.23, 1, .32, 1); }
+    @keyframes todayBump { 0% { transform: scale(1.15); color: var(--gold); } 100% { transform: scale(1); } }
+    @keyframes pipIn { 0% { transform: scale(1.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     @media (prefers-reduced-motion: reduce) { .today.bump b, .today .pip.new { animation: none; } }
     .today .pip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     /* A loss is a ring and a win a dot: readable without telling red from green (v2.19). */
@@ -469,7 +471,7 @@
       display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 14px; margin-bottom: 8px;
       text-align: left; border-radius: 14px; background: rgba(228,183,63,0.09); border: 1px solid var(--gold); color: var(--text);
     }
-    .deck-card:hover { background: rgba(228,183,63,0.14); border-color: var(--gold); }
+    @media (hover: hover) and (pointer: fine) { .deck-card:hover { background: rgba(228,183,63,0.14); border-color: var(--gold); } }
     .deck-card .dot { width: 12px; height: 12px; }
     .deck-card .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .deck-card .nm { font-weight: 600; font-size: 15.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -506,7 +508,7 @@
       display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 14px;
       background: none; border: none; text-align: left; font-size: 14px;
     }
-    .more-toggle:hover { background: none; border: none; }
+    @media (hover: hover) and (pointer: fine) { .more-toggle:hover { background: none; border: none; } }
     .more-toggle svg { transition: transform .15s; width: 18px; height: 18px; color: var(--text-sec); }
     .more-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
     .more-panel { padding: 0 12px 4px; }
@@ -519,12 +521,12 @@
       background: var(--surface); border: 1px dashed var(--border-strong); color: #8f8a9c; cursor: not-allowed;
     }
     .save-btn.ready { background: var(--gold); border: 1px solid var(--gold); color: #1a1406; cursor: pointer; box-shadow: 0 6px 20px rgba(228,183,63,0.22); }
-    .save-btn.ready:hover { background: #edc25a; }
+    @media (hover: hover) and (pointer: fine) { .save-btn.ready:hover { background: #edc25a; } }
     .save-btn.busy { opacity: 0.75; cursor: progress; }
     .save-summary { text-align: center; font-size: 13px; color: var(--text-sec); margin: 8px 0 0; min-height: 18px; }
     .save-summary.ready { color: #d6d2dc; }
     .link-btn { width: auto; background: none; border: none; color: var(--gold); text-decoration: underline; text-underline-offset: 3px; min-height: 40px; padding: 0 4px; }
-    .link-btn:hover { background: none; border: none; }
+    @media (hover: hover) and (pointer: fine) { .link-btn:hover { background: none; border: none; } }
     .edit-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; margin-bottom: 14px;
       border-radius: 10px; background: rgba(53,167,230,0.10); border: 1px solid rgba(53,167,230,0.35); font-size: 13px; color: #b7def5; }
 
@@ -568,7 +570,7 @@
     .sheet-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(8,7,12,0.62); display: flex; flex-direction: column; justify-content: flex-end; }
     .sheet {
       background: var(--surface); border-top: 1px solid var(--border-strong); border-radius: 20px 20px 0 0;
-      max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 -12px 40px rgba(0,0,0,0.45);
+      max-height: 86vh; max-height: 86dvh; display: flex; flex-direction: column; box-shadow: 0 -12px 40px rgba(0,0,0,0.45);
     }
     .sheet-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--border-strong); margin: 10px auto 0; }
     .sheet-head { display: flex; align-items: center; gap: 6px; padding: 8px 12px 10px 18px; border-bottom: 1px solid var(--border); }
@@ -582,7 +584,7 @@
       width: 100%; min-height: 50px; display: flex; align-items: center; gap: 12px; padding: 0 6px; text-align: left;
       border: none; border-radius: 10px; background: none; font-size: 15px;
     }
-    .sheet-row:hover { background: var(--surface-2); border: none; }
+    @media (hover: hover) and (pointer: fine) { .sheet-row:hover { background: var(--surface-2); border: none; } }
     .sheet-row.on { color: #f6d77f; font-weight: 600; background: rgba(228,183,63,0.08); }
     .sheet-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .sheet-row .meta { font-size: 12px; color: var(--text-sec); }
@@ -615,12 +617,47 @@
     .confirm-actions button { flex: 1; min-height: 48px; }
     .confirm-actions .danger-solid { background: #b8384a; border-color: #b8384a; color: #fff; font-weight: 700; }
 
+    /* ================= v2.20 polish (Emil Kowalski + tasteskill review) =================
+       Only feel, never layout or data: press feedback, entrances for the overlays,
+       44px tap targets. Hover looks live in (hover: hover) queries above so a tap
+       on a phone doesn't leave a button stuck "lit". */
+    :root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); }
+
+    /* Press: the button gives a little under the thumb. Big rows and text links don't. */
+    button { transition: border-color .15s, background .15s, transform 160ms var(--ease-out); }
+    button:not(:disabled):not([aria-disabled="true"]):active { transform: scale(0.97); }
+    .row-link:active, .sheet-row:active, .menu button:active, .link-toggle:active,
+    .link-btn:active, .more-toggle:active, .cat-open:active { transform: none; }
+
+    /* Tap targets: 44px minimum (they were 33-41px). */
+    button, .toggle-btn, .nav-btn, button.small, button.icon, .chip, .pager-btn, .assist-note button,
+    .link-btn, .toast button, .sheet-head button, .member-row button.small, .de-remove,
+    .filter-row select { min-height: 44px; }
+    button.icon { width: 44px; }
+    .de-remove { width: 44px; }
+    .chip { border-radius: 22px; }
+    input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select { min-height: 44px; }
+
+    /* Entrances. Closing stays instant: the system answering should feel faster than it asking. */
+    .sheet-backdrop, .confirm-backdrop { transition: opacity 200ms ease; }
+    @starting-style { .sheet-backdrop:not(.hidden), .confirm-backdrop:not(.hidden) { opacity: 0; } }
+    .sheet { transition: transform 280ms var(--ease-drawer); }
+    @starting-style { .sheet-backdrop:not(.hidden) .sheet { transform: translateY(100%); } }
+    .confirm-box { transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out); }
+    @starting-style { .confirm-backdrop:not(.hidden) .confirm-box { transform: scale(0.96); opacity: 0; } }
+    .toast { transition: transform 220ms var(--ease-out), opacity 220ms var(--ease-out); }
+    @starting-style { .toast:not(.hidden) { transform: translateY(100%); opacity: 0; } }
+    .menu { transform-origin: top right; transition: transform 150ms var(--ease-out), opacity 150ms var(--ease-out); }
+    @starting-style { .menu:not(.hidden) { transform: scale(0.97); opacity: 0; } }
+    .more-toggle svg { transition: transform 180ms var(--ease-out); }
+
+
     @media (min-width: 960px) {
       #app { display: grid; grid-template-columns: 236px minmax(0, 1fr); grid-template-rows: auto 1fr; }
       .appbar { grid-column: 1 / -1; padding: 10px 24px; }
       #appNav {
         position: sticky; top: 58px; bottom: auto; left: auto; right: auto; align-self: start;
-        height: calc(100vh - 58px); flex-direction: column; justify-content: flex-start; gap: 4px;
+        height: calc(100vh - 58px); height: calc(100dvh - 58px); flex-direction: column; justify-content: flex-start; gap: 4px;
         padding: 18px 14px; border-top: none; border-right: 1px solid var(--border);
       }
       .nav-item { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 12px; min-height: 44px; padding: 0 12px; font-size: 14px; }
@@ -636,9 +673,17 @@
       #viewTeam .card, #viewCatalogs .card, #viewHistory .card { break-inside: avoid; -webkit-column-break-inside: avoid; }
       #viewHistory.single { column-count: 1; }
       .sheet-backdrop { justify-content: center; align-items: center; }
-      .sheet { width: 100%; max-width: 480px; border-radius: 18px; border: 1px solid var(--border-strong); max-height: 80vh; }
+      .sheet { width: 100%; max-width: 480px; border-radius: 18px; border: 1px solid var(--border-strong); max-height: 80vh; max-height: 80dvh; }
+      /* On a wide screen the sheet is a centred dialog: it grows in place instead of rising. */
+      .sheet { transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out); }
+      @starting-style { .sheet-backdrop:not(.hidden) .sheet { transform: scale(0.96); opacity: 0; } }
       .sheet-grip { display: none; }
       .toast { left: auto; right: 24px; bottom: 24px; max-width: 420px; }
+    }
+    /* Last so it also beats the wide-screen sheet transition. */
+    @media (prefers-reduced-motion: reduce) {
+      button:not(:disabled):not([aria-disabled="true"]):active { transform: none; }
+      .sheet, .confirm-box, .toast, .menu { transition-property: opacity; }
     }
   </style>
 </head>
