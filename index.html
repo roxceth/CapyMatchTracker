@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 14805e8. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 755c5a9. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.20","commit":"14805e8"};</script>
+  <script>window.UAT_BUILD = {"version":"2.21","commit":"755c5a9"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -86,7 +86,7 @@
     }
     .card h2 .bar { width: 4px; height: 16px; background: var(--gold); border-radius: 2px; display: inline-block; }
 
-    label { font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px; }
+    label { font-size: 13px; color: var(--text-sec); display: block; margin-bottom: 6px; }   /* sentence case (v2.21) */
 
     select, input {
       width: 100%; padding: 10px 12px; margin-bottom: 14px;
@@ -183,11 +183,22 @@
 
     .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .stat-card { background: var(--surface-2); border-radius: 8px; padding: 12px; text-align: center; }
-    .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--gold); }
-    .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-top: 2px; }
+    .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+    .stat-label { font-size: 13px; color: var(--text-sec); margin-top: 2px; }
+    /* v2.21: the headline numbers are one block split by hairlines, label above
+       value, left-aligned (was four separate centred tiles). Same data, same markup
+       inside; the rows just dissolve into one grid. */
+    .stat-block {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-bottom: 16px;
+      background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    }
+    .stat-block .stat-row { display: contents; }
+    .stat-block .stat-card { display: flex; flex-direction: column; text-align: left; border-radius: 0; padding: 12px 14px; }
+    .stat-block .stat-label { order: -1; margin: 0 0 4px; }
+    .stat-block .pips { justify-content: flex-start; }
 
     .section-label {
-      font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted);
+      font-size: 13px; font-weight: 600; color: var(--text-sec);
       margin: 18px 0 8px; padding-top: 12px; border-top: 1px solid var(--border);
     }
 
@@ -222,15 +233,19 @@
     }
     .brick-head .pct { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: var(--gold); }
     .brick-head .pct-label { color: var(--text-muted); font-size: 11.5px; }
-    .brick-split { display: flex; gap: 8px; margin-top: 8px; }
-    .brick-split div {
-      flex: 1; background: var(--surface-2); border-radius: 8px; padding: 8px; text-align: center;
+    /* v2.21: same look as the headline numbers (.stat-block): one box split by a
+       hairline, label on top, left-aligned, the count on its own line. */
+    .brick-split {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-top: 8px;
+      background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
     }
-    .brick-split .v { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; }
+    .brick-split > div { background: var(--surface-2); padding: 12px 14px; text-align: left; }
+    .brick-split .k { font-size: 13px; color: var(--text-sec); margin: 0 0 4px; }
+    .brick-split .v { font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700; }
     .brick-split .v.good { color: var(--green); }
     .brick-split .v.bad { color: var(--red-text); }
-    .brick-split .v.na { font-size: 12px; color: var(--text-muted); font-family: inherit; font-weight: 500; }
-    .brick-split .k { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-top: 2px; }
+    .brick-split .v.na { font-size: 14px; color: var(--text-muted); font-family: inherit; font-weight: 500; }
+    .brick-split .n { font-size: 12px; color: #d6d2dc; margin-top: 1px; }
     .brick-note { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
     .badge-brick { background: rgba(228,183,63,0.15); color: var(--gold); border: 1px solid rgba(228,183,63,0.35); }
 
@@ -240,7 +255,8 @@
       background: var(--surface-2); color: var(--text-sec); font-size: 12.5px; text-align: center;
       font-family: inherit; cursor: pointer;
     }
-    .toggle-btn.active { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
+    /* Selected tab is a neutral step up, not gold: gold is for data and the one main action (v2.21). */
+    .toggle-btn.active { background: #37323f; color: var(--text); border-color: #6b6579; font-weight: 600; }
 
     /* Top-level nav inside the admin screen (Panel / Catalogs). Same visual
        language as .toggle-btn but bigger, since it switches whole views. */
@@ -251,7 +267,7 @@
       font-family: inherit; cursor: pointer;
     }
     @media (hover: hover) and (pointer: fine) { .nav-btn:hover { background: #262231; } }
-    .nav-btn.active { background: var(--gold); color: #241d08; border-color: var(--gold); font-weight: 600; }
+    .nav-btn.active { background: #37323f; color: var(--text); border-color: #6b6579; font-weight: 600; }
 
     .member-summary-row {
       display: flex; justify-content: space-between; align-items: center;
@@ -269,7 +285,7 @@
     .repair-to { color: var(--green); }
     .repair-count { color: var(--text-muted); font-size: 11px; margin-left: auto; }
     .dup-tier {
-      font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase;
+      font-size: 13px;
       margin: 12px 0 2px; font-weight: 600;
     }
     .dup-tier.exact { color: var(--green); }
@@ -452,7 +468,7 @@
     .pip.w { background: var(--green); } .pip.l { background: none; box-shadow: inset 0 0 0 2px var(--red); }
     .field { margin-bottom: 16px; }
     .field > label, .field-label {
-      font-size: 11.5px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-sec);
+      font-size: 13px; color: var(--text-sec);
       display: block; margin-bottom: 7px; font-weight: 600;
     }
     .opt { text-transform: none; letter-spacing: 0; font-weight: 400; }
@@ -534,7 +550,7 @@
     .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
     .filter-row select { width: auto; flex: 1 1 140px; min-width: 0; margin: 0; min-height: 40px; border-radius: 20px; padding: 8px 12px; font-size: 13px; }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .hist-day { display: flex; justify-content: space-between; padding: 14px 2px 6px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--text-sec); }
+    .hist-day { display: flex; justify-content: space-between; padding: 14px 2px 6px; font-size: 13px; font-weight: 600; color: var(--text-sec); }
     .hist-day span:last-child { text-transform: none; letter-spacing: 0; font-weight: 500; }
     .hist-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
     .res-badge { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
@@ -579,7 +595,7 @@
     .sheet-body { overflow-y: auto; padding: 12px 18px; flex: 1 1 auto; }
     .sheet-foot { padding: 12px 18px calc(16px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); }
     .sheet-foot:empty { display: none; }
-    .sheet-sec { font-size: 11.5px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--text-sec); margin: 10px 0 4px; }
+    .sheet-sec { font-size: 13px; font-weight: 600; color: var(--text-sec); margin: 10px 0 4px; }
     .sheet-row {
       width: 100%; min-height: 50px; display: flex; align-items: center; gap: 12px; padding: 0 6px; text-align: left;
       border: none; border-radius: 10px; background: none; font-size: 15px;
@@ -669,8 +685,14 @@
       .views { max-width: 1160px; margin: 0; padding: 26px 32px 48px; }
       .views.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
       .views.pair .view .card { margin-bottom: 0; }
-      #viewTeam, #viewCatalogs, #viewHistory { column-count: 2; column-gap: 20px; }
-      #viewTeam .card, #viewCatalogs .card, #viewHistory .card { break-inside: avoid; -webkit-column-break-inside: avoid; }
+      #viewCatalogs, #viewHistory { column-count: 2; column-gap: 20px; }
+      #viewCatalogs .card, #viewHistory .card { break-inside: avoid; -webkit-column-break-inside: avoid; }
+      /* v2.21: Team is the dashboard plus a narrow side column (Reports), not two equal
+         halves; the four headline numbers fit in one row. */
+      #viewTeam { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 20px; align-items: start; }
+      #viewTeam .card { margin-bottom: 0; }
+      /* Log on its own (admin, manager) stops at a readable width instead of 1000px+. */
+      .views:not(.pair) #logCard { max-width: 640px; }
       #viewHistory.single { column-count: 1; }
       .sheet-backdrop { justify-content: center; align-items: center; }
       .sheet { width: 100%; max-width: 480px; border-radius: 18px; border: 1px solid var(--border-strong); max-height: 80vh; max-height: 80dvh; }
@@ -680,6 +702,9 @@
       .sheet-grip { display: none; }
       .toast { left: auto; right: 24px; bottom: 24px; max-width: 420px; }
     }
+    /* Four across only where each number gets ~180px; between 960 and 1199 it stays 2x2. */
+    @media (min-width: 1200px) { #teamStats .stat-block { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
     /* Last so it also beats the wide-screen sheet transition. */
     @media (prefers-reduced-motion: reduce) {
       button:not(:disabled):not([aria-disabled="true"]):active { transform: none; }
@@ -968,7 +993,7 @@
       <div class="card" id="cardMembers">
         <div class="card-head">
           <h2><span class="bar"></span>Members</h2>
-          <button type="button" class="primary small" id="btnAddMember">+ Add</button>
+          <button type="button" class="small" id="btnAddMember">+ Add</button>
         </div>
         <div id="adminList"><div class="loading">Loading…</div></div>
         <button type="button" class="link-btn hidden" id="btnShowInactive" aria-expanded="false"></button>
@@ -2720,10 +2745,10 @@
   function brickSplitHtml(d) {
     if (!d.withBrick && !d.withoutBrick) return '';
     function cell(stat, label) {
-      if (!stat) return `<div><div class="v na">Not enough data</div><div class="k">${label}</div></div>`;
+      if (!stat) return `<div><div class="k">${label}</div><div class="v na">Not enough data</div></div>`;
       const tone = stat.winRate >= 50 ? 'good' : 'bad';
-      return `<div><div class="v ${tone}">${stat.winRate}%</div>
-        <div class="k">${label} (${stat.wins}/${stat.total})</div></div>`;
+      return `<div><div class="k">${label}</div><div class="v ${tone}">${stat.winRate}%</div>
+        <div class="n">${stat.wins} of ${stat.total}</div></div>`;
     }
     return `<div class="brick-split">
       ${cell(d.withBrick, 'WR with brick')}
@@ -2782,6 +2807,7 @@
       ? `<div class="stat-value sm" style="color:var(--${tone})">${esc(r.rival)} · ${r.winRate}%</div><div class="stat-sub">${r.wins} of ${r.total}</div><div class="stat-label">${label}</div>`
       : `<div class="stat-value sm muted">Not enough data</div><div class="stat-label">${label}</div>`;
     el('personalStats').innerHTML = `
+      <div class="stat-block">
       <div class="stat-row">
         <div class="stat-card"><div class="stat-value">${overall}%</div><div class="stat-sub">${wins} W · ${matches - wins} L</div><div class="stat-label">Overall win rate</div></div>
         <div class="stat-card"><div class="stat-value">${last.length ? lw + '–' + (last.length - lw) : '—'}</div>
@@ -2791,6 +2817,7 @@
       <div class="stat-row">
         <div class="stat-card">${rivalTile(personalRivalStats.bestRival, 'Best vs. rival', 'green')}</div>
         <div class="stat-card">${rivalTile(personalRivalStats.worstRival, 'Toughest rival', 'red-text')}</div>
+      </div>
       </div>
       <p class="stat-foot">${matches} matches played${recent.weekCount ? ' · ' + recent.weekCount + ' this week' : ''}</p>
     `;
@@ -2858,6 +2885,7 @@
       const cov = data.brick && data.brick.coverage;
       const rivalSub = r => r ? `<div class="stat-sub">${r.wins} of ${r.total}</div>` : '';
       el('teamStats').innerHTML = `
+        <div class="stat-block">
         <div class="stat-row">
           <div class="stat-card"><div class="stat-value">${data.totalMatches}</div><div class="stat-sub">${data.weekCount !== undefined ? data.weekCount + ' this week' : '&nbsp;'}</div><div class="stat-label">Total matches</div></div>
           <div class="stat-card"><div class="stat-value">${data.teamWinRate}%</div><div class="stat-sub">${tw} W · ${data.totalMatches - tw} L</div><div class="stat-label">Team win rate</div></div>
@@ -2865,6 +2893,7 @@
         <div class="stat-row">
           <div class="stat-card"><div class="stat-value sm" style="color:var(--green);">${esc(bestRivalText)}</div>${rivalSub(bestRival)}<div class="stat-label">Best vs. rival</div></div>
           <div class="stat-card"><div class="stat-value sm" style="color:var(--red-text);">${esc(worstRivalText)}</div>${rivalSub(worstRival)}<div class="stat-label">Toughest rival</div></div>
+        </div>
         </div>
         ${cov && cov.total ? `<p class="stat-foot">Brick answered in ${cov.marked} of ${cov.total} matches</p>` : ''}
       `;
