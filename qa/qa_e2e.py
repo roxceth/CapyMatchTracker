@@ -119,7 +119,7 @@ try:
             body: JSON.stringify({{fn:'listMembersAdmin', args:[JSON.parse(localStorage.getItem('uat.session.v1')).token]}})}}).then(r => r.json())""")
         check('y aunque llame directo a la API, el servidor lo niega', r['ok'] is False and 'permission' in r['error'].lower(), r)
         r = pg.evaluate(f"fetch('{EXEC}', {{method:'POST', body: JSON.stringify({{fn:'sheet_', args:['Members']}})}}).then(r => r.json())")
-        check('las funciones internas no se pueden llamar', r == {'ok': False, 'error': 'Bad request.', 'v': '2.16'}, r)
+        check('las funciones internas no se pueden llamar', r == {'ok': False, 'error': 'Bad request.', 'v': '2.17'}, r)
         ctx.close()
 
         print("\n=== Bloqueo de PIN desde la página ===\n")
