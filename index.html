@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 755c5a9. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 26e8140. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.21","commit":"755c5a9"};</script>
+  <script>window.UAT_BUILD = {"version":"2.22","commit":"26e8140"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -134,6 +134,7 @@
 
     .error { color: var(--red-text); font-size: 12.5px; margin: -6px 0 12px; display: none; }
     .hint { color: var(--green); font-size: 12.5px; margin: -6px 0 12px; display: none; }
+    #reportHint a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; }   /* v2.22: tappable */
     .hidden { display: none !important; }
 
     .member-row { display: flex; gap: 6px; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); }
@@ -3544,6 +3545,42 @@
 
   // ---------- Admin: PDF reports ----------
 
+  /**
+   * v2.22: the server sends the PDF itself, so it downloads right here. The
+   * Drive copy lives in the owner's Drive and is shared with nobody - a
+   * manager opening that link got Google's "Request access" page. Only the
+   * admin (the owner's side) gets the Drive link, as a secondary option.
+   * A server from before v2.22 sends only `url`: then it falls back to the
+   * old behaviour (open the Drive link).
+   */
+  function base64ToBlob(b64, type) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: type || 'application/pdf' });
+  }
+  let reportBlobUrl = null;
+  function showReportReady(resp) {
+    const hint = el('reportHint');
+    if (!resp.pdfBase64) {
+      hint.innerHTML = `Done — <a href="${esc(resp.url)}" target="_blank" rel="noopener" style="color:var(--gold);">open "${esc(resp.name)}"</a> (it also opened in a new tab).`;
+      hint.style.display = 'block';
+      window.open(resp.url, '_blank');
+      return;
+    }
+    if (reportBlobUrl) URL.revokeObjectURL(reportBlobUrl);
+    reportBlobUrl = URL.createObjectURL(base64ToBlob(resp.pdfBase64, resp.mimeType));
+    const a = document.createElement('a');
+    a.href = reportBlobUrl; a.download = resp.name || 'Union Arena Tracker Report.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    // A link to the same file stays on screen: if the phone blocked the
+    // automatic download, one tap gets it.
+    hint.innerHTML = `Downloaded “${esc(resp.name)}”. ` +
+      `<a id="reportDownloadAgain" href="${reportBlobUrl}" download="${esc(resp.name)}" style="color:var(--gold);">Download again</a>` +
+      (isAdmin() && resp.url ? ` · <a href="${esc(resp.url)}" target="_blank" rel="noopener" style="color:var(--text-sec);">Drive copy</a>` : '');
+    hint.style.display = 'block';
+  }
+
   el('btnGenerateReport').onclick = () => {
     el('reportError').style.display = 'none';
     el('reportHint').style.display = 'none';
@@ -3578,9 +3615,7 @@
           el('reportError').style.display = 'block';
           return;
         }
-        el('reportHint').innerHTML = `Done — <a href="${resp.url}" target="_blank" rel="noopener" style="color:var(--gold);">open "${resp.name}"</a> (it also opened in a new tab).`;
-        el('reportHint').style.display = 'block';
-        window.open(resp.url, '_blank');
+        showReportReady(resp);
       })
       .withFailureHandler(err => {
         if (settled) return;
