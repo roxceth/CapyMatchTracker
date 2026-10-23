@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 26e8140. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ b026caa. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.22","commit":"26e8140"};</script>
+  <script>window.UAT_BUILD = {"version":"2.23","commit":"b026caa"};</script>
   <script src="config.js?v=106d84726c"></script>
   <script src="demo.js?v=1d101c8e1c"></script>
   <script src="api.js?v=5ff40190c1"></script>
@@ -804,7 +804,7 @@
 
       <div class="card">
         <h2><span class="bar"></span>Reports</h2>
-        <p class="sheet-sub">A PDF styled like the app: win rate by deck and by member, matchups, rival meta and named rivals.</p>
+        <p class="sheet-sub">A printable PDF: key takeaways, win rate by deck and member, recent form, matchups to work on, the rival meta and bricks.</p>
         <p class="error" role="alert" id="reportError"></p>
         <p class="hint" id="reportHint"></p>
         <button class="primary" id="btnGenerateReport">Generate PDF report</button>
@@ -3545,14 +3545,456 @@
 
   // ---------- Admin: PDF reports ----------
 
-  /**
-   * v2.22: the server sends the PDF itself, so it downloads right here. The
-   * Drive copy lives in the owner's Drive and is shared with nobody - a
-   * manager opening that link got Google's "Request access" page. Only the
-   * admin (the owner's side) gets the Drive link, as a secondary option.
-   * A server from before v2.22 sends only `url`: then it falls back to the
-   * old behaviour (open the Drive link).
+  /*
+   * v2.23: the report is built here, in the browser, with pdfmake (hosted with
+   * the app under vendor/, loaded only when someone taps the button). The
+   * server just hands over the match rows (getTeamReportRows); every rule
+   * lives in buildReportModel below, and buildReportDoc only lays it out.
+   *
+   * Rules, also printed on the report's last page:
+   *  - Byes (rival deck or rival name "Bye") count nowhere.
+   *  - A game against another member is "internal practice": it gets its own
+   *    section and stays out of every team figure.
+   *  - Small samples are shown but never ranked or headlined (REPORT_MIN).
+   *
+   * If pdfmake can't load or the server predates getTeamReportRows, it falls
+   * back to the server's simpler PDF (v2.22) so the button always delivers.
    */
+  const REPORT_TEAM = 'CapyBros';
+  const REPORT_MIN = { rank: 10, headline: 5, matchup: 3, cell: 5, turn: 3, recent: 5 };
+  const REPORT_RECENT_DAYS = 30;
+  const REPORT_FORM_POINTS = 5;
+  const REPORT_WATCH_MAX_WR = 45;
+  const REPORT_TOP = 10;
+  const PDFMAKE_DIR = 'pdfmake-0.2.10/';
+
+  function rAgg(rows) {
+    let w = 0;
+    rows.forEach(r => { if (r.win) w++; });
+    const n = rows.length;
+    return { w: w, l: n - w, n: n, wr: n ? Math.round(100 * w / n) : null };
+  }
+  function rGroup(rows, key) {
+    const g = new Map();
+    rows.forEach(r => { const k = r[key]; if (!g.has(k)) g.set(k, []); g.get(k).push(r); });
+    return g;
+  }
+  const byNThenName = (a, b) => b.n - a.n || byText(a.name, b.name);
+
+  /** Monday 00:00 of the week `t` falls in (browser time). */
+  function weekStart(t) {
+    const d = new Date(t); d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d.getTime();
+  }
+
+  /**
+   * Turns the server's rows into every number the report prints. Pure: same
+   * input, same output - the QA suite feeds it fixtures directly.
+   */
+  function buildReportModel(data) {
+    const now = data.now || Date.now();
+    const memberKeys = new Set((data.members || []).map(m => String(m).trim().toLowerCase()));
+    const all = (data.rows || []).map(r => ({
+      t: r[0], player: r[1], deck: r[2], rdeck: r[3], win: r[4] === 'Win',
+      turn: r[5], rival: r[6], ownBrick: r[7], rivalBrick: r[8],
+    }));
+    const isBye = r => /^bye$/i.test(r.rdeck) || /^bye$/i.test(r.rival);
+    const isInternal = r => !!r.rival && memberKeys.has(r.rival.toLowerCase()) && r.rival.toLowerCase() !== r.player.toLowerCase();
+    const byes = all.filter(isBye);
+    const internal = all.filter(r => !isBye(r) && isInternal(r));
+    const games = all.filter(r => !isBye(r) && !isInternal(r));
+    const dated = games.filter(r => r.t);
+    const from = dated.length ? Math.min.apply(null, dated.map(r => r.t)) : null;
+    const to = dated.length ? Math.max.apply(null, dated.map(r => r.t)) : null;
+    const recentFrom = now - REPORT_RECENT_DAYS * 86400000;
+    const isRecent = r => r.t && r.t >= recentFrom;
+    const team = rAgg(games);
+
+    const form = (rows) => {
+      const recent = rAgg(rows.filter(isRecent));
+      const season = rAgg(rows);
+      if (recent.n < REPORT_MIN.recent || recent.n === season.n) return { recent: recent, delta: null };
+      return { recent: recent, delta: recent.wr - season.wr };
+    };
+    const matchups = (rows) => {
+      const xs = [];
+      rGroup(rows, 'rdeck').forEach((v, k) => { const a = rAgg(v); if (a.n >= REPORT_MIN.matchup) xs.push(Object.assign({ name: k }, a)); });
+      // Same rule as the app: "best" needs a win, "worst" needs a loss.
+      const best = xs.filter(x => x.w > 0).sort((a, b) => b.wr - a.wr || b.n - a.n)[0] || null;
+      const worst = xs.filter(x => x.l > 0).sort((a, b) => a.wr - b.wr || b.n - a.n)[0] || null;
+      return { best: best, worst: worst && best && worst.name === best.name ? null : worst };
+    };
+    const turnOf = (rows, which) => { const a = rAgg(rows.filter(r => r.turn === which)); return a.n >= REPORT_MIN.turn ? a : Object.assign(a, { wr: null }); };
+
+    const decks = [];
+    rGroup(games, 'deck').forEach((rows, name) => {
+      const a = rAgg(rows);
+      decks.push(Object.assign({ name: name, share: Math.round(100 * a.n / team.n), few: a.n < REPORT_MIN.rank,
+        first: turnOf(rows, 'First'), second: turnOf(rows, 'Second') }, a, matchups(rows), form(rows)));
+    });
+    decks.sort(byNThenName);
+    const ranked = decks.filter(d => !d.few);
+    const bestDeck = ranked.slice().sort((a, b) => b.wr - a.wr || b.n - a.n)[0] || null;
+    const weakDeck = ranked.slice().sort((a, b) => a.wr - b.wr || b.n - a.n)[0] || null;
+
+    const members = [];
+    rGroup(games, 'player').forEach((rows, name) => {
+      const ds = [];
+      rGroup(rows, 'deck').forEach((v, k) => ds.push(Object.assign({ name: k }, rAgg(v))));
+      ds.sort(byNThenName);
+      members.push(Object.assign({ name: name, decks: ds }, rAgg(rows), form(rows)));
+    });
+    members.sort(byNThenName);
+
+    const rivalDecks = [];
+    rGroup(games.filter(r => r.rdeck), 'rdeck').forEach((v, k) => rivalDecks.push(Object.assign({ name: k }, rAgg(v))));
+    rivalDecks.sort(byNThenName);
+    const watch = rivalDecks.filter(x => x.n >= REPORT_MIN.headline && x.wr <= REPORT_WATCH_MAX_WR)
+      .sort((a, b) => a.wr - b.wr || b.n - a.n);
+    const rivals = [];
+    rGroup(games.filter(r => r.rival), 'rival').forEach((v, k) => rivals.push(Object.assign({ name: k }, rAgg(v))));
+    rivals.sort(byNThenName);
+    const solid = rivals.filter(x => x.n >= REPORT_MIN.headline);
+    const toughest = solid.slice().sort((a, b) => a.wr - b.wr || b.n - a.n)[0] || null;
+    const favourite = solid.slice().sort((a, b) => b.wr - a.wr || b.n - a.n)[0] || null;
+
+    const turnRows = games.filter(r => r.turn === 'First' || r.turn === 'Second');
+    const turns = { first: rAgg(games.filter(r => r.turn === 'First')), second: rAgg(games.filter(r => r.turn === 'Second')), marked: turnRows.length };
+
+    const marked = games.filter(r => r.ownBrick === true || r.ownBrick === false);
+    const bricks = { marked: marked.length, withBrick: rAgg(marked.filter(r => r.ownBrick)), clean: rAgg(marked.filter(r => !r.ownBrick)),
+      rivalBricked: marked.filter(r => r.rivalBrick === true).length, byMember: [] };
+    rGroup(marked, 'player').forEach((v, k) => {
+      const b = v.filter(r => r.ownBrick).length;
+      bricks.byMember.push({ name: k, n: v.length, bricks: b, rate: Math.round(100 * b / v.length) });
+    });
+    bricks.byMember.sort(byNThenName);
+
+    const weeks = [];
+    rGroup(dated.map(r => Object.assign({ wk: weekStart(r.t) }, r)), 'wk').forEach((v, k) => weeks.push(Object.assign({ start: k }, rAgg(v))));
+    weeks.sort((a, b) => a.start - b.start);
+    if (weeks.length && to && to - weeks[weeks.length - 1].start < 6 * 86400000) weeks[weeks.length - 1].partial = true;
+
+    const internalBy = [];
+    rGroup(internal, 'player').forEach((v, k) => {
+      const opp = Array.from(new Set(v.map(r => r.rival))).sort(byText);
+      internalBy.push(Object.assign({ name: k, opponents: opp }, rAgg(v)));
+    });
+    internalBy.sort(byNThenName);
+
+    // Key takeaways: each one only when the data can carry it.
+    const take = [];
+    if (bestDeck) take.push({ k: 'best', deck: bestDeck });
+    if (weakDeck && weakDeck !== bestDeck && weakDeck.wr < team.wr) take.push({ k: 'weak', deck: weakDeck });
+    if (turns.first.n >= REPORT_MIN.headline && turns.second.n >= REPORT_MIN.headline) take.push({ k: 'turn', a: turns.first, b: turns.second });
+    if (watch.length) take.push({ k: 'watch', x: watch[0] });
+    else if (rivalDecks.length) take.push({ k: 'meta', x: rivalDecks[0] });
+    const tf = form(games);
+    if (tf.delta !== null && Math.abs(tf.delta) >= REPORT_FORM_POINTS) take.push({ k: 'form', recent: tf.recent, delta: tf.delta });
+    if (bricks.withBrick.n >= REPORT_MIN.turn && bricks.clean.n >= REPORT_MIN.headline) take.push({ k: 'brick', a: bricks.withBrick, b: bricks.clean });
+
+    return { now: now, from: from, to: to, team: team, teamForm: tf, decks: decks, bestDeck: bestDeck, weakDeck: weakDeck,
+      members: members, rivalDecks: rivalDecks, watch: watch, rivals: rivals, toughest: toughest, favourite: favourite,
+      turns: turns, bricks: bricks, weeks: weeks, internal: { n: internal.length, by: internalBy },
+      byes: byes.length, total: all.length, takeaways: take };
+  }
+
+  // ----- Layout -----
+  const RC = { ink: '#1d1b24', muted: '#6b6577', rule: '#e7e4ec', soft: '#f6f5f8', gold: '#d4a52c', goldInk: '#8a6a12',
+    green: '#1f8a5b', red: '#c23a4b', dark: '#14121a', darkText: '#bdb8c7' };
+  const RSTRIPE = ['#e6485a', '#f4a300', '#35c780', '#35a7e6', '#9b5de5'];
+  const fmtDay = t => { const d = new Date(t); return MONTHS[d.getMonth()] + ' ' + d.getDate(); };
+  const fmtDayY = t => fmtDay(t) + ', ' + new Date(t).getFullYear();
+  const svgEsc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const clip = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
+  const wl = a => a.w + '–' + a.l;
+  const toneOf = wr => wr === null ? RC.ink : wr >= 55 ? RC.green : wr <= 45 ? RC.red : RC.ink;
+  const deltaRun = d => d === null || Math.abs(d) < REPORT_FORM_POINTS
+    ? { text: '' }
+    : { text: (d > 0 ? ' ▲' : ' ▼') + Math.abs(d), color: d > 0 ? RC.green : RC.red, fontSize: 8 };
+
+  function deckChartSvg(m) {
+    const rows = m.decks.slice().sort((a, b) => (a.few - b.few) || b.wr - a.wr || b.n - a.n);
+    const W = 520, lab = 170, val = 110, h = 15, gap = 7, pw = W - lab - val;
+    const H = rows.length * (h + gap) + 30;
+    const x = v => lab + pw * v / 100;
+    let o = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+    [0, 25, 50, 75, 100].forEach(t => {
+      o += `<line x1="${x(t)}" x2="${x(t)}" y1="0" y2="${H - 20}" stroke="${RC.rule}" stroke-width="0.75"/>` +
+        `<text x="${x(t)}" y="${H - 7}" font-size="8" fill="${RC.muted}" text-anchor="middle" font-family="Inter">${t}%</text>`;
+    });
+    rows.forEach((d, i) => {
+      const y = i * (h + gap) + 3;
+      o += `<text x="${lab - 8}" y="${y + 11}" font-size="9" fill="${RC.ink}" text-anchor="end" font-family="Inter">${svgEsc(clip(d.name, 30))}</text>`;
+      const bw = Math.max(2, pw * d.wr / 100);
+      o += d.few
+        ? `<rect x="${lab}" y="${y}" width="${bw}" height="${h}" rx="2.5" fill="#ffffff" stroke="${RC.gold}" stroke-width="1" stroke-dasharray="3 2"/>`
+        : `<rect x="${lab}" y="${y}" width="${bw}" height="${h}" rx="2.5" fill="${RC.gold}"/>`;
+      o += `<text x="${x(d.wr) + 6}" y="${y + 11}" font-size="9" fill="${RC.ink}" font-family="Inter">` +
+        `<tspan font-weight="bold">${d.wr}%</tspan><tspan fill="${RC.muted}">  ${wl(d)}${d.few ? ' · few games' : ''}</tspan></text>`;
+    });
+    o += `<line x1="${x(m.team.wr)}" x2="${x(m.team.wr)}" y1="0" y2="${H - 20}" stroke="${RC.ink}" stroke-width="1" stroke-dasharray="3 3"/>`;
+    return o + '</svg>';
+  }
+
+  function trendSvg(m) {
+    const W = 520, H = 150, pl = 30, pr = 28, pt = 16, pb = 32, pw = W - pl - pr, ph = H - pt - pb, n = m.weeks.length;
+    const X = i => pl + (n === 1 ? pw / 2 : pw * i / (n - 1));
+    const Y = v => pt + ph * (1 - v / 100);
+    let o = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+    [25, 50, 75, 100].forEach(t => {
+      o += `<line x1="${pl}" x2="${W - pr}" y1="${Y(t)}" y2="${Y(t)}" stroke="${RC.rule}" stroke-width="0.75"/>` +
+        `<text x="${pl - 5}" y="${Y(t) + 3}" font-size="8" fill="${RC.muted}" text-anchor="end" font-family="Inter">${t}%</text>`;
+    });
+    o += `<line x1="${pl}" x2="${W - pr}" y1="${Y(m.team.wr)}" y2="${Y(m.team.wr)}" stroke="${RC.ink}" stroke-width="0.75" stroke-dasharray="3 3"/>`;
+    o += `<polyline points="${m.weeks.map((w, i) => X(i) + ',' + Y(w.wr)).join(' ')}" fill="none" stroke="${RC.gold}" stroke-width="2" stroke-linejoin="round"/>`;
+    m.weeks.forEach((w, i) => {
+      o += `<circle cx="${X(i)}" cy="${Y(w.wr)}" r="3.2" fill="${RC.gold}" stroke="#ffffff" stroke-width="1.5"/>` +
+        `<text x="${X(i)}" y="${Y(w.wr) - 7}" font-size="8" font-weight="bold" fill="${RC.ink}" text-anchor="middle" font-family="Inter">${w.wr}%</text>` +
+        `<text x="${X(i)}" y="${H - 17}" font-size="8" fill="${RC.muted}" text-anchor="middle" font-family="Inter">${fmtDay(Math.max(w.start, m.from))}</text>` +
+        `<text x="${X(i)}" y="${H - 6}" font-size="7" fill="${RC.muted}" text-anchor="middle" font-family="Inter">${w.n} games${w.partial ? '*' : ''}</text>`;
+    });
+    return o + '</svg>';
+  }
+
+  const H2 = (text, sub) => ({
+    margin: [0, 16, 0, 8], table: { widths: ['*', 'auto'], body: [[
+      { text: text, font: 'InterDisplay', fontSize: 13, color: RC.ink, border: [false, false, false, true] },
+      { text: sub || '', fontSize: 8, color: RC.muted, alignment: 'right', margin: [0, 4, 0, 0], border: [false, false, false, true] }]] },
+    layout: { hLineWidth: () => 1.5, hLineColor: () => RC.ink, vLineWidth: () => 0, paddingLeft: () => 0, paddingRight: () => 0, paddingBottom: () => 5 },
+  });
+  const TH = (t, right) => ({ text: t, bold: false, font: 'InterSemi', fontSize: 8, color: RC.muted, alignment: right ? 'right' : 'left', noWrap: !!right });
+  const TD = (t, o) => Object.assign({ text: t, fontSize: 9 }, o || {});
+  const NUM = (t, o) => TD(t, Object.assign({ alignment: 'right', noWrap: true }, o || {}));
+  const tableLayout = {
+    hLineWidth: (i, node) => i === 0 ? 0 : (i === 1 ? 1 : 0.5),
+    hLineColor: (i) => i === 1 ? RC.ink : RC.rule, vLineWidth: () => 0,
+    paddingTop: () => 4, paddingBottom: () => 4, paddingLeft: () => 5, paddingRight: () => 5,
+  };
+  const note = t => ({ text: t, fontSize: 7.5, color: RC.muted, margin: [0, 4, 0, 0] });
+  /**
+   * A section whose body is a table: the heading becomes the table's first
+   * header row, so it can never sit alone at the bottom of a page
+   * (keepWithHeaderRows) and it repeats, as "(cont.)", if the table runs on.
+   */
+  function sectionTable(title, sub, node) {
+    const cols = node.table.widths.length;
+    const head = H2(title, sub);
+    head.margin = [-5, 12, -5, 2];
+    node.table.body.unshift([Object.assign({ colSpan: cols, border: [false, false, false, false] }, head)].concat(Array(cols - 1).fill('')));
+    node.table.headerRows = (node.table.headerRows || 0) + 1;
+    node.table.keepWithHeaderRows = Math.min(3, node.table.body.length - node.table.headerRows);
+    const base = node.layout;
+    node.layout = Object.assign({}, base, {
+      hLineWidth: (i, n) => i <= 1 ? 0 : base.hLineWidth(i - 1, n),
+      hLineColor: (i, n) => base.hLineColor(i - 1, n),
+      paddingTop: (i, n) => i === 0 ? 0 : base.paddingTop(i, n),
+      paddingBottom: (i, n) => i === 0 ? 0 : base.paddingBottom(i, n),
+    });
+    return node;
+  }
+  const pct = a => a && a.wr !== null && a.n ? a.wr + '%' : '—';
+
+  function takeawayText(x, m) {
+    const B = t => ({ text: t, font: 'InterSemi' });
+    switch (x.k) {
+      case 'best': return [B(x.deck.name), ` is the strongest deck with ${REPORT_MIN.rank}+ games: `, B(x.deck.wr + '%'), ` over ${x.deck.n} matches (${wl(x.deck)}).`];
+      case 'weak': return [B(x.deck.name), ` is below the team average (${m.team.wr}%) at `, B(x.deck.wr + '%'), ` over ${x.deck.n} matches.`];
+      case 'turn': {
+        const d = x.a.wr - x.b.wr;
+        return d === 0 ? ['Going first or second makes no difference: ', B(x.a.wr + '%'), ' either way.']
+          : [d > 0 ? 'Going first is worth ' : 'Going second is worth ', B(Math.abs(d) + ' points'), `: ${x.a.wr}% on the 1st turn vs. ${x.b.wr}% on the 2nd (${m.turns.marked} matches with the turn recorded).`];
+      }
+      case 'watch': return ['Matchup to work on: ', B(x.x.name), ` - faced ${x.x.n} times, the team wins only `, B(x.x.wr + '%'), ` (${wl(x.x)}).`];
+      case 'meta': return ['Most faced rival deck: ', B(x.x.name), ` (${x.x.n} times, team wins ${x.x.wr}%).`];
+      case 'form': return ['Recent form: ', B(x.recent.wr + '%'), ` in the last ${REPORT_RECENT_DAYS} days (${x.recent.n} matches), `, B((x.delta > 0 ? '+' : '') + x.delta + ' points'), ' against the whole period.'];
+      case 'brick': return ['A brick costs ', B((x.b.wr - x.a.wr) + ' points'), `: ${x.a.wr}% with a brick vs. ${x.b.wr}% clean (${m.bricks.marked} matches marked).`];
+    }
+    return '';
+  }
+
+  function listTable(items, label, widths) {
+    const mx = Math.max.apply(null, items.map(x => x.n).concat([1]));
+    return {
+      table: { headerRows: 1, dontBreakRows: true, widths: widths || ['*', 70, 'auto', 'auto'], body: [[TH(label), TH('Matches'), TH('W–L', true), TH('Team WR', true)]]
+        .concat(items.map(x => [TD(x.name), { columns: [{ canvas: [{ type: 'rect', x: 0, y: 3, w: Math.max(2, 44 * x.n / mx), h: 6, r: 1.5, color: RC.gold }], width: 48 }, { text: String(x.n), fontSize: 9 }] },
+          NUM(wl(x)), NUM(x.wr + '%', { font: 'InterSemi', color: toneOf(x.wr) })])) },
+      layout: tableLayout,
+    };
+  }
+
+  function buildReportDoc(m, logo) {
+    const period = m.from ? `${fmtDay(m.from)} – ${fmtDayY(m.to)}` : 'No matches yet';
+    const gen = new Date(m.now);
+    const genText = `${fmtDayY(m.now)} · ${((gen.getHours() + 11) % 12) + 1}:${String(gen.getMinutes()).padStart(2, '0')} ${gen.getHours() < 12 ? 'AM' : 'PM'}`;
+    const c = [];
+
+    // Masthead
+    c.push({ table: { widths: ['*'], body: [[{ fillColor: RC.dark, border: [false, false, false, false], margin: [14, 12, 14, 10], columns: [
+      logo ? { image: logo, width: 40, margin: [0, 0, 0, 0] } : { text: '', width: 0 },
+      { text: '', width: 14 },
+      { width: '*', stack: [{ text: [{ text: REPORT_TEAM + ' ', color: '#f1efe9' }, { text: 'Team Report', color: RC.gold }], font: 'InterDisplay', fontSize: 20 },
+        { text: 'Union Arena · match tracker', fontSize: 8.5, color: RC.darkText, margin: [0, 2, 0, 0] }] },
+      { width: 'auto', alignment: 'right', fontSize: 8, color: RC.darkText, stack: [{ text: period, font: 'InterSemi', color: '#f1efe9', fontSize: 9 },
+        `${m.team.n} matches · ${m.members.length} members`, `Generated ${genText}`] }] }],
+      [{ border: [false, false, false, false], margin: [0, 0, 0, 0], canvas: RSTRIPE.map((col, i) => ({ type: 'rect', x: i * 106.4, y: 0, w: 106.4, h: 3.5, color: col })) }]] },
+      layout: { paddingLeft: () => 0, paddingRight: () => 0, paddingTop: () => 0, paddingBottom: () => 0, hLineWidth: () => 0, vLineWidth: () => 0 } });
+
+    if (!m.team.n) {
+      c.push({ text: 'There are no matches to report yet.', margin: [0, 24, 0, 0], color: RC.muted });
+      return reportShell(c, period);
+    }
+
+    // KPI strip
+    const kpi = (label, value, sub, o) => ({ stack: [{ text: label, fontSize: 7.5, color: RC.muted }, Object.assign({ text: value, font: 'InterDisplay', fontSize: 18, margin: [0, 1, 0, 0] }, o || {}), { text: sub, fontSize: 7.5, color: RC.muted }], margin: [8, 7, 8, 7] });
+    const small = { fontSize: 11, margin: [0, 4, 0, 2] };
+    c.push({ margin: [0, 12, 0, 0], table: { widths: ['*', '*', '*', '*'], body: [[
+      kpi('Matches', String(m.team.n), `${m.weeks.length} weeks · ${m.decks.length} decks`),
+      kpi('Team win rate', m.team.wr + '%', `${m.team.w} W · ${m.team.l} L`),
+      m.bestDeck ? kpi(`Best deck (${REPORT_MIN.rank}+ games)`, m.bestDeck.name, `${m.bestDeck.wr}% · ${m.bestDeck.n} matches`, small) : kpi('Best deck', '—', `None with ${REPORT_MIN.rank}+ games yet`, small),
+      m.toughest ? kpi(`Toughest rival (${REPORT_MIN.headline}+ games)`, m.toughest.name, `${m.toughest.wr}% · ${wl(m.toughest)}`, Object.assign({ color: RC.red }, small)) : kpi('Toughest rival', '—', `None with ${REPORT_MIN.headline}+ games yet`, small),
+    ]] }, layout: { hLineWidth: (i) => 0.75, vLineWidth: (i, node) => (i === 0 || i === 4) ? 0.75 : 0.75, hLineColor: () => RC.rule, vLineColor: () => RC.rule } });
+
+    // Key takeaways
+    if (m.takeaways.length) {
+      c.push({ unbreakable: true, stack: [H2('Key takeaways'),
+        { table: { widths: [8, '*'], body: m.takeaways.map(x => [{ canvas: [{ type: 'rect', x: 0, y: 4, w: 5, h: 5, r: 1, color: RC.gold }] }, { text: takeawayText(x, m), fontSize: 9.5 }]) },
+          layout: { hLineWidth: (i, node) => (i === 0 || i === node.table.body.length) ? 0 : 0.5, hLineColor: () => RC.rule, vLineWidth: () => 0, paddingTop: () => 5, paddingBottom: () => 5, paddingLeft: () => 0 } }] });
+    }
+
+    c.push({ unbreakable: true, stack: [H2('Win rate by deck', `Dashed line: team ${m.team.wr}% · hollow: fewer than ${REPORT_MIN.rank} games`), { svg: deckChartSvg(m), width: 520 }] });
+
+    // Decks table
+    c.push(Object.assign(sectionTable('Decks', 'Sorted by matches played', { table: { headerRows: 1, dontBreakRows: true, widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 72, 72],
+      body: [[TH('Deck'), TH('Matches', true), TH('Share', true), TH('W–L', true), TH('WR', true), TH(`${REPORT_RECENT_DAYS}d`, true), TH('1st / 2nd', true), TH('Best matchup'), TH('Worst matchup')]]
+        .concat(m.decks.map(d => {
+          const mu = x => x ? { stack: [{ text: x.name, fontSize: 8 }, { text: `${x.wr}% · ${x.n} games`, fontSize: 7.5, color: RC.muted }] } : TD('—', { color: RC.muted });
+          const muted = d.few ? { color: RC.muted } : {};
+          return [{ stack: [TD(d.name, muted), d.few ? { text: 'few games', fontSize: 7, color: RC.muted } : ''] }, NUM(String(d.n), muted), NUM(d.share + '%', muted), NUM(wl(d), muted),
+            NUM(d.wr + '%', Object.assign({ font: 'InterSemi' }, muted)),
+            NUM([{ text: d.recent.n >= REPORT_MIN.recent ? d.recent.wr + '%' : '—' }, deltaRun(d.delta)], muted),
+            NUM(`${pct(d.first)} / ${pct(d.second)}`, muted), mu(d.best), mu(d.worst)];
+        })) }, layout: tableLayout }), { pageBreak: 'before' }));
+    c.push(note(`Share = part of the team's matches played with that deck. ${REPORT_RECENT_DAYS}d = win rate in the last ${REPORT_RECENT_DAYS} days, with ▲▼ when it moved ${REPORT_FORM_POINTS}+ points against the whole period (needs ${REPORT_MIN.recent}+ recent games). ` +
+      `1st / 2nd need ${REPORT_MIN.turn}+ games on that turn (turn recorded in ${m.turns.marked} of ${m.team.n} matches). Matchups need ${REPORT_MIN.matchup}+ games against that rival deck.`));
+
+    if (m.weeks.length >= 2) {
+      c.push({ unbreakable: true, stack: [H2('Trend', 'Team win rate by week · dashed: whole period'), { svg: trendSvg(m), width: 520 },
+        m.weeks[m.weeks.length - 1].partial ? note('* Current week, still in progress.') : ''] });
+    }
+
+    // Members
+    c.push(sectionTable('Members', `Each member's decks · win rate · games`, { table: { headerRows: 1, dontBreakRows: true, widths: ['auto', 'auto', 'auto', 'auto', 'auto', '*'],
+      body: [[TH('Member'), TH('Matches', true), TH('W–L', true), TH('WR', true), TH(`${REPORT_RECENT_DAYS}d`, true), TH('Decks played')]]
+        .concat(m.members.map(p => [TD(p.name, { font: 'InterSemi' }), NUM(String(p.n)), NUM(wl(p)), NUM(p.wr + '%', { font: 'InterSemi' }),
+          NUM([{ text: p.recent.n >= REPORT_MIN.recent ? p.recent.wr + '%' : '—' }, deltaRun(p.delta)]),
+          { text: p.decks.reduce((acc, d, i) => acc.concat(i ? [{ text: '   ·   ', color: RC.rule }] : [],
+            d.n >= REPORT_MIN.cell ? [{ text: d.name + ' ' }, { text: d.wr + '%', font: 'InterSemi', color: toneOf(d.wr) }, { text: ' (' + d.n + ')', color: RC.muted }]
+              : [{ text: d.name + ' (' + d.n + ')', color: RC.muted }]), []), fontSize: 8 }])) }, layout: tableLayout }));
+    c.push(note(`Decks with fewer than ${REPORT_MIN.cell} games show only their count. Green: 55%+, red: 45% or less.`));
+
+    // Watch list
+    const watchSub = `Rival decks faced ${REPORT_MIN.headline}+ times where the team wins ${REPORT_WATCH_MAX_WR}% or less`;
+    c.push(m.watch.length ? sectionTable('Matchups to work on', watchSub, listTable(m.watch, 'Rival deck'))
+      : { unbreakable: true, stack: [H2('Matchups to work on', watchSub), { text: `None right now - no rival deck with ${REPORT_MIN.headline}+ games keeps the team at ${REPORT_WATCH_MAX_WR}% or less.`, fontSize: 9, color: RC.muted }] });
+
+    // Meta
+    c.push(sectionTable('Rival meta', `Top ${Math.min(REPORT_TOP, m.rivalDecks.length)} of ${m.rivalDecks.length} rival decks · full list in the appendix`, listTable(m.rivalDecks.slice(0, REPORT_TOP), 'Rival deck')));
+    if (m.rivals.length) {
+      c.push(sectionTable('Named rivals', `Top ${Math.min(REPORT_TOP, m.rivals.length)} of ${m.rivals.length} · full list in the appendix`, listTable(m.rivals.slice(0, REPORT_TOP), 'Rival')));
+      c.push(note(`Green: the team wins 55%+, red: 45% or less.${m.favourite ? ` Best record with ${REPORT_MIN.headline}+ games: ${m.favourite.name} (${m.favourite.wr}%, ${wl(m.favourite)}).` : ''}`));
+    }
+
+    // Bricks
+    if (m.bricks.marked) {
+      const b = m.bricks;
+      const half = (label, a, col) => ({ stack: [{ text: label, fontSize: 7.5, color: RC.muted }, { text: a.n ? a.wr + '%' : '—', font: 'InterDisplay', fontSize: 16, color: col }, { text: `${wl(a)} · ${a.n} matches`, fontSize: 7.5, color: RC.muted }], margin: [8, 6, 8, 6] });
+      c.push({ unbreakable: true, stack: [H2('Bricks', `${b.marked} of ${m.team.n} matches marked (${Math.round(100 * b.marked / m.team.n)}%)`),
+        { table: { widths: ['*', '*', '*'], body: [[half('Win rate with a brick', b.withBrick, RC.red), half('Win rate clean', b.clean, RC.green),
+          { stack: [{ text: 'Rival bricked', fontSize: 7.5, color: RC.muted }, { text: Math.round(100 * b.rivalBricked / b.marked) + '%', font: 'InterDisplay', fontSize: 16 }, { text: `${b.rivalBricked} of ${b.marked} matches`, fontSize: 7.5, color: RC.muted }], margin: [8, 6, 8, 6] }]] },
+          layout: { hLineWidth: () => 0.75, vLineWidth: () => 0.75, hLineColor: () => RC.rule, vLineColor: () => RC.rule } },
+        b.byMember.length ? { margin: [0, 8, 0, 0], table: { headerRows: 1, widths: ['*', 'auto', 'auto', 'auto'], body: [[TH('Member'), TH('Marked', true), TH('Bricks', true), TH('Brick rate', true)]]
+          .concat(b.byMember.map(x => [TD(x.name), NUM(String(x.n)), NUM(String(x.bricks)), NUM(x.rate + '%')])) }, layout: tableLayout } : '',
+        note('A brick is going at least 2 consecutive turns without drawing a cost-0 card. Only matches where it was marked count here; nothing in this section changes the win rates above.' +
+          (b.withBrick.n < REPORT_MIN.headline ? ` Only ${b.withBrick.n} bricks marked so far: read the "with a brick" figure as early.` : ''))] });
+    }
+
+    // Internal practice
+    if (m.internal.n) {
+      c.push(sectionTable('Internal practice', `${m.internal.n} matches between members · not in any team figure`,
+        { table: { headerRows: 1, dontBreakRows: true, widths: ['auto', 'auto', 'auto', '*'], body: [[TH('Member'), TH('W–L', true), TH('WR', true), TH('Played against')]]
+          .concat(m.internal.by.map(x => [TD(x.name, { font: 'InterSemi' }), NUM(wl(x)), NUM(x.wr + '%'), TD(x.opponents.join(', '), { fontSize: 8, color: RC.muted })])) }, layout: tableLayout }));
+      c.push(note('A match counts as internal when the rival name is a team member. If both members logged the same game, it appears once for each.'));
+    }
+
+    // How to read
+    c.push({ unbreakable: true, stack: [H2('How to read this report'), { columns: [
+      { stack: [
+        { text: [{ text: 'Win rate', font: 'InterSemi' }, ' is wins ÷ matches, rounded.'], margin: [0, 0, 0, 4] },
+        { text: [{ text: 'Left out of every figure: ', font: 'InterSemi' }, `byes (${m.byes}) and internal practice (${m.internal.n}).`], margin: [0, 0, 0, 4] },
+        { text: [{ text: 'Period. ', font: 'InterSemi' }, `${period}. Recent form = the last ${REPORT_RECENT_DAYS} days before the report was generated.`] }], fontSize: 8, color: RC.muted },
+      { stack: [
+        { text: [{ text: 'Small samples ', font: 'InterSemi' }, `are shown but never ranked: decks need ${REPORT_MIN.rank}+ games, headline rivals ${REPORT_MIN.headline}+, matchups ${REPORT_MIN.matchup}+.`], margin: [0, 0, 0, 4] },
+        { text: [{ text: 'Names ', font: 'InterSemi' }, 'are counted as written. Two spellings of one deck (e.g. with and without its color) split its numbers - merge them in Catalogs.'] }], fontSize: 8, color: RC.muted }],
+      columnGap: 18 }] });
+
+    // Appendix: kept whole when it fits a page (up to ~80 names in two columns).
+    const appendix = (title, sub, items, first) => {
+      const block = [H2(title, sub), appendixColumns(items)];
+      return Object.assign(items.length <= 80 ? { unbreakable: true, stack: block } : { stack: block }, first ? { pageBreak: 'before' } : {});
+    };
+    c.push(appendix('Appendix · every rival deck', `${m.rivalDecks.length} decks`, m.rivalDecks, true));
+    if (m.rivals.length) c.push(appendix('Appendix · every named rival', `${m.rivals.length} rivals`, m.rivals, false));
+    return reportShell(c, period);
+  }
+
+  function appendixColumns(items) {
+    const half = Math.ceil(items.length / 2);
+    const t = xs => ({ table: { headerRows: 1, dontBreakRows: true, widths: ['*', 'auto', 'auto', 'auto'], body: [[TH('Name'), TH('Matches', true), TH('W–L', true), TH('WR', true)]]
+      .concat(xs.map(x => [TD(x.name, { fontSize: 8 }), NUM(String(x.n), { fontSize: 8 }), NUM(wl(x), { fontSize: 8 }), NUM(x.wr + '%', { fontSize: 8, color: x.n >= REPORT_MIN.headline ? toneOf(x.wr) : RC.muted })])) },
+      layout: Object.assign({}, tableLayout, { paddingTop: () => 2.5, paddingBottom: () => 2.5 }) });
+    return { columns: [t(items.slice(0, half)), items.length > half ? t(items.slice(half)) : { text: '' }], columnGap: 16 };
+  }
+
+  function reportShell(content, period) {
+    return {
+      pageSize: 'LETTER', pageMargins: [40, 40, 40, 46],
+      // A section heading never sits alone at the bottom of a page.
+      info: { title: `${REPORT_TEAM} Team Report`, author: REPORT_TEAM, subject: 'Union Arena team report · ' + period },
+      defaultStyle: { font: 'Inter', fontSize: 9, color: RC.ink, lineHeight: 1.15 },
+      footer: (cur, total) => ({ margin: [40, 14, 40, 0], columns: [{ text: `${REPORT_TEAM} · Union Arena team report · ${period}`, fontSize: 7, color: RC.muted },
+        { text: `Page ${cur} of ${total}`, fontSize: 7, color: RC.muted, alignment: 'right' }] }),
+      content: content,
+    };
+  }
+
+  // ----- Loading pdfmake and delivering the file -----
+  let reportToolsPromise = null;
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = resolve; s.onerror = () => reject(new Error('Could not load ' + src));
+      document.head.appendChild(s);
+    });
+  }
+  function loadReportTools() {
+    if (!reportToolsPromise) {
+      const base = (window.UAT_VENDOR_BASE || 'vendor/') + PDFMAKE_DIR;
+      reportToolsPromise = loadScript(base + 'pdfmake.min.js')
+        .then(() => loadScript(base + 'vfs_inter.js'))
+        .then(() => {
+          const f = (n) => ({ normal: n, bold: n, italics: n, bolditalics: n });
+          window.pdfMake.fonts = { Inter: { normal: 'Inter-Regular.otf', bold: 'Inter-SemiBold.otf', italics: 'Inter-Regular.otf', bolditalics: 'Inter-SemiBold.otf' },
+            InterSemi: f('Inter-SemiBold.otf'), InterDisplay: f('InterDisplay-Bold.otf') };
+          return window.pdfMake;
+        })
+        .catch(e => { reportToolsPromise = null; throw e; });
+    }
+    return reportToolsPromise;
+  }
+
   function base64ToBlob(b64, type) {
     const bin = atob(b64);
     const bytes = new Uint8Array(bin.length);
@@ -3560,7 +4002,20 @@
     return new Blob([bytes], { type: type || 'application/pdf' });
   }
   let reportBlobUrl = null;
-  function showReportReady(resp) {
+  function deliverReport(blob, name, extraHtml) {
+    if (reportBlobUrl) URL.revokeObjectURL(reportBlobUrl);
+    reportBlobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = reportBlobUrl; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    // A link to the same file stays on screen: if the phone blocked the
+    // automatic download, one tap gets it.
+    el('reportHint').innerHTML = `Downloaded “${esc(name)}”. ` +
+      `<a id="reportDownloadAgain" href="${reportBlobUrl}" download="${esc(name)}" style="color:var(--gold);">Download again</a>` + (extraHtml || '');
+    el('reportHint').style.display = 'block';
+  }
+  /** v2.22 path: the server's simpler PDF. Kept as the fallback. */
+  function showReportReady(resp, extraHtml) {
     const hint = el('reportHint');
     if (!resp.pdfBase64) {
       hint.innerHTML = `Done — <a href="${esc(resp.url)}" target="_blank" rel="noopener" style="color:var(--gold);">open "${esc(resp.name)}"</a> (it also opened in a new tab).`;
@@ -3568,65 +4023,59 @@
       window.open(resp.url, '_blank');
       return;
     }
-    if (reportBlobUrl) URL.revokeObjectURL(reportBlobUrl);
-    reportBlobUrl = URL.createObjectURL(base64ToBlob(resp.pdfBase64, resp.mimeType));
-    const a = document.createElement('a');
-    a.href = reportBlobUrl; a.download = resp.name || 'Union Arena Tracker Report.pdf';
-    document.body.appendChild(a); a.click(); a.remove();
-    // A link to the same file stays on screen: if the phone blocked the
-    // automatic download, one tap gets it.
-    hint.innerHTML = `Downloaded “${esc(resp.name)}”. ` +
-      `<a id="reportDownloadAgain" href="${reportBlobUrl}" download="${esc(resp.name)}" style="color:var(--gold);">Download again</a>` +
-      (isAdmin() && resp.url ? ` · <a href="${esc(resp.url)}" target="_blank" rel="noopener" style="color:var(--text-sec);">Drive copy</a>` : '');
-    hint.style.display = 'block';
+    deliverReport(base64ToBlob(resp.pdfBase64, resp.mimeType), resp.name || 'Union Arena Tracker Report.pdf',
+      (extraHtml || '') + (isAdmin() && resp.url ? ` · <a href="${esc(resp.url)}" target="_blank" rel="noopener" style="color:var(--text-sec);">Drive copy</a>` : ''));
+  }
+
+  function reportFileName(now) {
+    const d = new Date(now);
+    return `${REPORT_TEAM} Team Report - ${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.pdf`;
+  }
+  const callServer = (fn, args) => new Promise((resolve, reject) => {
+    const r = gs().withSuccessHandler(resolve).withFailureHandler(reject);
+    r[fn].apply(r, args);
+  });
+  function reportLogo() {
+    const img = el('brandLogo');
+    return img && /^data:image\/(png|jpeg)/.test(img.src) ? img.src : null;
   }
 
   el('btnGenerateReport').onclick = () => {
+    const btn = el('btnGenerateReport');
     el('reportError').style.display = 'none';
     el('reportHint').style.display = 'none';
-    el('btnGenerateReport').disabled = true;
-    el('btnGenerateReport').textContent = 'Generating…';
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    const done = () => { btn.disabled = false; btn.textContent = 'Generate PDF report'; };
+    const fail = (msg) => { done(); el('reportError').textContent = msg; el('reportError').style.display = 'block'; };
 
-    // Safety net: if neither handler below ever fires (which can happen if
-    // the call gets stuck before Code.gs even returns), don't leave the
-    // button stuck on "Generating…" forever.
-    let settled = false;
-    const timeoutId = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      el('btnGenerateReport').disabled = false;
-      el('btnGenerateReport').textContent = 'Generate PDF report';
-      el('reportError').textContent =
-        'This is taking longer than expected — it may be a permissions issue the first time this ' +
-        'runs (see the technical guide\'s "Reportes en PDF" troubleshooting note). Check the Drive ' +
-        'folder next to the spreadsheet before trying again, in case it did finish.';
-      el('reportError').style.display = 'block';
-    }, 45000);
+    // The server's simpler PDF, used only when the new one can't be built.
+    const fallback = (why) => callServer('generateTeamReportPdf', [token]).then(resp => {
+      done();
+      if (!resp.ok) return fail(resp.error);
+      showReportReady(resp, ' <span style="color:var(--text-sec)">(simple version: ' + esc(why) + ')</span>');
+    }).catch(err => fail(failText(err)));
 
-    gs()
-      .withSuccessHandler(resp => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timeoutId);
-        el('btnGenerateReport').disabled = false;
-        el('btnGenerateReport').textContent = 'Generate PDF report';
-        if (!resp.ok) {
-          el('reportError').textContent = resp.error;
-          el('reportError').style.display = 'block';
-          return;
-        }
-        showReportReady(resp);
+    let rows;
+    callServer('getTeamReportRows', [token])
+      .then(data => { rows = data; return loadReportTools(); }, err => {
+        // A server from before v2.23 doesn't know getTeamReportRows yet.
+        const msg = String(err && err.message || err);
+        if (/not found|unknown|bad request|is not a function|not allowed/i.test(msg)) { const e = new Error('old server'); e.fallback = 'the server needs updating'; throw e; }
+        throw err;
       })
-      .withFailureHandler(err => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timeoutId);
-        el('btnGenerateReport').disabled = false;
-        el('btnGenerateReport').textContent = 'Generate PDF report';
-        el('reportError').textContent = failText(err);
-        el('reportError').style.display = 'block';
-      })
-      .generateTeamReportPdf(token);
+      .then(pdfMake => new Promise((resolve, reject) => {
+        let doc;
+        try { doc = buildReportDoc(buildReportModel(rows), reportLogo()); } catch (e) { return reject(e); }
+        try { pdfMake.createPdf(doc).getBlob(resolve); } catch (e) { reject(e); }
+      }))
+      .then(blob => { done(); deliverReport(blob, reportFileName(rows.now)); })
+      .catch(err => {
+        if (err && err.fallback) return fallback(err.fallback);
+        if (err && /Could not load/.test(String(err.message))) return fallback('could not load the PDF tools');
+        console.error(err);
+        fail(failText(err));
+      });
   };
 
   // ---------- Admin: team match history ----------
