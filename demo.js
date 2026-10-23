@@ -5,6 +5,40 @@
  */
 (function () {
   'use strict';
+  // Same seeded sample the private repo QA uses (v2.23): ~400 matches over 7 weeks,
+  // with byes, games between members, blank turns and brick marks.
+  function demoReportData() {
+    let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const pick = a => a[Math.floor(rnd() * a.length)];
+    const members = ['Sofia', 'Luis', 'Hector', 'Marco', 'Ana', 'Diego', 'Valeria'];
+    const decks = { Sofia: ['Jujutsu Kaisen - Red', 'Chainsaw Man - Blue'], Luis: ['Jujutsu Kaisen - Red'], Hector: ['RamRem | Re: Zero | Yellow', 'Code Geass - Yellow'],
+      Marco: ['Tokyo Ghoul - Purple', 'Mob Psycho - Blue'], Ana: ['Hunter x Hunter - Green', 'Bleach - Purple'], Diego: ['Demon Slayer - Red', 'One Punch - Yellow'], Valeria: ['Chainsaw Man - Blue', 'Hunter x Hunter - Green'] };
+    const edge = { 'Jujutsu Kaisen - Red': .64, 'Chainsaw Man - Blue': .6, 'RamRem | Re: Zero | Yellow': .68, 'Code Geass - Yellow': .7, 'Tokyo Ghoul - Purple': .32,
+      'Mob Psycho - Blue': .5, 'Hunter x Hunter - Green': .55, 'Bleach - Purple': .4, 'Demon Slayer - Red': .62, 'One Punch - Yellow': .45 };
+    const rdecks = ['Titan Ramp', 'Titan Ramp', 'Shadow Army', 'Shadow Army', 'Hunter Rush', 'Spear Control', 'Reze Tempo', 'Kenshin Aggro', 'Mixed Midrange', 'Nano Combo', 'Order Lock', 'Kaneki Burn', 'Historia Go-wide', 'Milim Rush'];
+    const rpen = { 'Shadow Army': -.22, 'Hunter Rush': -.12 };
+    const rivals = ['Kenji', 'Lulu', 'Omar', 'Ivan', 'Nico', 'Rafa', 'Teo', 'Gabi', 'Bruno', 'Paco', 'Mila', 'Zoe', 'Hugo', 'Elena'];
+    const rskill = { Kenji: -.25, Lulu: .2 };
+    const start = new Date(2026, 8, 5, 18, 0).getTime(), day = 86400000, rows = [];
+    for (let d = 0; d < 48; d++) {
+      const players = members.filter(() => rnd() < .3);
+      players.forEach(p => {
+        const deck = pick(decks[p]);
+        const k = 3 + Math.floor(rnd() * 3);
+        for (let i = 0; i < k; i++) {
+          const t = start + d * day + i * 600000;
+          const internal = rnd() < .06, bye = !internal && rnd() < .01;
+          const rd = bye ? 'Bye' : pick(rdecks), rv = internal ? pick(members.filter(m => m !== p)) : (bye ? 'Bye' : (rnd() < .85 ? pick(rivals) : ''));
+          const turn = d > 40 ? '' : pick(['First', 'Second', 'Second', 'First', '']);
+          const marked = d >= 27, brick = marked && rnd() < .12;
+          let pw = edge[deck] + (rpen[rd] || 0) + (rskill[rv] || 0) + (turn === 'First' ? .06 : turn === 'Second' ? -.05 : 0) - (brick ? .35 : 0);
+          rows.push([t, p, deck, rd, (bye || rnd() < pw) ? 'Win' : 'Loss', turn, rv, marked ? brick : null, marked ? rnd() < .1 : null]);
+        }
+      });
+    }
+    return { now: start + 48 * day, timeZone: 'America/Puerto_Rico', members: members.concat(['Old Member']), rows: rows };
+  }
+
   const DEMO_TOKENS = { ts: {name:'Sofia', role:'member'}, ta: {name:'Hector', role:'admin'}, tg: {name:'Luis', role:'manager'} };
   const MOCK = {
     listNamesForLogin: () => ['Sofia','Hector','Luis'],
@@ -110,6 +144,7 @@
     removeRivalName: () => ({ok:true}),
     mergeRivalNames: () => ({ok:true, rowsUpdated:2, backupName:null}),
     generateTeamReportPdf: () => { throw new Error('the PDF report is not available in the demo'); },
+    getTeamReportRows: () => demoReportData(),
     applyCatalogSpellingRepair: () => ({ok:true, rowsUpdated:0, backupName:null}),
   };
   window.UAT_DEMO = MOCK;
