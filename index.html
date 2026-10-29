@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ b026caa. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ 8e4d4a8. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.23","commit":"b026caa"};</script>
+  <script>window.UAT_BUILD = {"version":"2.24","commit":"8e4d4a8"};</script>
   <script src="config.js?v=106d84726c"></script>
-  <script src="demo.js?v=1d101c8e1c"></script>
+  <script src="demo.js?v=c508f618e7"></script>
   <script src="api.js?v=5ff40190c1"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -135,6 +135,26 @@
     .error { color: var(--red-text); font-size: 12.5px; margin: -6px 0 12px; display: none; }
     .hint { color: var(--green); font-size: 12.5px; margin: -6px 0 12px; display: none; }
     #reportHint a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; }   /* v2.22: tappable */
+    /* ---- Deck inventory (v2.24) ---- */
+    .inv-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .inv-row:last-child { border-bottom: none; }
+    .inv-row .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+    .inv-row.busy { opacity: .6; }
+    .stepper { display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+    .stepper .step { width: 44px; min-height: 44px; padding: 0; font-size: 18px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .stepper .step svg { width: 17px; height: 17px; }
+    .stepper .count { min-width: 28px; text-align: center; font-weight: 600; font-size: 15px; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip-row .chip .muted { margin-left: 2px; }
+    .team-inv-row { padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .team-inv-row:last-child { border-bottom: none; }
+    .team-inv-row .deck-header { margin-bottom: 3px; }
+    .team-inv-row .owners { font-size: 13px; color: var(--text-sec); padding-left: 16px; display: flex; flex-wrap: wrap; gap: 2px 0; }
+    .team-inv-row .owners .me { color: var(--text); font-weight: 600; }
+    .team-inv-row .owners .x { color: var(--text-sec); font-weight: 400; }
+    .team-inv-row .owners .sep { margin: 0 7px; color: var(--border-strong); }
+    /* Six items in the admin's bottom bar: a little tighter on the narrowest phones. */
+    @media (max-width: 360px) { body #appNav { gap: 0; padding-left: 2px; padding-right: 2px; } body .nav-item { font-size: 10px; padding-left: 0; padding-right: 0; letter-spacing: -0.01em; } .nav-item svg { width: 20px; height: 20px; } }
     .hidden { display: none !important; }
 
     .member-row { display: flex; gap: 6px; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); }
@@ -694,6 +714,9 @@
       #viewTeam .card { margin-bottom: 0; }
       /* Log on its own (admin, manager) stops at a readable width instead of 1000px+. */
       .views:not(.pair) #logCard { max-width: 640px; }
+      /* v2.24: My decks and Team decks side by side. */
+      #viewDecks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+      #viewDecks .card { margin-bottom: 0; }
       #viewHistory.single { column-count: 1; }
       .sheet-backdrop { justify-content: center; align-items: center; }
       .sheet { width: 100%; max-width: 480px; border-radius: 18px; border: 1px solid var(--border-strong); max-height: 80vh; max-height: 80dvh; }
@@ -762,6 +785,10 @@
     <button type="button" class="nav-item" data-view="stats" id="navStats">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
       <span>My stats</span>
+    </button>
+    <button type="button" class="nav-item" data-view="decks" id="navDecks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="3" width="13" height="17" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h9"/></svg>
+      <span>Decks</span>
     </button>
     <button type="button" class="nav-item" data-view="history" id="navHistory">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 3"/></svg>
@@ -900,6 +927,23 @@
     </section>
 
     <!-- ===== HISTORY ===== -->
+    <section class="view hidden" id="viewDecks" data-view="decks">
+      <div class="card">
+        <div class="card-head">
+          <h2><span class="bar"></span>My decks</h2>
+          <button type="button" class="small" id="btnInvAdd">+ Add</button>
+        </div>
+        <p class="sheet-sub" id="invSummary"></p>
+        <div id="invMine"></div>
+        <div id="invPlayed"></div>
+      </div>
+      <div class="card">
+        <h2><span class="bar"></span>Team decks</h2>
+        <input type="search" id="invTeamSearch" class="stats-search" placeholder="Search a deck or a player…" autocomplete="off" aria-label="Search team decks">
+        <div id="invTeam"></div>
+      </div>
+    </section>
+
     <section class="view hidden" id="viewHistory" data-view="history">
       <div class="card" id="memberHistoryCard">
         <h2><span class="bar"></span>History</h2>
@@ -1285,6 +1329,7 @@
       loadCatalogAndForm();
     }
     showView(navFor()[0]);
+    loadInventory();   // v2.24: the Log deck picker lists the player's own decks first
   }
 
   el('btnLogout').onclick = () => {
@@ -1302,6 +1347,7 @@
     token = null; role = null; myName = null; currentView = null;
     historyOffset = 0; teamHistoryOffset = 0;
     catalog = []; colorMap = {}; rivalCatalog = []; activeMembers = [];
+    inventory = null; inventoryState = 'idle';
     catalogState = 'loading'; rivalsReady = false;
     personalDeckStats = []; personalRivalStats = { byRival: [], bestRival: null, worstRival: null };
     personalStatsView = 'deck'; personalBrickStats = null;
@@ -1370,9 +1416,9 @@
 
   // ================= Navigation =================
   const NAV = {
-    member: ['log', 'stats', 'history'],
-    manager: ['team', 'log', 'history'],
-    admin: ['team', 'log', 'history', 'catalogs', 'members'],
+    member: ['log', 'stats', 'decks', 'history'],
+    manager: ['team', 'log', 'decks', 'history'],
+    admin: ['team', 'log', 'decks', 'history', 'catalogs', 'members'],
   };
   const navFor = () => NAV[isAdmin() ? 'admin' : isManager() ? 'manager' : 'member'];
 
@@ -1409,6 +1455,7 @@
     if (changed) window.scrollTo(0, 0);
     if (view === 'catalogs' && changed) { loadDeckMaintenance(); loadRivalMaintenance(); }
     if (view === 'members' && changed) loadAdmin();
+    if (view === 'decks' && changed) loadInventory();
   }
   document.querySelectorAll('#appNav .nav-item').forEach(b => { b.onclick = () => showView(b.dataset.view); });
   WIDE.addEventListener('change', () => { if (currentView) showView(currentView); });
@@ -1642,8 +1689,8 @@
           `<button type="button" class="chip" data-deck="${esc(n)}">${dot(n)}<span class="nm">${esc(n)}</span></button>`).join('') + '</div>' : '');
     }
     box.querySelectorAll('[data-deck]').forEach(b => { b.onclick = () => setDeck(b.dataset.deck); });
-    box.querySelectorAll('[data-act="open"]').forEach(b => { b.onclick = () => openDeckSheet('list'); });
-    box.querySelectorAll('[data-act="add"]').forEach(b => { b.onclick = () => openDeckSheet('add'); });
+    box.querySelectorAll('[data-act="open"]').forEach(b => { b.onclick = () => openDeckSheet('list', '', null); });
+    box.querySelectorAll('[data-act="add"]').forEach(b => { b.onclick = () => openDeckSheet('add', '', null); });
   }
 
   function setDeck(name) {
@@ -2108,19 +2155,30 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && el('confirm').classList.contains('hidden') && !el('sheet').classList.contains('hidden')) closeSheet(); });
 
   // ---- Deck sheet: pick from the whole catalog, or add a new deck ----
-  function openDeckSheet(mode, prefill) {
+  // v2.24: the same sheet picks a deck for the Log form (default) or for the
+  // inventory (opts: title, addLabel, owned, onPick).
+  let deckSheetOpts = null;
+  const deckPick = name => (deckSheetOpts && deckSheetOpts.onPick ? deckSheetOpts.onPick : setDeck)(name);
+  function openDeckSheet(mode, prefill, opts) {
+    if (opts !== undefined) deckSheetOpts = opts || null;
     if (mode === 'add') { openAddDeck(prefill || ''); return; }
-    openSheet('Choose a deck', `
+    const forInventory = !!(deckSheetOpts && deckSheetOpts.onPick);
+    const owned = forInventory ? (deckSheetOpts.owned || []) : inventoryOf(form.player || myName);
+    openSheet(forInventory ? deckSheetOpts.title : 'Choose a deck', `
       <input type="search" id="deckSheetSearch" placeholder="Search all decks" autocomplete="off" aria-label="Search all decks">
       <div id="deckSheetList"></div>`,
       '<button type="button" class="chip add" style="width:100%;justify-content:center;min-height:46px" id="btnSheetAddDeck">+ Add a new deck</button>');
     const paint = () => {
       const q = el('deckSheetSearch').value.trim().toLowerCase();
       const names = deckNames();
-      const row = n => `<button type="button" class="sheet-row${n === form.deck ? ' on' : ''}" data-deck="${esc(n)}">${dot(n)}<span class="nm">${esc(n)}</span><span class="meta">${recent.deckCounts[n] ? recent.deckCounts[n] + ' played' : ''}</span></button>`;
+      const meta = n => forInventory ? (owned.indexOf(n) !== -1 ? 'In my decks' : '') : (recent.deckCounts[n] ? recent.deckCounts[n] + ' played' : '');
+      const row = n => `<button type="button" class="sheet-row${!forInventory && n === form.deck ? ' on' : ''}" data-deck="${esc(n)}">${dot(n)}<span class="nm">${esc(n)}</span><span class="meta">${meta(n)}</span></button>`;
       let html = '';
-      if (!q) {
-        const rec = recent.decks.filter(d => names.indexOf(d) !== -1).slice(0, 3);
+      if (!q && !forInventory) {
+        // The player's own decks first (v2.24), then recent ones not already listed.
+        const mine = owned.filter(d => names.indexOf(d) !== -1).sort(byText);
+        if (mine.length) html += `<div class="sheet-sec">${(form.player || myName) === myName ? 'My decks' : esc(form.player) + '’s decks'}</div>` + mine.map(row).join('');
+        const rec = recent.decks.filter(d => names.indexOf(d) !== -1 && mine.indexOf(d) === -1).slice(0, 3);
         if (rec.length && names.length > 5) html += '<div class="sheet-sec">Recent</div>' + rec.map(row).join('');
       }
       const all = names.filter(n => !q || n.toLowerCase().indexOf(q) !== -1).sort(byText);
@@ -2131,7 +2189,7 @@
           <button type="button" class="primary" id="btnAddFromSearch">+ Add “${esc(raw)}” as a new deck</button>`;
       }
       el('deckSheetList').innerHTML = html;
-      el('deckSheetList').querySelectorAll('[data-deck]').forEach(b => { b.onclick = () => { setDeck(b.dataset.deck); closeSheet(); }; });
+      el('deckSheetList').querySelectorAll('[data-deck]').forEach(b => { b.onclick = () => { closeSheet(); deckPick(b.dataset.deck); }; });
       const fromSearch = el('btnAddFromSearch');
       if (fromSearch) fromSearch.onclick = () => openAddDeck(el('deckSheetSearch').value.trim());
     };
@@ -2155,7 +2213,7 @@
       </div>
       <div id="newDeckAssist"></div>
       <p class="error" role="alert" id="newDeckError"></p>`,
-      '<button type="button" class="primary" id="btnSaveDeck">Add deck and use it</button>',
+      `<button type="button" class="primary" id="btnSaveDeck">${deckSheetOpts && deckSheetOpts.addLabel ? deckSheetOpts.addLabel : 'Add deck and use it'}</button>`,
       () => openDeckSheet('list'));
     const paintColors = () => el('newDeckColors').querySelectorAll('[data-color]').forEach(b => {
       b.classList.toggle('on', b.dataset.color === color);
@@ -2168,7 +2226,7 @@
       const box = el('newDeckAssist');
       const btn = el('btnSaveDeck');
       btn.disabled = !name || (la && la.kind !== 'similar');
-      btn.textContent = la && la.kind === 'similar' ? 'No, add mine' : 'Add deck and use it';
+      btn.textContent = la && la.kind === 'similar' ? 'No, add mine' : (deckSheetOpts && deckSheetOpts.addLabel ? deckSheetOpts.addLabel : 'Add deck and use it');
       if (la && la.kind !== 'similar') {
         box.innerHTML = `<div class="assist"><div class="assist-note block"><span class="grow">“${esc(la.name)}” is already in the catalog.</span><button type="button" class="primary" data-use="${esc(la.name)}">Use it</button></div></div>`;
       } else if (la) {
@@ -2176,7 +2234,7 @@
       } else {
         box.innerHTML = '';
       }
-      box.querySelectorAll('[data-use]').forEach(b => { b.onclick = () => { setDeck(b.dataset.use); closeSheet(); }; });
+      box.querySelectorAll('[data-use]').forEach(b => { b.onclick = () => { closeSheet(); deckPick(b.dataset.use); }; });
     };
     el('newDeckName').oninput = check;
     check();
@@ -2201,8 +2259,9 @@
           catalog.push(added);
           colorMap[added.name] = color;
           closeSheet();
-          setDeck(added.name);
-          showToast(`Added ${added.name}`, null, false);
+          const forInventory = !!(deckSheetOpts && deckSheetOpts.onPick);
+          deckPick(added.name);
+          if (!forInventory) showToast(`Added ${added.name}`, null, false);
           if (isManager()) loadAdminCatalogAndMembers();
         })
         .withFailureHandler(err => {
@@ -2214,6 +2273,136 @@
         .addOwnDeck(token, name, anime, color);
     };
   }
+
+  // ================= Deck inventory (v2.24) =================
+  //
+  // Which decks each player owns and how many copies. Everyone sees the
+  // team's; each player edits only their own (the server takes the name from
+  // the session, never from the page). Saves go one at a time per deck, and
+  // the screen only changes after the server confirms, so a failed save
+  // can never leave the screen showing something the sheet doesn't have.
+  let inventory = null;        // last getInventory payload
+  let inventoryState = 'idle'; // idle | loading | ready | error
+  const inventoryBusy = {};    // deck -> true while its save is in flight
+  /** Whatever the server sent, in the shape the screen expects (never undefined lists). */
+  const normInventory = d => Object.assign({ mine: [], played: [], team: [], byMember: {}, maxCopies: 20 }, d && typeof d === 'object' ? d : {});
+
+  function loadInventory() {
+    inventoryState = inventory ? 'ready' : 'loading';
+    paintInventory();
+    gs()
+      .withSuccessHandler(data => { inventory = normInventory(data); inventoryState = 'ready'; paintInventory(); })
+      .withFailureHandler(err => {
+        inventoryState = inventory ? 'ready' : 'error';
+        if (currentView === 'decks') showError(failText(err));
+        paintInventory();
+      })
+      .getInventory(token);
+  }
+
+  /** The decks a given player owns (for the Log picker), by name. */
+  function inventoryOf(player) {
+    if (!inventory) return [];
+    if (player === myName) return inventory.mine.map(d => d.deck);
+    return ((inventory.byMember || {})[player] || []).map(d => d.deck);
+  }
+
+  function copiesWord(n) { return n + (n === 1 ? ' copy' : ' copies'); }
+
+  function paintInventory() {
+    if (!el('invMine')) return;
+    if (inventoryState === 'loading' && !inventory) {
+      el('invSummary').textContent = 'Loading your decks…';
+      el('invMine').innerHTML = ''; el('invPlayed').innerHTML = ''; el('invTeam').innerHTML = '<p class="loading">Loading…</p>';
+      return;
+    }
+    if (inventoryState === 'error' && !inventory) {
+      el('invSummary').textContent = '';
+      el('invMine').innerHTML = '<div class="assist-note warn"><span class="grow">Couldn’t load the decks.</span><button type="button" class="primary" id="btnInvRetry">Retry</button></div>';
+      el('invPlayed').innerHTML = ''; el('invTeam').innerHTML = '';
+      el('btnInvRetry').onclick = loadInventory;
+      return;
+    }
+    const inv = inventory || { mine: [], played: [], team: [], maxCopies: 20 };
+    const total = inv.mine.reduce((s, d) => s + d.copies, 0);
+    el('invSummary').textContent = inv.mine.length
+      ? `${inv.mine.length} deck${inv.mine.length === 1 ? '' : 's'} · ${copiesWord(total)}`
+      : 'Add the decks you own. The team can see them; only you can change yours.';
+    el('invMine').innerHTML = inv.mine.map(d => {
+      const busy = !!inventoryBusy[d.deck];
+      return `<div class="inv-row${busy ? ' busy' : ''}" data-deck="${esc(d.deck)}">
+        ${dot(d.deck)}<span class="nm">${esc(d.deck)}</span>
+        <div class="stepper" role="group" aria-label="Copies of ${esc(d.deck)}">
+          <button type="button" class="step" data-step="-1" aria-label="${d.copies === 1 ? 'Remove ' + esc(d.deck) : 'One copy less of ' + esc(d.deck)}"${busy ? ' disabled' : ''}>${d.copies === 1 ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>' : '−'}</button>
+          <span class="count" aria-live="polite">${d.copies}</span>
+          <button type="button" class="step" data-step="1" aria-label="One more copy of ${esc(d.deck)}"${busy || d.copies >= inv.maxCopies ? ' disabled' : ''}>+</button>
+        </div></div>`;
+    }).join('');
+    el('invMine').querySelectorAll('.inv-row').forEach(row => {
+      const deck = row.dataset.deck;
+      const current = inv.mine.find(d => d.deck === deck).copies;
+      row.querySelectorAll('[data-step]').forEach(b => {
+        b.onclick = async () => {
+          const next = current + Number(b.dataset.step);
+          if (next === 0 && !(await askConfirm(`Remove ${deck}?`, 'It comes off your decks. You can add it again any time.', 'Remove'))) return;
+          saveInventoryDeck(deck, next);
+        };
+      });
+    });
+    el('invPlayed').innerHTML = inv.played.length
+      ? `<div class="section-label">Decks you’ve played</div><div class="chip-row">${inv.played.map(p =>
+          `<button type="button" class="chip" data-add="${esc(p.deck)}"${inventoryBusy[p.deck] ? ' disabled' : ''}>${dot(p.deck)}<span class="nm">+ ${esc(p.deck)}</span><span class="muted">${p.matches}</span></button>`).join('')}</div>`
+      : '';
+    el('invPlayed').querySelectorAll('[data-add]').forEach(b => { b.onclick = () => saveInventoryDeck(b.dataset.add, 1); });
+    paintTeamInventory();
+  }
+
+  function paintTeamInventory() {
+    const inv = inventory || { team: [] };
+    const q = el('invTeamSearch').value.trim().toLowerCase();
+    const list = inv.team.filter(t => !q || t.deck.toLowerCase().indexOf(q) !== -1 || t.owners.some(o => o.member.toLowerCase().indexOf(q) !== -1));
+    if (!inv.team.length) {
+      el('invTeam').innerHTML = '<p class="empty">Nobody has added decks yet.</p>';
+    } else if (!list.length) {
+      el('invTeam').innerHTML = `<p class="empty">No deck or player matches “${esc(el('invTeamSearch').value.trim())}”.</p>`;
+    } else {
+      el('invTeam').innerHTML = `<p class="stat-foot" style="text-align:left;margin:0 0 6px">${list.length} of ${inv.team.length} decks</p>` + list.map(t => `
+        <div class="team-inv-row">
+          <div class="deck-header"><span class="deck-name">${dot(t.deck)}${esc(t.deck)}</span><span class="cnt">${copiesWord(t.copies)}</span></div>
+          <div class="owners">${t.owners.map(o => `<span${o.member === myName ? ' class="me"' : ''}>${esc(o.member)}${o.copies > 1 ? ` <span class="x">×${o.copies}</span>` : ''}</span>`).join('<span class="sep" aria-hidden="true">·</span>')}</div>
+        </div>`).join('');
+    }
+  }
+  el('invTeamSearch').oninput = paintTeamInventory;
+
+  function saveInventoryDeck(deck, copies) {
+    if (inventoryBusy[deck]) return;
+    inventoryBusy[deck] = true;
+    paintInventory();
+    gs()
+      .withSuccessHandler(resp => {
+        delete inventoryBusy[deck];
+        if (!resp.ok) { paintInventory(); showError(resp.error); return; }
+        const had = inventory && inventory.mine.find(d => d.deck === deck);
+        inventory = normInventory(resp);
+        inventoryState = 'ready';
+        paintInventory();
+        if (!had && copies > 0) showToast(`Added ${deck} to your decks`, null, false);
+        else if (copies === 0) showToast(`Removed ${deck}`, null, false);
+      })
+      .withFailureHandler(err => { delete inventoryBusy[deck]; paintInventory(); showError(failText(err)); })
+      .setInventoryDeck(token, deck, copies);
+  }
+
+  el('btnInvAdd').onclick = () => openDeckSheet('list', '', {
+    title: 'Add to my decks',
+    addLabel: 'Add deck to my decks',
+    owned: inventory ? inventory.mine.map(d => d.deck) : [],
+    onPick: name => {
+      const have = inventory && inventory.mine.find(d => d.deck === name);
+      saveInventoryDeck(name, have ? Math.min(have.copies + 1, inventory.maxCopies) : 1);
+    },
+  });
 
   // ================= Editing a match (same screen as Log) =================
   function startEdit(m) {
