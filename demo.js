@@ -39,6 +39,24 @@
     return { now: start + 48 * day, timeZone: 'America/Puerto_Rico', members: members.concat(['Old Member']), rows: rows };
   }
 
+  // v2.24: who owns which decks in the demo.
+  const DEMO_INV = { Sofia: [{deck: 'Jujutsu Kaisen - Red', copies: 2}], Luis: [{deck: 'Jujutsu Kaisen - Red', copies: 1}, {deck: 'Titan Ramp', copies: 1}],
+    Marco: [{deck: 'Chainsaw Man - Blue', copies: 3}] };
+  function demoInventory(tok) {
+    const me = DEMO_TOKENS[tok].name;
+    const byMember = {}, team = {};
+    Object.keys(DEMO_INV).forEach(m => {
+      const list = DEMO_INV[m].slice().sort((a, b) => a.deck.localeCompare(b.deck));
+      if (!list.length) return;
+      byMember[m] = list;
+      list.forEach(d => { const t = team[d.deck] = team[d.deck] || {deck: d.deck, copies: 0, owners: []}; t.copies += d.copies; t.owners.push({member: m, copies: d.copies}); });
+    });
+    const mine = byMember[me] || [];
+    const played = ['Jujutsu Kaisen - Red', 'Chainsaw Man - Blue'].filter(d => !mine.some(x => x.deck === d)).map((d, i) => ({deck: d, matches: 21 - i * 12}));
+    return { mine: mine, played: played, byMember: byMember, maxCopies: 20,
+      team: Object.keys(team).sort().map(k => { team[k].owners.sort((a, b) => a.member.localeCompare(b.member)); return team[k]; }) };
+  }
+
   const DEMO_TOKENS = { ts: {name:'Sofia', role:'member'}, ta: {name:'Hector', role:'admin'}, tg: {name:'Luis', role:'manager'} };
   const MOCK = {
     listNamesForLogin: () => ['Sofia','Hector','Luis'],
@@ -145,6 +163,14 @@
     mergeRivalNames: () => ({ok:true, rowsUpdated:2, backupName:null}),
     generateTeamReportPdf: () => { throw new Error('the PDF report is not available in the demo'); },
     getTeamReportRows: () => demoReportData(),
+    // v2.24: deck inventory, in memory (resets when the page reloads).
+    getInventory: (tok) => demoInventory(tok),
+    setInventoryDeck: (tok, deck, copies) => {
+      const me = DEMO_TOKENS[tok].name;
+      const list = DEMO_INV[me] = (DEMO_INV[me] || []).filter(d => d.deck !== deck);
+      if (copies > 0) list.push({deck: deck, copies: copies});
+      return Object.assign({ok: true}, demoInventory(tok));
+    },
     applyCatalogSpellingRepair: () => ({ok:true, rowsUpdated:0, backupName:null}),
   };
   window.UAT_DEMO = MOCK;
