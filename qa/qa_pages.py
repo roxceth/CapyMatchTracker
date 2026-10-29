@@ -146,7 +146,7 @@ with sync_playwright() as p:
         seen.append({'method': req.method, 'ctype': req.headers.get('content-type', ''), 'body': body})
         fn, args = body['fn'], body['args']
         out = {'listNamesForLogin': ['Ana', 'Beto'],
-               'login': {'ok': True, 'token': 'T1', 'name': args[0] if args else '', 'role': 'member'} if args and args[1] == '2222' else {'ok': False, 'error': 'Wrong PIN.'},
+               'login': {'ok': True, 'token': 'T1', 'name': args[0] if args else '', 'role': 'member'} if len(args) > 1 and args[1] == '2222' else {'ok': False, 'error': 'Wrong PIN.'},
                'resumeSession': {'ok': False}}.get(fn)
         if fn == 'getMemberScreen':
             route.fulfill(status=200, content_type='application/json', body=json.dumps({'ok': False, 'error': 'Session expired. Log in again.'})); return
