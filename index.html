@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- GENERADO por tools/build.mjs desde Index.html @ 8e4d4a8. No editar aquí: los cambios se hacen en el repo privado. -->
+<!-- GENERADO por tools/build.mjs desde Index.html @ d1d9003. No editar aquí: los cambios se hacen en el repo privado. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>html { background: #0e0d13; }</style>
-  <script>window.UAT_BUILD = {"version":"2.24","commit":"8e4d4a8"};</script>
+  <script>window.UAT_BUILD = {"version":"2.24","commit":"d1d9003"};</script>
   <script src="config.js?v=106d84726c"></script>
-  <script src="demo.js?v=c508f618e7"></script>
+  <script src="demo.js?v=79674e010f"></script>
   <script src="api.js?v=5ff40190c1"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -3050,7 +3050,7 @@
       })
       .withFailureHandler(err => {
         el('personalStatsList').innerHTML =
-          `<p class="empty">Couldn't load brick stats: ${err.message}</p>`;
+          `<p class="empty">Couldn't load brick stats: ${esc(err.message)}</p>`;
       })
       .getBrickStats(token);
   };
@@ -3166,7 +3166,7 @@
         renderTeamRivals();
       })
       .withFailureHandler(err => {
-        container.innerHTML = `<p class="empty">Couldn't load that member's rivals: ${err.message}</p>`;
+        container.innerHTML = `<p class="empty">Couldn't load that member's rivals: ${esc(err.message)}</p>`;
       })
       .getTeamRivalStats(token, who);
   }
