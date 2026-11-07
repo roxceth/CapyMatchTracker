@@ -127,7 +127,12 @@ try:
             body: JSON.stringify({{fn:'listMembersAdmin', args:[JSON.parse(localStorage.getItem('uat.session.v1')).token]}})}}).then(r => r.json())""")
         check('y aunque llame directo a la API, el servidor lo niega', r['ok'] is False and 'permission' in r['error'].lower(), r)
         r = pg.evaluate(f"fetch('{EXEC}', {{method:'POST', body: JSON.stringify({{fn:'sheet_', args:['Members']}})}}).then(r => r.json())")
-        check('las funciones internas no se pueden llamar', r == {'ok': False, 'error': 'Bad request.', 'v': '2.19'}, r)
+        check('las funciones internas no se pueden llamar', r == {'ok': False, 'error': 'Bad request.', 'v': '2.20'}, r)
+        # v2.25 (seguridad): un PIN malo deja "pinfail:<nombre>" en el caché; antes servía de sesión.
+        r = pg.evaluate(f"""fetch('{EXEC}', {{method:'POST', body: JSON.stringify({{fn:'login', args:['Hector', '0000']}})}})
+            .then(() => fetch('{EXEC}', {{method:'POST', body: JSON.stringify({{fn:'getRivalCatalog', args:['pinfail:hector']}})}}))
+            .then(r => r.json())""")
+        check('una clave del caché que no es sesión ("pinfail:hector") no abre nada', r['ok'] is False and 'result' not in r, r)
         ctx.close()
 
         print("\n=== Bloqueo de PIN desde la página ===\n")
